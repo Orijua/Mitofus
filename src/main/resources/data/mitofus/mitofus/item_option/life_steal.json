@@ -1,0 +1,8 @@
+{
+  "name": { "translate": "option.mitofus.life_steal" },
+  "weight": 10,
+  "min": 0.02,
+  "max": 0.10,
+  "applies_to": "mitofus:weapons",
+  "effect": { "type": "life_steal" }
+}

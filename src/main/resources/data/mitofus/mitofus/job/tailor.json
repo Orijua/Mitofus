@@ -1,0 +1,12 @@
+{
+  "name": {
+    "translate": "job.mitofus.tailor"
+  },
+  "description": {
+    "translate": "job.mitofus.tailor.desc"
+  },
+  "bonus_stats": {
+    "dexterity": 2
+  },
+  "skills": []
+}

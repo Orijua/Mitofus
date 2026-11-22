@@ -1,0 +1,24 @@
+{
+  "name": {
+    "translate": "skill.mitofus.mana_shield"
+  },
+  "description": {
+    "translate": "skill.mitofus.mana_shield.desc"
+  },
+  "icon": "minecraft:amethyst_shard",
+  "mana_cost": 20,
+  "cooldown_ticks": 500,
+  "effects": [
+    {
+      "type": "self_buff",
+      "effects": [
+        {
+          "id": "minecraft:absorption",
+          "amplifier": 1,
+          "duration": 120
+        }
+      ],
+      "duration_per_level": 10
+    }
+  ]
+}

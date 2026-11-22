@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "mitofus:block/body",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "mitofus:block/body"
+    },
+    "facing=south": {
+      "model": "mitofus:block/body",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "mitofus:block/body",
+      "y": 270
+    }
+  }
+}

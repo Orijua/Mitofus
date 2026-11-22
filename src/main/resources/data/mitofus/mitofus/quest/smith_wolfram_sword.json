@@ -1,0 +1,9 @@
+{
+  "name": { "translate": "quest.mitofus.smith_wolfram_sword" },
+  "description": { "translate": "quest.mitofus.smith_wolfram_sword.desc" },
+  "giver": "mitofus:blacksmith",
+  "goal": { "type": "forge", "item": "mitofus:wolfram_sword", "count": 1 },
+  "requires_quest": "mitofus:smith_wolfram_ingots",
+  "xp_reward": 200,
+  "item_rewards": [{ "id": "mitofus:wolfram_ingot", "count": 4 }, { "id": "mitofus:enhancement_stone", "count": 1 }]
+}

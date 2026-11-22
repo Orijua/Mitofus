@@ -1,0 +1,30 @@
+{
+  "name": {
+    "translate": "skill.mitofus.rending_slash"
+  },
+  "description": {
+    "translate": "skill.mitofus.rending_slash.desc"
+  },
+  "icon": "minecraft:redstone",
+  "mana_cost": 12,
+  "cooldown_ticks": 160,
+  "required_item": "minecraft:swords",
+  "weapon_wear": 2,
+  "effects": [
+    {
+      "type": "area_damage",
+      "range": 3.5,
+      "cone_degrees": 90,
+      "damage_multiplier": 0.6,
+      "strength_scaling": 0.02,
+      "target_effects": [
+        {
+          "id": "mitofus:bleeding",
+          "amplifier": 1,
+          "duration": 100
+        }
+      ],
+      "damage_multiplier_per_level": 0.02
+    }
+  ]
+}

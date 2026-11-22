@@ -1,0 +1,9 @@
+{
+  "name": { "translate": "quest.mitofus.night_watch" },
+  "description": { "translate": "quest.mitofus.night_watch.desc" },
+  "goal": { "type": "kill", "entity": "minecraft:skeleton", "count": 8 },
+  "giver": "mitofus:village_chief",
+  "requires_quest": "mitofus:zombie_plague",
+  "xp_reward": 250,
+  "item_rewards": [{ "id": "mitofus:mithril_ingot", "count": 4 }]
+}

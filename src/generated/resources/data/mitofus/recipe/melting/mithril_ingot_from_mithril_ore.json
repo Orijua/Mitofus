@@ -1,0 +1,14 @@
+{
+  "type": "mitofus:melting",
+  "ingredient": {
+    "item": "mitofus:mithril_ore"
+  },
+  "min_temperature": 1200,
+  "result": {
+    "count": 1,
+    "id": "mitofus:mithril_ingot"
+  },
+  "smithing_level": 3,
+  "smithing_xp": 8,
+  "time": 240
+}

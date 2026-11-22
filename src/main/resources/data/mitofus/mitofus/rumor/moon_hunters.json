@@ -1,0 +1,5 @@
+{
+  "givers": ["mitofus:village_chief"],
+  "text": { "translate": "rumor.mitofus.moon_hunters" },
+  "solved_by": { "quests": ["mitofus:moonlit_hunt"] }
+}

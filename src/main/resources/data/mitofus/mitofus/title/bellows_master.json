@@ -1,0 +1,6 @@
+{
+  "name": { "translate": "title.mitofus.bellows_master" },
+  "description": { "translate": "title.mitofus.bellows_master.desc" },
+  "goal": { "type": "milestone", "milestone": "mitofus:bellows_extra", "count": 10 },
+  "bonus_stats": { "stamina": 1 }
+}

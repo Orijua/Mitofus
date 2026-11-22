@@ -1,0 +1,28 @@
+{
+  "type": "mitofus:mitofus",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "mitofus:mitofus",
+    "biome_source": {
+      "type": "mitofus:mitofus_map",
+      "outside": {
+        "type": "minecraft:multi_noise",
+        "preset": "minecraft:overworld"
+      },
+      "map": "mitofus:west",
+      "legend": {
+        "1": "minecraft:plains",
+        "2": "minecraft:forest",
+        "3": "minecraft:desert",
+        "4": "minecraft:taiga",
+        "5": "minecraft:snowy_plains",
+        "6": "minecraft:snowy_taiga",
+        "7": "minecraft:windswept_hills",
+        "8": "minecraft:savanna",
+        "9": "minecraft:badlands",
+        "10": "minecraft:stony_peaks",
+        "11": "minecraft:frozen_peaks"
+      }
+    }
+  }
+}

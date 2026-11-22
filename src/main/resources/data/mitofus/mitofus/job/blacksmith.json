@@ -1,0 +1,17 @@
+{
+  "name": {
+    "translate": "job.mitofus.blacksmith"
+  },
+  "description": {
+    "translate": "job.mitofus.blacksmith.desc"
+  },
+  "bonus_stats": {
+    "dexterity": 3,
+    "stamina": 2
+  },
+  "smithing_bonus": 5,
+  "skills": [
+    "mitofus:iron_guard",
+    "mitofus:blacksmith_rage"
+  ]
+}

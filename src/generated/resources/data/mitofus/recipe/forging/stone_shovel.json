@@ -1,0 +1,14 @@
+{
+  "type": "mitofus:forging",
+  "handle": {
+    "item": "minecraft:stick"
+  },
+  "material": {
+    "tag": "minecraft:stone_tool_materials"
+  },
+  "result": {
+    "count": 1,
+    "id": "minecraft:stone_shovel"
+  },
+  "smithing_xp": 3
+}

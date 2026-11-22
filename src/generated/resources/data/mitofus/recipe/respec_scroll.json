@@ -1,0 +1,19 @@
+{
+  "type": "mitofus:mitofus_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "minecraft:lapis_lazuli"
+    },
+    {
+      "item": "mitofus:mithril_ingot"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "mitofus:respec_scroll"
+  }
+}

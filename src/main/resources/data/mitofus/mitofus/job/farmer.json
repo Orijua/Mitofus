@@ -1,0 +1,12 @@
+{
+  "name": {
+    "translate": "job.mitofus.farmer"
+  },
+  "description": {
+    "translate": "job.mitofus.farmer.desc"
+  },
+  "bonus_stats": {
+    "stamina": 2
+  },
+  "skills": []
+}

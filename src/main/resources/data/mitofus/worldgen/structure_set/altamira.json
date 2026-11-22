@@ -1,0 +1,12 @@
+{
+  "structures": [
+    {
+      "structure": "mitofus:altamira",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "mitofus:world_site",
+    "site": "altamira"
+  }
+}

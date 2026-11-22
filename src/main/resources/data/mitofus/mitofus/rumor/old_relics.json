@@ -1,0 +1,6 @@
+{
+  "givers": ["mitofus:conde_nuno"],
+  "text": { "translate": "rumor.mitofus.old_relics" },
+  "requires_quest": "mitofus:quality_test",
+  "solved_by": { "milestones": ["mitofus:appraised_orbe"] }
+}

@@ -1,0 +1,9 @@
+{
+  "name": { "translate": "quest.mitofus.watch_commander" },
+  "description": { "translate": "quest.mitofus.watch_commander.desc" },
+  "goal": { "type": "kill", "entity": "minecraft:zombie", "count": 30 },
+  "giver": "mitofus:village_chief",
+  "requires_quest": "mitofus:night_watch",
+  "xp_reward": 400,
+  "item_rewards": [{ "id": "mitofus:commanders_sword" }]
+}

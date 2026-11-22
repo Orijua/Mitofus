@@ -1,0 +1,8 @@
+{
+  "name": { "translate": "quest.mitofus.sancho_legacy" },
+  "description": { "translate": "quest.mitofus.sancho_legacy.desc" },
+  "discover_when": { "type": "milestone", "milestone": "mitofus:appraised_orbe" },
+  "goal": { "type": "milestone", "milestone": "mitofus:read_orbe" },
+  "item_rewards": [{ "id": "mitofus:guadalete_blueprint" }],
+  "job_reward": "mitofus:legendary_blacksmith"
+}

@@ -1,0 +1,21 @@
+{
+  "type": "mitofus:forging",
+  "handle": {
+    "item": "minecraft:stick"
+  },
+  "material": {
+    "item": "mitofus:wolfram_ingot"
+  },
+  "material_count": 2,
+  "requirements": {
+    "level": 2,
+    "stats": {
+      "strength": 2
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "mitofus:wolfram_sword"
+  },
+  "smithing_xp": 15
+}

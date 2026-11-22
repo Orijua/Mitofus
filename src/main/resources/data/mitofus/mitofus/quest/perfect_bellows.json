@@ -1,0 +1,8 @@
+{
+  "name": { "translate": "quest.mitofus.perfect_bellows" },
+  "description": { "translate": "quest.mitofus.perfect_bellows.desc" },
+  "discover_when": { "type": "milestone", "milestone": "mitofus:bellows_extra" },
+  "goal": { "type": "milestone", "milestone": "mitofus:bellows_extra", "count": 5 },
+  "xp_reward": 300,
+  "item_rewards": [{ "id": "mitofus:mithril_ingot", "count": 2 }]
+}

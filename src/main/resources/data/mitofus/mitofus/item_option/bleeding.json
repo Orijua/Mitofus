@@ -1,0 +1,8 @@
+{
+  "name": { "translate": "option.mitofus.bleeding" },
+  "weight": 8,
+  "min": 0.05,
+  "max": 0.20,
+  "applies_to": "mitofus:weapons",
+  "effect": { "type": "apply_effect", "effect": "mitofus:bleeding", "duration": 100 }
+}

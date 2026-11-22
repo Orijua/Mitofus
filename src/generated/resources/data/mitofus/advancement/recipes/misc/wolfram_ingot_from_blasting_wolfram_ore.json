@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "mitofus:wolfram_ingot_from_blasting_wolfram_ore"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_wolfram_ore": {
+      "conditions": {
+        "items": [
+          {
+            "items": "mitofus:wolfram_ore"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_wolfram_ore"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "mitofus:wolfram_ingot_from_blasting_wolfram_ore"
+    ]
+  }
+}

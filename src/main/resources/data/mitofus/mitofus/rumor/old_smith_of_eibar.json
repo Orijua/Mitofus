@@ -1,0 +1,6 @@
+{
+  "givers": ["mitofus:blacksmith"],
+  "text": { "translate": "rumor.mitofus.old_smith_of_eibar" },
+  "requires_quest": "mitofus:sancho_legacy",
+  "solved_by": { "milestones": ["mitofus:met_velasco"] }
+}

@@ -1,0 +1,5 @@
+{
+  "givers": ["mitofus:blacksmith"],
+  "text": { "translate": "rumor.mitofus.north_cave" },
+  "solved_by": { "milestones": ["mitofus:nuno_secret", "mitofus:read_orbe", "mitofus:appraised_orbe"] }
+}

@@ -1,0 +1,7 @@
+{
+  "name": { "translate": "title.mitofus.velascos_disciple" },
+  "description": { "translate": "title.mitofus.velascos_disciple.desc" },
+  "goal": { "type": "milestone", "milestone": "mitofus:velascos_disciple" },
+  "smithing_xp_bonus": 0.1,
+  "rare": true
+}

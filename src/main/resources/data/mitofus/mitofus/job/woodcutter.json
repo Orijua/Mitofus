@@ -1,0 +1,12 @@
+{
+  "name": {
+    "translate": "job.mitofus.woodcutter"
+  },
+  "description": {
+    "translate": "job.mitofus.woodcutter.desc"
+  },
+  "bonus_stats": {
+    "strength": 2
+  },
+  "skills": []
+}

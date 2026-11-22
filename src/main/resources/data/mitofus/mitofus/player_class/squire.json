@@ -1,0 +1,18 @@
+{
+  "name": {
+    "translate": "class.mitofus.squire"
+  },
+  "description": {
+    "translate": "class.mitofus.squire.desc"
+  },
+  "bonus_stats": {
+    "stamina": 3,
+    "strength": 1
+  },
+  "skills": [
+    "mitofus:war_cry"
+  ],
+  "passives": [
+    "mitofus:tough_skin"
+  ]
+}

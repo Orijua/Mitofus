@@ -1,0 +1,26 @@
+{
+  "name": {
+    "translate": "class.mitofus.swordsman"
+  },
+  "description": {
+    "translate": "class.mitofus.swordsman.desc"
+  },
+  "bonus_stats": {
+    "strength": 3,
+    "stamina": 2
+  },
+  "skills": [
+    "mitofus:heavy_strike"
+  ],
+  "passives": [
+    "mitofus:tough_skin"
+  ],
+  "third_slot_passive": "mitofus:sword_mastery",
+  "grade_requirements": [
+    {
+      "grade": "master",
+      "job": "mitofus:blacksmith",
+      "job_level": 10
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "type": "mitofus:forging",
+  "handle": {
+    "item": "minecraft:stick"
+  },
+  "material": {
+    "tag": "minecraft:planks"
+  },
+  "result": {
+    "count": 1,
+    "id": "minecraft:wooden_shovel"
+  },
+  "smithing_xp": 2
+}

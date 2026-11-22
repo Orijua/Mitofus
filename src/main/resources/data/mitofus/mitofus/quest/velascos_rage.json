@@ -1,0 +1,10 @@
+{
+  "name": { "translate": "quest.mitofus.velascos_rage" },
+  "description": { "translate": "quest.mitofus.velascos_rage.desc" },
+  "discover_when": { "type": "milestone", "milestone": "mitofus:met_velasco" },
+  "giver": "mitofus:velasco",
+  "goal": { "type": "milestone", "milestone": "mitofus:contract_destroyed" },
+  "time_limit_days": 7,
+  "accept_skill": "mitofus:blacksmith_rage",
+  "xp_reward": 1500
+}

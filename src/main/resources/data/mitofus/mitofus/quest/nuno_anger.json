@@ -1,0 +1,9 @@
+{
+  "name": { "translate": "quest.mitofus.nuno_anger" },
+  "description": { "translate": "quest.mitofus.nuno_anger.desc" },
+  "discover_when": { "type": "milestone", "milestone": "mitofus:nuno_betrayal" },
+  "goal": { "type": "kill", "entity": "mitofus:conde_nuno", "count": 1 },
+  "xp_reward": 5000,
+  "time_limit_days": 7,
+  "fail_level_penalty": 2
+}

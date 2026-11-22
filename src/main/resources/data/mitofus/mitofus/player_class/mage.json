@@ -1,0 +1,19 @@
+{
+  "name": {
+    "translate": "class.mitofus.mage"
+  },
+  "description": {
+    "translate": "class.mitofus.mage.desc"
+  },
+  "bonus_stats": {
+    "intelligence": 5
+  },
+  "skills": [
+    "mitofus:flame_bolt",
+    "mitofus:mana_shield"
+  ],
+  "passives": [
+    "mitofus:mana_reserve"
+  ],
+  "third_slot_passive": "mitofus:composure"
+}

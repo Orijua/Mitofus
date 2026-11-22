@@ -1,0 +1,9 @@
+{
+  "name": { "translate": "quest.mitofus.path_of_the_adventurer" },
+  "description": { "translate": "quest.mitofus.path_of_the_adventurer.desc" },
+  "giver": "mitofus:village_chief",
+  "goal": { "type": "level", "level": 3 },
+  "item_rewards": [
+    { "id": "mitofus:skill_book", "count": 1, "components": { "mitofus:skill_book": "mitofus:flame_bolt" } }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:flat_cache",
+  "argument": {
+    "type": "mitofus:mitofus_terrain",
+    "channel": "erosion",
+    "map": "mitofus:west",
+    "detail": true
+  }
+}

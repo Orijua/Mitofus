@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_helmet": {
+      "conditions": {
+        "items": [
+          {
+            "items": "mitofus:helmet"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "mitofus:advanced_helmet"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_helmet"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "mitofus:advanced_helmet"
+    ]
+  }
+}

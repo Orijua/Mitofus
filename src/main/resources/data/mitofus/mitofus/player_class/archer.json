@@ -1,0 +1,16 @@
+{
+  "name": {
+    "translate": "class.mitofus.archer"
+  },
+  "description": {
+    "translate": "class.mitofus.archer.desc"
+  },
+  "bonus_stats": {
+    "agility": 3,
+    "dexterity": 3
+  },
+  "skills": [],
+  "passives": [
+    "mitofus:night_eyes"
+  ]
+}

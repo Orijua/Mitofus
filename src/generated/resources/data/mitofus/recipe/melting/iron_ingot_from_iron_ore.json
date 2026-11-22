@@ -1,0 +1,14 @@
+{
+  "type": "mitofus:melting",
+  "ingredient": {
+    "item": "minecraft:iron_ore"
+  },
+  "max_temperature": 1250,
+  "min_temperature": 1150,
+  "result": {
+    "count": 1,
+    "id": "minecraft:iron_ingot"
+  },
+  "smithing_xp": 3,
+  "time": 160
+}

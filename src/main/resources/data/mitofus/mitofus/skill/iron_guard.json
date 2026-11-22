@@ -1,0 +1,29 @@
+{
+  "name": {
+    "translate": "skill.mitofus.iron_guard"
+  },
+  "description": {
+    "translate": "skill.mitofus.iron_guard.desc"
+  },
+  "icon": "minecraft:shield",
+  "mana_cost": 15,
+  "cooldown_ticks": 400,
+  "effects": [
+    {
+      "type": "self_buff",
+      "effects": [
+        {
+          "id": "minecraft:resistance",
+          "amplifier": 1,
+          "duration": 160
+        },
+        {
+          "id": "minecraft:absorption",
+          "amplifier": 0,
+          "duration": 400
+        }
+      ],
+      "duration_per_level": 10
+    }
+  ]
+}

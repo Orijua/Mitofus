@@ -1,0 +1,6 @@
+{
+  "name": { "translate": "title.mitofus.adventurer" },
+  "description": { "translate": "title.mitofus.adventurer.desc" },
+  "goal": { "type": "level", "level": 5 },
+  "bonus_stats": { "stamina": 1, "agility": 1 }
+}

@@ -1,0 +1,6 @@
+{
+  "givers": ["mitofus:conde_nuno"],
+  "text": { "translate": "rumor.mitofus.unchosen_paths" },
+  "requires_quest": "mitofus:quality_test",
+  "solved_by": { "quests": ["mitofus:call_of_the_night", "mitofus:sancho_legacy"] }
+}

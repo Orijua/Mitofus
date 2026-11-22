@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "mitofus:block/diamond_body",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "mitofus:block/diamond_body"
+    },
+    "facing=south": {
+      "model": "mitofus:block/diamond_body",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "mitofus:block/diamond_body",
+      "y": 270
+    }
+  }
+}

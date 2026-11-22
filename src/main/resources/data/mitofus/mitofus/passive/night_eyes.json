@@ -1,0 +1,16 @@
+{
+  "name": {
+    "translate": "passive.mitofus.night_eyes"
+  },
+  "description": {
+    "translate": "passive.mitofus.night_eyes.desc"
+  },
+  "icon": "minecraft:spider_eye",
+  "bonuses": [
+    {
+      "type": "damage",
+      "amount": 0.1,
+      "at_night": true
+    }
+  ]
+}

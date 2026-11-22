@@ -1,0 +1,7 @@
+{
+  "name": { "translate": "option.mitofus.guadalete_agility" },
+  "weight": 0,
+  "min": 30,
+  "max": 50,
+  "effect": { "type": "stat", "stat": "agility" }
+}

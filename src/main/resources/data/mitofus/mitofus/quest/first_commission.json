@@ -1,0 +1,9 @@
+{
+  "name": { "translate": "quest.mitofus.first_commission" },
+  "description": { "translate": "quest.mitofus.first_commission.desc" },
+  "giver": "mitofus:blacksmith",
+  "requires_quest": "mitofus:smith_wolfram_sword",
+  "goal": { "type": "forge", "count": 1 },
+  "xp_reward": 50,
+  "item_rewards": [{ "id": "mitofus:enhancement_stone", "count": 2 }]
+}

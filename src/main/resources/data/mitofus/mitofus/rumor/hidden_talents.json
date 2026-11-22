@@ -1,0 +1,6 @@
+{
+  "givers": ["mitofus:village_chief"],
+  "text": { "translate": "rumor.mitofus.hidden_talents" },
+  "requires_quest": "mitofus:watch_commander",
+  "solved_by": { "milestones": ["mitofus:talent_found"] }
+}

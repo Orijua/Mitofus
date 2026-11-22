@@ -1,0 +1,8 @@
+{
+  "name": { "translate": "quest.mitofus.smith_firewood" },
+  "description": { "translate": "quest.mitofus.smith_firewood.desc" },
+  "giver": "mitofus:blacksmith",
+  "goal": { "type": "deliver", "items": "#minecraft:logs", "count": 64 },
+  "xp_reward": 60,
+  "item_rewards": [{ "id": "minecraft:bread", "count": 4 }, { "id": "mitofus:copper_coin", "count": 20 }]
+}

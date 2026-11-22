@@ -1,0 +1,8 @@
+{
+  "name": { "translate": "quest.mitofus.steady_hand" },
+  "description": { "translate": "quest.mitofus.steady_hand.desc" },
+  "discover_when": { "type": "milestone", "milestone": "mitofus:great_success" },
+  "goal": { "type": "forge", "min_rating": "epic", "count": 3 },
+  "xp_reward": 500,
+  "item_rewards": [{ "id": "mitofus:enhancement_stone", "count": 5 }]
+}

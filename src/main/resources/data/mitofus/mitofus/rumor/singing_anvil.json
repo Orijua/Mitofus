@@ -1,0 +1,5 @@
+{
+  "givers": ["mitofus:blacksmith"],
+  "text": { "translate": "rumor.mitofus.singing_anvil" },
+  "solved_by": { "milestones": ["mitofus:great_success"] }
+}

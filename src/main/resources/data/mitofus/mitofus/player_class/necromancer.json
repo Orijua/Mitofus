@@ -1,0 +1,17 @@
+{
+  "name": {
+    "translate": "class.mitofus.necromancer"
+  },
+  "description": {
+    "translate": "class.mitofus.necromancer.desc"
+  },
+  "bonus_stats": {
+    "intelligence": 3,
+    "stamina": 1
+  },
+  "skills": [],
+  "passives": [
+    "mitofus:mana_reserve"
+  ],
+  "third_slot_passive": "mitofus:night_eyes"
+}

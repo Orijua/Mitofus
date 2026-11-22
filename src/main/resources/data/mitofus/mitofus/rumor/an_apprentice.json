@@ -1,0 +1,6 @@
+{
+  "givers": ["mitofus:blacksmith"],
+  "text": { "translate": "rumor.mitofus.an_apprentice" },
+  "requires_quest": "mitofus:smith_wolfram_sword",
+  "solved_by": { "milestones": ["mitofus:apprentice_introduced"] }
+}

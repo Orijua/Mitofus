@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "mitofus:block/account_terminal",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "mitofus:block/account_terminal"
+    },
+    "facing=south": {
+      "model": "mitofus:block/account_terminal",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "mitofus:block/account_terminal",
+      "y": 270
+    }
+  }
+}

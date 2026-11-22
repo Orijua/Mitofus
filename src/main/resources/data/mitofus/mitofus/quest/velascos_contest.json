@@ -1,0 +1,9 @@
+{
+  "name": { "translate": "quest.mitofus.velascos_contest" },
+  "description": { "translate": "quest.mitofus.velascos_contest.desc" },
+  "discover_when": { "type": "milestone", "milestone": "mitofus:met_velasco" },
+  "giver": "mitofus:velasco",
+  "requires_quest": "mitofus:velascos_rage",
+  "goal": { "type": "milestone", "milestone": "mitofus:contest_won" },
+  "xp_reward": 3000
+}

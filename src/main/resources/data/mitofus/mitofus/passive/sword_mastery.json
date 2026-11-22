@@ -1,0 +1,21 @@
+{
+  "name": {
+    "translate": "passive.mitofus.sword_mastery"
+  },
+  "description": {
+    "translate": "passive.mitofus.sword_mastery.desc"
+  },
+  "icon": "minecraft:iron_sword",
+  "bonuses": [
+    {
+      "type": "damage",
+      "amount": 0.1,
+      "with_item": "minecraft:swords"
+    },
+    {
+      "type": "damage",
+      "amount": 0.1,
+      "with_item": "minecraft:axes"
+    }
+  ]
+}

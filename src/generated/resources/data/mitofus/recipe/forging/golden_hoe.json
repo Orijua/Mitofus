@@ -1,0 +1,15 @@
+{
+  "type": "mitofus:forging",
+  "handle": {
+    "item": "minecraft:stick"
+  },
+  "material": {
+    "item": "minecraft:gold_ingot"
+  },
+  "material_count": 2,
+  "result": {
+    "count": 1,
+    "id": "minecraft:golden_hoe"
+  },
+  "smithing_xp": 12
+}
