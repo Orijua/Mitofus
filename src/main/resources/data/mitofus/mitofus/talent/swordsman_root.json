@@ -11,11 +11,5 @@
   "x": 0,
   "y": 0,
   "cost": 0,
-  "effects": [
-    {
-      "type": "stat",
-      "stat": "strength",
-      "amount": 1
-    }
-  ]
+  "effects": []
 }

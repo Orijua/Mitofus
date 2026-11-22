@@ -1494,5 +1494,16 @@
   "message.mitofus.help.talent": "buys a talent for the class in a slot, or refunds all talents",
   "message.mitofus.debug_talent_bought": "Talent bought: %s",
   "message.mitofus.debug_talent_failed": "Could not buy the talent %s",
-  "message.mitofus.debug_talent_reset": "Talents refunded: %s points"
+  "message.mitofus.debug_talent_reset": "Talents refunded: %s points",
+  "tab.mitofus.talents": "Talents",
+  "screen.mitofus.talents_no_class": "Choose a class in Profile to see its talents.",
+  "screen.mitofus.talents_no_tree": "This class has no talents yet.",
+  "screen.mitofus.talent_points": "Talent points: %s",
+  "screen.mitofus.talent_cost": "Cost: %s",
+  "screen.mitofus.talent_grade": "Needs grade: %s",
+  "screen.mitofus.talent_owned": "You have this talent",
+  "screen.mitofus.talent_click": "Click to buy",
+  "screen.mitofus.talent_locked": "Get the talents before it first",
+  "screen.mitofus.talent_needs_grade": "Your class grade is too low",
+  "screen.mitofus.talent_needs_points": "Not enough talent points"
 }

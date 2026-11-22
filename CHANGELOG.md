@@ -4,6 +4,9 @@ All notable changes to this mod are listed here. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+### Added
+- **Talent trees:** each class earns 1 talent point per class level and spends it in its own tree (stat points, better skills and passives, new skills), shown in a new Talents tab. The swordsman has the first tree. The respec scroll now also refunds talents.
+
 ## [0.1.0-beta.1] - first beta
 
 First version of Mitofus, with its own design.

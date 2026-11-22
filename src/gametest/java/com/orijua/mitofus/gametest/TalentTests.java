@@ -1,9 +1,14 @@
 package com.orijua.mitofus.gametest;
 
 import com.orijua.mitofus.Mitofus;
+import com.orijua.mitofus.feature.effect.ActiveTraits;
+import com.orijua.mitofus.feature.effect.BonusType;
 import com.orijua.mitofus.feature.progression.ClassGrade;
 import com.orijua.mitofus.feature.progression.ClassService;
 import com.orijua.mitofus.feature.progression.ClassSlot;
+import com.orijua.mitofus.feature.progression.ProgressionService;
+import com.orijua.mitofus.feature.skill.SkillService;
+import com.orijua.mitofus.feature.talent.TalentEffects;
 import com.orijua.mitofus.feature.talent.TalentRules;
 import com.orijua.mitofus.feature.talent.TalentService;
 import net.minecraft.gametest.framework.GameTest;
@@ -70,6 +75,63 @@ public final class TalentTests {
         helper.assertTrue(slot(player).talents().isEmpty() && available(player) == 5, "all five points are free again");
         helper.assertTrue(slot(player).classLevel() == 5 && slot(player).grade() == ClassGrade.APPRENTICE, "level and grade are kept");
         helper.assertTrue(TalentService.refundAll(player) == 0, "nothing more to refund");
+        helper.succeed();
+    }
+
+    private static void buyAll(ServerPlayer player, String... nodes) {
+        for (String node : nodes) {
+            TalentService.buy(player, 0, Mitofus.id(node));
+        }
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void statNodesRaiseTheEffectiveStatAndRefundTakesThemBack(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        ClassService.chooseClass(player, 0, SWORD);
+        int before = ProgressionService.effectiveStats(player).strength();
+        buyAll(player, "sharp_edge");
+        helper.assertTrue(ProgressionService.effectiveStats(player).strength() == before + 1, "sharp edge gives +1 strength");
+        TalentService.refundAll(player);
+        helper.assertTrue(ProgressionService.effectiveStats(player).strength() == before, "refunding takes it back");
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void aPassiveBoostAddsItsBonusToAPassiveTheClassHas(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        ClassService.chooseClass(player, 0, SWORD);
+        ClassService.setClassLevel(player, 0, 5);
+        double armor = ActiveTraits.total(player, BonusType.ARMOR);
+        buyAll(player, "thick_hide", "tough_skin_1");
+        helper.assertTrue(ActiveTraits.total(player, BonusType.ARMOR) == armor + 1, "tough skin I gives +1 armor");
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void aSkillBoostChangesCostAndCooldownButNotOtherSkills(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        ClassService.chooseClass(player, 0, SWORD);
+        ClassService.setClassLevel(player, 0, 5);
+        buyAll(player, "sharp_edge", "quick_recovery", "heavy_strike_1");
+        var heavy = TalentEffects.tuning(player, Mitofus.id("heavy_strike"));
+        helper.assertTrue(heavy.cooldown() == 0.9 && heavy.damage() == 1.1, "heavy strike: 10% faster and 10% stronger: " + heavy);
+        helper.assertTrue(TalentEffects.tuning(player, Mitofus.id("war_cry")).equals(TalentEffects.SkillTuning.NONE), "other skills are untouched");
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void aGrantedSkillIsLearnedAndForgottenOnRefund(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        ClassService.chooseClass(player, 0, SWORD);
+        ClassService.setClassLevel(player, 0, 10);
+        ResourceLocation slash = Mitofus.id("rending_slash");
+        buyAll(player, "sharp_edge", "quick_recovery", "nimble_wrists");
+        helper.assertFalse(SkillService.get(player).knows(slash), "not yet");
+        buyAll(player, "rending_slash");
+        helper.assertTrue(SkillService.get(player).knows(slash), "the node teaches the skill");
+        TalentService.refundAll(player);
+        helper.assertFalse(SkillService.get(player).knows(slash), "the refund takes it back");
+        helper.assertTrue(SkillService.get(player).knows(Mitofus.id("heavy_strike")), "the class skill stays");
         helper.succeed();
     }
 }

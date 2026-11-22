@@ -10,7 +10,7 @@ import java.util.Optional;
 
 /**
  * Everything an {@link Effect} needs to act. The caster is a {@link LivingEntity}, not a player, so bosses can use the engine.
- * {@code magnitude} and {@code skillLevel} are reserved: no effect reads them yet.
+ * {@code magnitude} scales the damage of an area_damage effect (1 = as written; talents raise it) and {@code skillLevel} is the mastery level.
  */
 public record EffectContext(ServerLevel level, LivingEntity caster, Optional<LivingEntity> target, Vec3 position,
                             Vec3 direction, EffectSource source, float magnitude, int skillLevel, PlayerStats casterStats) {

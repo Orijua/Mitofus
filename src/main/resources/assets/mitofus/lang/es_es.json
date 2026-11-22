@@ -1494,5 +1494,16 @@
   "message.mitofus.help.talent": "compra un talento de la clase de un hueco o devuelve todos los talentos",
   "message.mitofus.debug_talent_bought": "Talento comprado: %s",
   "message.mitofus.debug_talent_failed": "No se pudo comprar el talento %s",
-  "message.mitofus.debug_talent_reset": "Talentos devueltos: %s puntos"
+  "message.mitofus.debug_talent_reset": "Talentos devueltos: %s puntos",
+  "tab.mitofus.talents": "Talentos",
+  "screen.mitofus.talents_no_class": "Elige una clase en Perfil para ver sus talentos.",
+  "screen.mitofus.talents_no_tree": "Esta clase aún no tiene talentos.",
+  "screen.mitofus.talent_points": "Puntos de talento: %s",
+  "screen.mitofus.talent_cost": "Coste: %s",
+  "screen.mitofus.talent_grade": "Pide el grado: %s",
+  "screen.mitofus.talent_owned": "Tienes este talento",
+  "screen.mitofus.talent_click": "Clic para comprar",
+  "screen.mitofus.talent_locked": "Consigue antes los talentos previos",
+  "screen.mitofus.talent_needs_grade": "El grado de tu clase es demasiado bajo",
+  "screen.mitofus.talent_needs_points": "No tienes puntos de talento suficientes"
 }

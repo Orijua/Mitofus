@@ -6,6 +6,7 @@ import com.orijua.mitofus.core.registry.ModAttachments;
 import com.orijua.mitofus.core.registry.ModDatapackRegistries;
 import com.orijua.mitofus.feature.progression.ClassSlot;
 import com.orijua.mitofus.feature.skill.SkillDefinition;
+import com.orijua.mitofus.feature.talent.TalentEffects;
 import com.orijua.mitofus.feature.progression.ProgressionService;
 import com.orijua.mitofus.feature.world.MitofusWorld;
 import net.minecraft.core.Holder;
@@ -18,6 +19,7 @@ import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The passives a player has right now: the ones the classes in their slots give. Works on both sides (the class and the
@@ -42,6 +44,13 @@ public final class ActiveTraits {
 
     /** The passives the player has, in the order the class lists them, then the ones a debug command gave. Empty outside Mitofus. */
     public static List<PassiveDefinition> active(Player player) {
+        List<PassiveDefinition> result = new ArrayList<>();
+        activeIds(player).forEach(id -> Definitions.get(player.level(), ModDatapackRegistries.PASSIVE, id).ifPresent(result::add));
+        return result;
+    }
+
+    /** The ids of {@link #active}, which is what a talent's passive boost is matched against. */
+    private static List<ResourceLocation> activeIds(Player player) {
         if (!MitofusWorld.is(player.level())) {
             return List.of();
         }
@@ -55,11 +64,7 @@ public final class ActiveTraits {
                 }
             });
         }
-        List<PassiveDefinition> result = new ArrayList<>();
-        for (ResourceLocation id : player.getData(ModAttachments.PASSIVE_OVERRIDES).resolve(fromClass)) {
-            Definitions.get(player.level(), ModDatapackRegistries.PASSIVE, id).ifPresent(result::add);
-        }
-        return result;
+        return player.getData(ModAttachments.PASSIVE_OVERRIDES).resolve(fromClass);
     }
 
     /** The bonuses of the learned skills that carry a passive. Empty outside Mitofus, like every class bonus. */
@@ -79,6 +84,7 @@ public final class ActiveTraits {
     private static List<Bonus> bonuses(Player player) {
         List<Bonus> result = new ArrayList<>();
         active(player).forEach(passive -> result.addAll(passive.trait().bonuses()));
+        result.addAll(TalentEffects.passiveBonuses(player, Set.copyOf(activeIds(player))));
         result.addAll(skillBonuses(player));
         return result;
     }

@@ -1,6 +1,7 @@
 package com.orijua.mitofus.feature.skill;
 
 import com.orijua.mitofus.core.registry.Definitions;
+import com.orijua.mitofus.feature.talent.TalentEffects;
 import com.orijua.mitofus.core.registry.ModAttachments;
 import com.orijua.mitofus.core.registry.ModDataComponents;
 import com.orijua.mitofus.core.registry.ModDatapackRegistries;
@@ -45,6 +46,17 @@ public final class SkillService {
 
     public static Optional<SkillDefinition> definition(ServerPlayer player, ResourceLocation id) {
         return Definitions.get(player.level(), ModDatapackRegistries.SKILL, id);
+    }
+
+    /** @return false if the skill was not known. Used when a talent that taught it is refunded. */
+    public static boolean forget(ServerPlayer player, ResourceLocation skill) {
+        PlayerSkills skills = get(player);
+        if (!skills.knows(skill)) {
+            return false;
+        }
+        player.setData(ModAttachments.PLAYER_SKILLS, skills.forget(skill));
+        ActiveTraits.apply(player);
+        return true;
     }
 
     /** @return false if the skill doesn't exist or is already known. */
@@ -123,8 +135,10 @@ public final class SkillService {
             return fail(player, Result.ON_COOLDOWN, Component.translatable("message.mitofus.cooldown",
                     skill.name(), String.format("%.1f", remaining / 20.0)));
         }
+        TalentEffects.SkillTuning tuning = TalentEffects.tuning(player, id);
+        float manaCost = tuning.mana(skill.manaCost());
         float mana = player.getData(ModAttachments.MANA);
-        if (mana < skill.manaCost()) {
+        if (mana < manaCost) {
             return fail(player, Result.NO_MANA, Component.translatable("message.mitofus.no_mana", skill.name()));
         }
 
@@ -143,7 +157,7 @@ public final class SkillService {
         boolean grows = !fromWeaponSlot && skills.knows(id);
         SkillMastery mastery = player.getData(ModAttachments.SKILL_MASTERY);
         int level = grows ? mastery.level(id) : 1;
-        EffectEngine.Outcome outcome = EffectEngine.run(skill.effects(), skill.conditions(), context.withSkillLevel(level));
+        EffectEngine.Outcome outcome = EffectEngine.run(skill.effects(), skill.conditions(), context.withSkillLevel(level).withMagnitude((float) tuning.damage()));
         if (grows && outcome == EffectEngine.Outcome.ACTED) {
             recordUse(player, id, skill, mastery, level);
         }
@@ -152,8 +166,8 @@ public final class SkillService {
         if (wear > 0) {
             player.getMainHandItem().hurtAndBreak(wear, player, EquipmentSlot.MAINHAND);
         }
-        player.setData(ModAttachments.MANA, mana - skill.manaCost());
-        player.setData(ModAttachments.PLAYER_SKILLS, skills.withCooldown(id, now + skill.cooldownTicks()));
+        player.setData(ModAttachments.MANA, mana - manaCost);
+        player.setData(ModAttachments.PLAYER_SKILLS, skills.withCooldown(id, now + tuning.cooldownTicks(skill.cooldownTicks())));
         player.displayClientMessage(skill.name(), true);
         NeoForge.EVENT_BUS.post(new SkillUsedEvent(player, id));
         return Result.SUCCESS;
