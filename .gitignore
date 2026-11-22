@@ -22,11 +22,6 @@ run
 run-gametest
 run-client2
 
-# Documentation (guide, roadmap, notes): kept local, never published
-/docs
-
-
-# Local Claude Code instructions (point at the personal docs above)
 RELEASING.md
 
 # Output of `gradlew publish` (local maven repo)
@@ -36,9 +31,3 @@ repo/
 *.log
 .vscode/
 logs/
-
-# Local Claude Code instructions and private tooling (kept in the private docs repo)
-CLAUDE.md
-CLAUDE.MD
-tools/terminos-prohibidos.txt
-tools/comprobar_terminos.py
