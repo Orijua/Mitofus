@@ -1,0 +1,19 @@
+{
+  "name": {
+    "translate": "passive.mitofus.mana_reserve"
+  },
+  "description": {
+    "translate": "passive.mitofus.mana_reserve.desc"
+  },
+  "icon": "minecraft:lapis_lazuli",
+  "bonuses": [
+    {
+      "type": "max_mana",
+      "amount": 20
+    },
+    {
+      "type": "mana_regen",
+      "amount": 0.25
+    }
+  ]
+}

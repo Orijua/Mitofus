@@ -1,0 +1,12 @@
+{
+  "type": "mitofus:forging",
+  "material": {
+    "item": "minecraft:iron_ingot"
+  },
+  "material_count": 4,
+  "result": {
+    "count": 1,
+    "id": "minecraft:iron_boots"
+  },
+  "smithing_xp": 15
+}

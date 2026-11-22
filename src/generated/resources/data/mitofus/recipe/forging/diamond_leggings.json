@@ -1,0 +1,18 @@
+{
+  "type": "mitofus:forging",
+  "material": {
+    "item": "minecraft:diamond"
+  },
+  "material_count": 7,
+  "requirements": {
+    "level": 5,
+    "stats": {
+      "stamina": 4
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "minecraft:diamond_leggings"
+  },
+  "smithing_xp": 63
+}

@@ -1,0 +1,7 @@
+{
+  "name": { "translate": "option.mitofus.guadalete_fear" },
+  "weight": 0,
+  "min": 20,
+  "max": 20,
+  "effect": { "type": "fear", "radius": 8, "duration": 60 }
+}

@@ -1,0 +1,6 @@
+{
+  "name": { "translate": "title.mitofus.tireless_forger" },
+  "description": { "translate": "title.mitofus.tireless_forger.desc" },
+  "goal": { "type": "forge", "count": 50 },
+  "bonus_stats": { "dexterity": 2 }
+}

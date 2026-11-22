@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_raw_wolfram": {
+      "conditions": {
+        "items": [
+          {
+            "items": "mitofus:raw_wolfram"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "mitofus:wolfram_ingot_from_smelting_raw_wolfram"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_raw_wolfram"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "mitofus:wolfram_ingot_from_smelting_raw_wolfram"
+    ]
+  }
+}

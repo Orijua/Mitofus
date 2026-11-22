@@ -1,0 +1,5 @@
+{
+  "givers": ["mitofus:village_chief"],
+  "text": { "translate": "rumor.mitofus.eibar_drunk" },
+  "solved_by": { "milestones": ["mitofus:met_velasco"] }
+}

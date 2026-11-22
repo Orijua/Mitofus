@@ -1,0 +1,5 @@
+{
+  "givers": ["mitofus:blacksmith"],
+  "text": { "translate": "rumor.mitofus.white_metal" },
+  "solved_by": { "milestones": ["mitofus:found_mithril"] }
+}

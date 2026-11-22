@@ -1,0 +1,17 @@
+{
+  "name": {
+    "translate": "passive.mitofus.tough_skin"
+  },
+  "description": {
+    "translate": "passive.mitofus.tough_skin.desc"
+  },
+  "icon": "minecraft:iron_chestplate",
+  "bonuses": [
+    {
+      "type": "armor",
+      "amount": 2,
+      "per_levels": 10,
+      "cap": 10
+    }
+  ]
+}

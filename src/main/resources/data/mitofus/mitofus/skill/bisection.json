@@ -1,0 +1,21 @@
+{
+  "name": {
+    "translate": "skill.mitofus.bisection"
+  },
+  "description": {
+    "translate": "skill.mitofus.bisection.desc"
+  },
+  "icon": "mitofus:guadalete_sword",
+  "mana_cost": 30,
+  "cooldown_ticks": 300,
+  "weapon_wear": 4,
+  "effects": [
+    {
+      "type": "area_damage",
+      "range": 7.0,
+      "cone_degrees": 30,
+      "damage_multiplier": 3.0,
+      "strength_scaling": 0.03
+    }
+  ]
+}

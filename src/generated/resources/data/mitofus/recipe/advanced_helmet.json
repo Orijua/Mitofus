@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "mitofus:helmet"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "G": {
+      "item": "minecraft:gold_block"
+    },
+    "L": {
+      "item": "minecraft:ender_eye"
+    }
+  },
+  "pattern": [
+    "DLD",
+    "GCG",
+    "D D"
+  ],
+  "result": {
+    "count": 1,
+    "id": "mitofus:advanced_helmet"
+  }
+}

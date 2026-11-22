@@ -1,0 +1,20 @@
+// 1.21.1	2026-11-21T10:29:49.725503608	Structure pieces
+ea2ebcbc853622ba453423c1381401427ccbd894 data/mitofus/structure/adventurer_camp/center.nbt
+0ab14e69c43c576fc5cdd8838bd4425053d58513 data/mitofus/structure/adventurer_camp/forge.nbt
+87218bbd38e2b11178bb5a55e17ef96effbedec3 data/mitofus/structure/adventurer_camp/tent.nbt
+0815a57725b8c21749eecb829662544f99bb9377 data/mitofus/structure/altamira/descent.nbt
+f4a05a22563ff6ae5168f0f3f32d9216cd71b384 data/mitofus/structure/altamira/entrance.nbt
+326fcf0423741d476ce9f3213ff68e6af65f5db2 data/mitofus/structure/altamira/hall.nbt
+b21a367fce31198a3e09b6a09bc78ecbfc62b1e1 data/mitofus/structure/altamira/sanctum.nbt
+2a64fd7c55dc4d0de7dd4be2b45585f92f824c3f data/mitofus/structure/covadonga/chief_house.nbt
+297a4e7684d8d4b58774261b47fb4874288dc779 data/mitofus/structure/covadonga/garden_house.nbt
+6b77b5839fe7a825b411f0f81e47d56245a4072d data/mitofus/structure/covadonga/house.nbt
+ac76b66896a4c21d6366a09013154add54b87216 data/mitofus/structure/covadonga/mine.nbt
+6ad3c90cc89ca1c2a01c51b501ee2cc4526b89d1 data/mitofus/structure/covadonga/plaza.nbt
+5379252facc0a854943b7093d8926941065b34d5 data/mitofus/structure/covadonga/smithy.nbt
+24ad8ed627ef83e53b830984cad15ba9a1ea3c3c data/mitofus/structure/eibar/house.nbt
+91d202855c67be3f78e4571c8e545fd034b64d41 data/mitofus/structure/eibar/levante_office.nbt
+3f577e0e570cdb9b9274210be40c77c114954316 data/mitofus/structure/eibar/square.nbt
+1b535d8ce96dda37d4930304798ad395731b6dd8 data/mitofus/structure/eibar/velasco_smithy.nbt
+294ae2544ecf3743e257a52988c67d1a61756b1a data/mitofus/structure/eibar/velasco_smithy_restored.nbt
+15502dc7e96fb60fdd77f3664779d5b3bfef6bb0 data/mitofus/structure/torre_del_oro/manor.nbt

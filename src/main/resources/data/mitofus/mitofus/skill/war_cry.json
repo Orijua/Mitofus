@@ -1,0 +1,24 @@
+{
+  "name": {
+    "translate": "skill.mitofus.war_cry"
+  },
+  "description": {
+    "translate": "skill.mitofus.war_cry.desc"
+  },
+  "icon": "minecraft:goat_horn",
+  "mana_cost": 15,
+  "cooldown_ticks": 600,
+  "effects": [
+    {
+      "type": "self_buff",
+      "effects": [
+        {
+          "id": "minecraft:strength",
+          "amplifier": 0,
+          "duration": 200
+        }
+      ],
+      "duration_per_level": 10
+    }
+  ]
+}

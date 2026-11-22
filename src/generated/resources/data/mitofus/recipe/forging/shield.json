@@ -1,0 +1,15 @@
+{
+  "type": "mitofus:forging",
+  "handle": {
+    "item": "minecraft:iron_ingot"
+  },
+  "material": {
+    "tag": "minecraft:planks"
+  },
+  "material_count": 6,
+  "result": {
+    "count": 1,
+    "id": "minecraft:shield"
+  },
+  "smithing_xp": 15
+}

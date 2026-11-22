@@ -1,0 +1,5 @@
+{
+  "givers": ["mitofus:blacksmith"],
+  "text": { "translate": "rumor.mitofus.breathing_bellows" },
+  "solved_by": { "milestones": ["mitofus:bellows_extra"] }
+}

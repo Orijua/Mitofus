@@ -1,0 +1,5 @@
+{
+  "givers": ["mitofus:conde_nuno"],
+  "text": { "translate": "rumor.mitofus.watchful_eyes" },
+  "solved_by": { "quests": ["mitofus:smiths_gaze"] }
+}

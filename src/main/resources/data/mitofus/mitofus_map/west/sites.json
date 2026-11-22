@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "map": "west",
+  "source": "Fixed Mitofus sites: the same in every new world. Coordinates in chunks; chunk (0, 0) is the pixel of Covadonga.",
+  "sites": [
+    {
+      "id": "covadonga",
+      "chunk": [
+        0,
+        0
+      ],
+      "note": "The origin of the map."
+    },
+    {
+      "id": "altamira",
+      "chunk": [
+        -61,
+        -22
+      ],
+      "note": "Snowy north coast."
+    },
+    {
+      "id": "torre_del_oro",
+      "chunk": [
+        10,
+        -12
+      ],
+      "note": "About 12 chunks from Covadonga."
+    },
+    {
+      "id": "eibar",
+      "chunk": [
+        -12,
+        -6
+      ],
+      "note": "About 13 chunks north-west of Covadonga."
+    }
+  ]
+}

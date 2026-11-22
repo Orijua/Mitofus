@@ -1,0 +1,20 @@
+{
+  "name": {
+    "translate": "job.mitofus.legendary_blacksmith"
+  },
+  "description": {
+    "translate": "job.mitofus.legendary_blacksmith.desc"
+  },
+  "legendary": true,
+  "selectable": false,
+  "bonus_stats": {
+    "dexterity": 8,
+    "stamina": 4,
+    "strength": 3
+  },
+  "smithing_bonus": 15,
+  "skills": [
+    "mitofus:iron_guard",
+    "mitofus:sancho_link"
+  ]
+}

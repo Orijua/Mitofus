@@ -1,0 +1,107 @@
+package com.orijua.mitofus.core.config;
+
+/**
+ * Every tunable number of the game rules in one value. Rules take it as a parameter so they stay
+ * pure and testable; the game passes {@link #current()} (the server config), tests pass {@link #DEFAULT}.
+ */
+public record Balance(
+        int statPointsPerLevel,
+        double killXpMultiplier,
+        double killXpPerAttackDamage,
+        double killXpPerArmor,
+        double spawnerXpMultiplier,
+        int xpBase,
+        int xpPerLevel,
+        float baseMana,
+        float manaPerIntelligence,
+        float baseManaRegen,
+        float manaRegenPerIntelligence,
+        double enhanceBaseChance,
+        double enhanceChanceLossPerLevel,
+        double enhanceChancePerDexterity,
+        double enhanceMinChance,
+        double deathXpLoss,
+        int mobLevelSpread,
+        double mobHealthPerLevel,
+        double mobDamagePerLevel,
+        double eliteChance,
+        double eliteStatBonus,
+        double eliteXpMultiplier,
+        double eliteEquipmentChance,
+        ContestLoss contestLoss) {
+
+    /**
+     * What losing the contest against Mencia does: {@link #FAIL} closes the quest for good (the Levante keeps the
+     * smithy), {@link #REMATCH} lets the player try again the next game day, and {@link #AUTO} fails it in a
+     * single-player world and gives a rematch in a shared one.
+     */
+    public enum ContestLoss { AUTO, FAIL, REMATCH }
+
+    public static final Balance DEFAULT = new Balance(
+            // 10 points per level , each worth half of what it was with 5: the same power per level.
+            10, 1.0, 2.0, 1.0, 0.25, 50, 25,
+            20.0f, 2.5f, 1.0f, 0.1f,
+            0.95, 0.09, 0.0025, 0.05,
+            // Dying in Mitofus loses 30 % of the XP of the level,
+            // never a level and nothing under level 10.
+            0.3,
+            2, 0.08, 0.05, 0.05, 0.5, 3.0, 0.25,
+            ContestLoss.AUTO);
+
+    /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
+    private static Balance override;
+
+    /** The active server config, or the defaults before a world is loaded (e.g. on the title screen). */
+    public static Balance current() {
+        if (override != null) {
+            return override;
+        }
+        return Config.isLoaded() ? Config.balance() : DEFAULT;
+    }
+
+    /**
+     * For game tests: {@link #current()} returns {@code balance} while {@code action} runs, then the config again.
+     * Safe because a game test runs from start to end on the server thread, with no other test in between.
+     */
+    public static void withOverride(Balance balance, Runnable action) {
+        Balance previous = override;
+        override = balance;
+        try {
+            action.run();
+        } finally {
+            override = previous;
+        }
+    }
+
+    /** A copy with a different {@link #eliteEquipmentChance}, e.g. 1.0 so a test always gets the drop. */
+    public Balance withEliteEquipmentChance(double chance) {
+        return new Balance(statPointsPerLevel, killXpMultiplier, killXpPerAttackDamage, killXpPerArmor, spawnerXpMultiplier,
+                xpBase, xpPerLevel, baseMana, manaPerIntelligence, baseManaRegen, manaRegenPerIntelligence,
+                enhanceBaseChance, enhanceChanceLossPerLevel, enhanceChancePerDexterity, enhanceMinChance, deathXpLoss,
+                mobLevelSpread, mobHealthPerLevel, mobDamagePerLevel, eliteChance, eliteStatBonus, eliteXpMultiplier, chance, contestLoss);
+    }
+
+    /** A copy with a different {@link #deathXpLoss}, to try the penalty (the default is none). */
+    public Balance withDeathXpLoss(double loss) {
+        return new Balance(statPointsPerLevel, killXpMultiplier, killXpPerAttackDamage, killXpPerArmor, spawnerXpMultiplier,
+                xpBase, xpPerLevel, baseMana, manaPerIntelligence, baseManaRegen, manaRegenPerIntelligence,
+                enhanceBaseChance, enhanceChanceLossPerLevel, enhanceChancePerDexterity, enhanceMinChance, loss,
+                mobLevelSpread, mobHealthPerLevel, mobDamagePerLevel, eliteChance, eliteStatBonus, eliteXpMultiplier, eliteEquipmentChance, contestLoss);
+    }
+
+    /** A copy with a different base and minimum enhancement chance, e.g. 0 and 0 so a test always fails to enhance. */
+    public Balance withEnhanceChances(double base, double min) {
+        return new Balance(statPointsPerLevel, killXpMultiplier, killXpPerAttackDamage, killXpPerArmor, spawnerXpMultiplier,
+                xpBase, xpPerLevel, baseMana, manaPerIntelligence, baseManaRegen, manaRegenPerIntelligence,
+                base, enhanceChanceLossPerLevel, enhanceChancePerDexterity, min, deathXpLoss,
+                mobLevelSpread, mobHealthPerLevel, mobDamagePerLevel, eliteChance, eliteStatBonus, eliteXpMultiplier, eliteEquipmentChance, contestLoss);
+    }
+
+    /** A copy with a different {@link #contestLoss}, so a test can try each way of losing. */
+    public Balance withContestLoss(ContestLoss loss) {
+        return new Balance(statPointsPerLevel, killXpMultiplier, killXpPerAttackDamage, killXpPerArmor, spawnerXpMultiplier,
+                xpBase, xpPerLevel, baseMana, manaPerIntelligence, baseManaRegen, manaRegenPerIntelligence,
+                enhanceBaseChance, enhanceChanceLossPerLevel, enhanceChancePerDexterity, enhanceMinChance, deathXpLoss,
+                mobLevelSpread, mobHealthPerLevel, mobDamagePerLevel, eliteChance, eliteStatBonus, eliteXpMultiplier, eliteEquipmentChance, loss);
+    }
+}

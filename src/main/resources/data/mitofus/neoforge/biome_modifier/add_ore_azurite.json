@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#mitofus:has_ore/azurite",
+  "features": "mitofus:ore_azurite",
+  "step": "underground_ores"
+}

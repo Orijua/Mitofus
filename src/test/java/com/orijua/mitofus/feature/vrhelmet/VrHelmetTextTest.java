@@ -1,0 +1,92 @@
+package com.orijua.mitofus.feature.vrhelmet;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.Locale;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class VrHelmetTextTest {
+    @Test
+    void wholeNumbersHaveNoDecimals() {
+        assertAll(
+                () -> assertEquals("55", VrHelmetText.minutes(55.0)),
+                () -> assertEquals("0", VrHelmetText.minutes(0.0)),
+                () -> assertEquals("1440", VrHelmetText.minutes(1440.0)));
+    }
+
+    @Test
+    void anythingElseHasOneDecimal() {
+        assertAll(
+                () -> assertEquals("7.5", VrHelmetText.minutes(7.5)),
+                () -> assertEquals("0.1", VrHelmetText.minutes(0.1)),
+                () -> assertEquals("41.3", VrHelmetText.minutes(41.25 + 0.05)),
+                () -> assertEquals("8.3", VrHelmetText.minutes(8.25 + 0.04)));
+    }
+
+    @Test
+    void aValueThatRoundsToAWholeNumberIsWrittenWhole() {
+        assertAll(
+                () -> assertEquals("8", VrHelmetText.minutes(7.96)),
+                () -> assertEquals("55", VrHelmetText.minutes(54.99)));
+    }
+
+    @Test
+    void theDecimalSeparatorIsAlwaysADot() {
+        Locale previous = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.GERMANY);
+            assertEquals("7.5", VrHelmetText.minutes(7.5));
+        } finally {
+            Locale.setDefault(previous);
+        }
+    }
+
+    @Test
+    void notFiniteValuesAreADash() {
+        assertAll(
+                () -> assertEquals("-", VrHelmetText.minutes(Double.NaN)),
+                () -> assertEquals("-", VrHelmetText.minutes(Double.POSITIVE_INFINITY)));
+    }
+
+    @Test
+    void minutesWithNegativeValuesKeepTheSignAndTheRule() {
+        assertAll(
+                () -> assertEquals("-55", VrHelmetText.minutes(-55.0)),
+                () -> assertEquals("-7.5", VrHelmetText.minutes(-7.5)),
+                () -> assertEquals("-8", VrHelmetText.minutes(-7.96)),
+                () -> assertEquals("0", VrHelmetText.minutes(-0.04), "rounds to zero: no minus"),
+                () -> assertEquals("0", VrHelmetText.minutes(-0.0)),
+                () -> assertEquals("-", VrHelmetText.minutes(Double.NEGATIVE_INFINITY)));
+    }
+
+    @Test
+    void clockAndMinutesWriteLatinDigitsWhateverTheLocale() {
+        Locale previous = Locale.getDefault();
+        try {
+            for (Locale locale : new Locale[]{Locale.forLanguageTag("ar-EG"), Locale.forLanguageTag("hi-IN"), Locale.GERMANY}) {
+                Locale.setDefault(locale);
+                assertEquals("01:05", VrHelmetText.clock(65), locale.toString());
+                assertEquals("1440:00", VrHelmetText.clock(86_400), locale.toString());
+                assertEquals("7.5", VrHelmetText.minutes(7.5), locale.toString());
+                assertEquals("-7.5", VrHelmetText.minutes(-7.5), locale.toString());
+            }
+        } finally {
+            Locale.setDefault(previous);
+        }
+    }
+
+    @Test
+    void clockWritesMinutesAndSeconds() {
+        assertAll(
+                () -> assertEquals("00:00", VrHelmetText.clock(0)),
+                () -> assertEquals("00:59", VrHelmetText.clock(59)),
+                () -> assertEquals("01:00", VrHelmetText.clock(60)),
+                () -> assertEquals("09:59", VrHelmetText.clock(599)),
+                () -> assertEquals("30:00", VrHelmetText.clock(1800)),
+                () -> assertEquals("1440:00", VrHelmetText.clock(86_400)),
+                () -> assertEquals("00:00", VrHelmetText.clock(-1)),
+                () -> assertEquals("00:00", VrHelmetText.clock(Integer.MIN_VALUE)));
+    }
+}

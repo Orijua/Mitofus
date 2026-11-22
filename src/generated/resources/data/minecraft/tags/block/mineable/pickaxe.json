@@ -1,0 +1,16 @@
+{
+  "values": [
+    "mitofus:smithing_anvil",
+    "mitofus:smelter",
+    "mitofus:body",
+    "mitofus:advanced_body",
+    "mitofus:diamond_body",
+    "mitofus:account_terminal",
+    "mitofus:mithril_ore",
+    "mitofus:deepslate_mithril_ore",
+    "mitofus:wolfram_ore",
+    "mitofus:deepslate_wolfram_ore",
+    "mitofus:azurite_ore",
+    "mitofus:deepslate_azurite_ore"
+  ]
+}

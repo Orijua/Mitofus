@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "map": "west",
+  "source": "Mitofus own map: pixel position on the 4096x3072 placeholder map; block = (px - origin) * blocks_per_pixel, origin in meta.json (Covadonga).",
+  "certainty": {
+    "alta": "fixed by Mitofus design",
+    "media": "approximate",
+    "mapa": "map only"
+  },
+  "omitted": "None.",
+  "places": [
+    {
+      "id": "covadonga",
+      "name": "Covadonga",
+      "type": "village",
+      "px": [
+        1772,
+        458
+      ],
+      "certainty": "alta",
+      "land": true,
+      "note": "Starting village; origin of the map (block 0,0)."
+    },
+    {
+      "id": "eibar",
+      "name": "Eibar",
+      "type": "city",
+      "px": [
+        1669,
+        410
+      ],
+      "certainty": "alta",
+      "land": true,
+      "note": "City with Maese Velasco's smithy."
+    },
+    {
+      "id": "sierra_nevada",
+      "name": "Sierra Nevada",
+      "type": "mountains",
+      "px": [
+        1736,
+        1304
+      ],
+      "certainty": "alta",
+      "land": true,
+      "note": "Stony mountain range in the west."
+    },
+    {
+      "id": "desierto_de_tabernas",
+      "name": "Desierto de Tabernas",
+      "type": "desert",
+      "px": [
+        808,
+        1288
+      ],
+      "certainty": "alta",
+      "land": true,
+      "note": "Desert in the south-west."
+    },
+    {
+      "id": "mar_del_este",
+      "name": "Mar del Este",
+      "type": "sea",
+      "px": [
+        3960,
+        968
+      ],
+      "certainty": "alta",
+      "land": false,
+      "note": "Open sea east of the continent."
+    }
+  ]
+}

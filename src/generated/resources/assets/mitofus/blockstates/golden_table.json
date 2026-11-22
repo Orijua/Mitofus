@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "book=false": {
+      "model": "mitofus:block/golden_table"
+    },
+    "book=true": {
+      "model": "mitofus:block/golden_table_book"
+    }
+  }
+}

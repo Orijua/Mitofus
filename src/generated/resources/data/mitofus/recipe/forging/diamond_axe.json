@@ -1,0 +1,21 @@
+{
+  "type": "mitofus:forging",
+  "handle": {
+    "item": "minecraft:stick"
+  },
+  "material": {
+    "item": "minecraft:diamond"
+  },
+  "material_count": 3,
+  "requirements": {
+    "level": 5,
+    "stats": {
+      "strength": 4
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "minecraft:diamond_axe"
+  },
+  "smithing_xp": 38
+}

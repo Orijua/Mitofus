@@ -1,0 +1,6 @@
+{
+  "name": { "translate": "title.mitofus.became_legend" },
+  "description": { "translate": "title.mitofus.became_legend.desc" },
+  "goal": { "type": "milestone", "milestone": "mitofus:read_orbe" },
+  "rare": true
+}

@@ -1,0 +1,64 @@
+package com.orijua.mitofus.gametest;
+
+import com.orijua.mitofus.Mitofus;
+import com.orijua.mitofus.core.registry.ModEffects;
+import com.orijua.mitofus.feature.equipment.option.ApplyEffectOptionEffect;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+
+@GameTestHolder(Mitofus.MODID)
+@PrefixGameTestTemplate(false)
+public final class EffectTests {
+    private EffectTests() {
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void bleedingIgnoresArmor(GameTestHelper helper) {
+        Zombie zombie = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, 1, 1, 1);
+        zombie.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.DIAMOND_CHESTPLATE));
+        zombie.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.DIAMOND_LEGGINGS));
+        float before = zombie.getHealth();
+        ModEffects.BLEEDING.get().applyEffectTick(zombie, 1);
+        TestSupport.assertClose(helper, 2.0, before - zombie.getHealth(), "Bleeding II deals 2 damage through diamond armor");
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void bleedOptionAppliesTheEffect(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        Zombie zombie = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, 1, 1, 1);
+        // A 100% chance, so the roll always succeeds.
+        new ApplyEffectOptionEffect(ModEffects.BLEEDING, 100, 0).onHit(player, zombie, 5.0f, 1.0f);
+        MobEffectInstance effect = zombie.getEffect(ModEffects.BLEEDING);
+        helper.assertTrue(effect != null && effect.getDuration() == 100, "the hit should make the zombie bleed for 100 ticks");
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void effectOptionNeverAppliesWithoutChanceOrOnADeadTarget(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        ApplyEffectOptionEffect bleed = new ApplyEffectOptionEffect(ModEffects.BLEEDING, 100, 0);
+
+        Zombie lucky = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, 1, 1, 1);
+        bleed.onHit(player, lucky, 5.0f, 0.0f);
+        helper.assertFalse(lucky.hasEffect(ModEffects.BLEEDING), "a 0% chance never applies");
+        bleed.onHit(player, lucky, 5.0f, 1.0f);
+        helper.assertTrue(lucky.hasEffect(ModEffects.BLEEDING), "control: a 100% chance does");
+
+        Zombie dead = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, 2, 1, 1);
+        dead.kill();
+        helper.assertFalse(dead.isAlive(), "the target is dead");
+        bleed.onHit(player, dead, 5.0f, 1.0f);
+        helper.assertFalse(dead.hasEffect(ModEffects.BLEEDING), "a dead target gets nothing");
+        helper.succeed();
+    }
+}

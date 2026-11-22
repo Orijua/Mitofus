@@ -1,0 +1,8 @@
+{
+  "name": { "translate": "quest.mitofus.smiths_gaze" },
+  "description": { "translate": "quest.mitofus.smiths_gaze.desc" },
+  "discover_when": { "type": "milestone", "milestone": "mitofus:observed", "count": 10 },
+  "goal": { "type": "milestone", "milestone": "mitofus:observed", "count": 10 },
+  "xp_reward": 300,
+  "item_rewards": [{ "id": "mitofus:enhancement_stone", "count": 2 }]
+}

@@ -1,0 +1,9 @@
+{
+  "name": { "translate": "quest.mitofus.zombie_plague" },
+  "description": { "translate": "quest.mitofus.zombie_plague.desc" },
+  "giver": "mitofus:village_chief",
+  "goal": { "type": "kill", "entity": "minecraft:zombie", "count": 5 },
+  "xp_reward": 100,
+  "item_rewards": [{ "id": "minecraft:bread", "count": 3 }],
+  "repeatable": true
+}

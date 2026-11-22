@@ -1,0 +1,6 @@
+{
+  "givers": ["mitofus:conde_nuno"],
+  "text": { "translate": "rumor.mitofus.moonlit_ore" },
+  "requires_quest": "mitofus:quality_test",
+  "solved_by": { "milestones": ["mitofus:found_azurite"] }
+}

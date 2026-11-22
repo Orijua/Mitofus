@@ -1,0 +1,61 @@
+{
+    player_stats: {level: 12, xp: 340, free_points: 5, strength: 7, stamina: 6, agility: 4, intelligence: 3, dexterity: 9, smithing_xp: 1500},
+    player_skills: {learned: ["mitofus:blacksmith_rage"], slots: ["mitofus:blacksmith_rage", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""], cooldown_until: {"mitofus:blacksmith_rage": 4800L}},
+    skill_mastery: {"mitofus:blacksmith_rage": 130},
+    mana: 12.5f,
+    fatigue: 0.75f,
+    trade_saturation: [{key: "sword/rare", pressure: 3, day: 14L}],
+    fatigue_grace: 9,
+    fatigue_forced_out: 1b,
+    fatigue_away_since: 1762770000000L,
+    player_identity: {titles: ["mitofus:one_who_became_a_legend"]},
+    player_classes: {
+        slots: [{slot: 0, class: "mitofus:swordsman", class_level: 150, class_xp: 12, grade: "adept"}],
+        job: "mitofus:legendary_blacksmith"
+    },
+    player_counters: {"kills/minecraft:zombie": 17},
+    player_quests: {
+        active: {"mitofus:smith_iron": 12},
+        completed: ["mitofus:smith_wood"],
+        discovered: ["mitofus:nuno_secret"],
+        seen: ["mitofus:smith_wood"],
+        times_completed: {"mitofus:zombie_plague": 2},
+        tracked: ["mitofus:smith_iron"],
+        deadlines: {"mitofus:night_watch": 96000L},
+        warned: ["mitofus:night_watch"],
+        failed: ["mitofus:velasco_contest"]
+    },
+    apprentices: [[I; 1, 2, 3, 4]],
+    workshop: [{apprentice: [I; 1, 2, 3, 4], name: "Hans", named: 1b, craftsman: 1b, level: 3, status: "WORKING", order: "minecraft:iron_sword", days_paid: 2, progress: 45, missing: "minecraft:iron_ingot", missing_count: 2, reported_at: 5000L}],
+    view: 7,
+    view_learned: {day: 14L, targets: [[I; 5, 6, 7, 8]]},
+    talents_found: [[I; 9, 10, 11, 12]],
+    heard_rumors: ["mitofus:altamira"],
+    velasco_contest: {started_at: 24000L, rival_score: 4, lost_day: 13L},
+    vrhelmet: {
+        vrhelmet: {dimension: "minecraft:overworld", pos: [I; 10, 64, -20]},
+        exit: {dimension: "minecraft:overworld", pos: [I; 11, 64, -20]},
+        last_save: [I; 100, 70, 200]
+    },
+    rarity_pity: {forge: 7, loot: 3},
+    mitofus_deaths: {last_death_at: 123456L, pending_disconnect: 1b},
+    mitofus_death_kept: {
+        inventory: [{Slot: 0b, id: "minecraft:stone", count: 3}],
+        deaths_before: {last_death_at: 120000L}
+    },
+    residence: {pos: [I; 120, 70, 210], site: "covadonga", changed_at: 48000L},
+    purse: {iron: 250L},
+    storage: {rows: 2, number: 123456, items: {Items: [{Slot: 0b, id: "minecraft:stone", count: 3}]}},
+    vrhelmet_tier: "diamond",
+    rested_seconds: 300,
+    rested_cooldown: 1200,
+    xp_rate: {minutes: [I; 12, 30], current_xp: 5, current_seconds: 20},
+    starter_vrhelmet_given: 1b,
+    offer_bought: {day: 14L, positions: [I; 3]},
+    phone_given: 1b,
+    character_vault: {live: "mitofus", stored: {data_version: 3955, xp_level: 4, health: 18.0f}},
+    save_version: 1,
+    from_spawner: 1b,
+    mob_level: {level: 25, elite: 1b},
+    passive_overrides: {granted: ["mitofus:mana_reserve"], revoked: ["mitofus:composure"]}
+}

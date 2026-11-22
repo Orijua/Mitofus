@@ -1,0 +1,15 @@
+{
+  "type": "mitofus:forging",
+  "handle": {
+    "item": "minecraft:leather"
+  },
+  "material": {
+    "item": "mitofus:wolfram_ingot"
+  },
+  "material_count": 4,
+  "result": {
+    "count": 1,
+    "id": "mitofus:wolfram_smithing_hammer"
+  },
+  "smithing_xp": 25
+}

@@ -1,0 +1,9 @@
+{
+  "name": { "translate": "quest.mitofus.quality_test" },
+  "description": { "translate": "quest.mitofus.quality_test.desc" },
+  "goal": { "type": "forge", "min_rating": "rare", "count": 2 },
+  "giver": "mitofus:blacksmith",
+  "requires_quest": "mitofus:first_commission",
+  "xp_reward": 150,
+  "item_rewards": [{ "id": "mitofus:enhancement_stone", "count": 3 }]
+}

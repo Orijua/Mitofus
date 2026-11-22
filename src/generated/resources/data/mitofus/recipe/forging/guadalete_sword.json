@@ -1,0 +1,53 @@
+{
+  "type": "mitofus:forging",
+  "fixed_options": [
+    {
+      "max_rating": "unique",
+      "option": "mitofus:guadalete_agility",
+      "value": 30.0
+    },
+    {
+      "min_rating": "legendary",
+      "option": "mitofus:guadalete_agility",
+      "value": 50.0
+    },
+    {
+      "option": "mitofus:guadalete_block",
+      "value": 0.15
+    },
+    {
+      "option": "mitofus:guadalete_darkness",
+      "value": 0.2
+    },
+    {
+      "option": "mitofus:guadalete_fear",
+      "value": 20.0
+    },
+    {
+      "min_rating": "legendary",
+      "option": "mitofus:guadalete_bisection",
+      "value": 1.0
+    }
+  ],
+  "handle": {
+    "item": "mitofus:guadalete_blueprint"
+  },
+  "material": {
+    "item": "mitofus:azurite_ingot"
+  },
+  "material_count": 15,
+  "max_rating": "legendary",
+  "min_rating": "unique",
+  "required_job": "mitofus:legendary_blacksmith",
+  "requirements": {
+    "level": 300,
+    "stats": {
+      "strength": 5000
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "mitofus:guadalete_sword"
+  },
+  "smithing_xp": 500
+}

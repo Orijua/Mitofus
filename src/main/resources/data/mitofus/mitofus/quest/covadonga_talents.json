@@ -1,0 +1,10 @@
+{
+  "name": { "translate": "quest.mitofus.covadonga_talents" },
+  "description": { "translate": "quest.mitofus.covadonga_talents.desc" },
+  "goal": { "type": "milestone", "milestone": "mitofus:talent_found", "count": 3 },
+  "giver": "mitofus:village_chief",
+  "requires_quest": "mitofus:watch_commander",
+  "xp_reward": 500,
+  "loaned_items": [{ "id": "mitofus:rulers_sword" }],
+  "item_rewards": [{ "id": "mitofus:gold_coin", "count": 5 }]
+}

@@ -1,0 +1,6 @@
+{
+  "givers": ["mitofus:village_chief"],
+  "text": { "translate": "rumor.mitofus.the_earl" },
+  "requires_quest": "mitofus:quality_test",
+  "solved_by": { "milestones": ["mitofus:nuno_secret"] }
+}

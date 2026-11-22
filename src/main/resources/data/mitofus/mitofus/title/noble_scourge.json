@@ -1,0 +1,7 @@
+{
+  "name": { "translate": "title.mitofus.noble_scourge" },
+  "description": { "translate": "title.mitofus.noble_scourge.desc" },
+  "goal": { "type": "kill", "entity": "mitofus:conde_nuno", "count": 1 },
+  "bonus_stats": { "intelligence": -50 },
+  "rare": true
+}

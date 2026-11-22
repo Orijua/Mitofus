@@ -1,0 +1,57 @@
+# Compiles the mod and runs the unit tests on every push. The game tests and the dedicated server start (the slow part)
+# only run on PRs that are ready for review and on main; a draft PR gets just the compile and the unit tests.
+name: Build
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+
+# A new push to the same branch cancels the run still in progress (never on main, so every merge keeps its result).
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # Caches Gradle and the downloaded Minecraft/NeoForge artifacts between runs.
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Compile and unit tests
+        run: ./gradlew build --console=plain
+
+      - name: Game tests
+        if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+        run: ./gradlew runGameTestServer --console=plain
+
+      # The game tests run in the dev environment; this starts the built jar on a real NeoForge dedicated server.
+      - name: Dedicated server
+        if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+        run: tools/ci/dedicated-server-smoke.sh
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            build/reports/tests
+            build/test-results
+            run/logs
+            run-gametest/logs
+            build/dedicated-server/server-output.log
+            build/dedicated-server/crash-reports

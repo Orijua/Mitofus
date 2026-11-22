@@ -1,0 +1,14 @@
+{
+  "type": "mitofus:melting",
+  "ingredient": {
+    "item": "mitofus:raw_azurite"
+  },
+  "min_temperature": 1450,
+  "result": {
+    "count": 1,
+    "id": "mitofus:azurite_ingot"
+  },
+  "smithing_level": 8,
+  "smithing_xp": 20,
+  "time": 400
+}

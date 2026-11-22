@@ -1,0 +1,12 @@
+{
+  "structures": [
+    {
+      "structure": "mitofus:torre_del_oro",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "mitofus:world_site",
+    "site": "torre_del_oro"
+  }
+}

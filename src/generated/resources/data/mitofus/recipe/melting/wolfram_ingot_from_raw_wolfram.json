@@ -1,0 +1,14 @@
+{
+  "type": "mitofus:melting",
+  "ingredient": {
+    "item": "mitofus:raw_wolfram"
+  },
+  "max_temperature": 1000,
+  "min_temperature": 950,
+  "result": {
+    "count": 1,
+    "id": "mitofus:wolfram_ingot"
+  },
+  "smithing_xp": 4,
+  "time": 160
+}

@@ -1,0 +1,15 @@
+{
+  "name": {
+    "translate": "passive.mitofus.composure"
+  },
+  "description": {
+    "translate": "passive.mitofus.composure.desc"
+  },
+  "icon": "minecraft:shield",
+  "bonuses": [
+    {
+      "type": "knockback_resistance",
+      "amount": 0.3
+    }
+  ]
+}

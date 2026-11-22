@@ -1,0 +1,23 @@
+{
+  "name": {
+    "translate": "skill.mitofus.heavy_strike"
+  },
+  "description": {
+    "translate": "skill.mitofus.heavy_strike.desc"
+  },
+  "icon": "minecraft:iron_axe",
+  "mana_cost": 8,
+  "cooldown_ticks": 60,
+  "required_item": "minecraft:swords",
+  "weapon_wear": 1,
+  "effects": [
+    {
+      "type": "area_damage",
+      "range": 3.0,
+      "cone_degrees": 40,
+      "damage_multiplier": 1.4,
+      "strength_scaling": 0.03,
+      "damage_multiplier_per_level": 0.02
+    }
+  ]
+}

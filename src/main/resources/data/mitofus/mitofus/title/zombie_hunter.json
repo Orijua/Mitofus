@@ -1,0 +1,6 @@
+{
+  "name": { "translate": "title.mitofus.zombie_hunter" },
+  "description": { "translate": "title.mitofus.zombie_hunter.desc" },
+  "goal": { "type": "kill", "entity": "minecraft:zombie", "count": 10 },
+  "bonus_stats": { "strength": 1 }
+}

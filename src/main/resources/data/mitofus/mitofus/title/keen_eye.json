@@ -1,0 +1,6 @@
+{
+  "name": { "translate": "title.mitofus.keen_eye" },
+  "description": { "translate": "title.mitofus.keen_eye.desc" },
+  "goal": { "type": "milestone", "milestone": "mitofus:observed", "count": 20 },
+  "bonus_stats": { "intelligence": 1 }
+}

@@ -1,0 +1,6 @@
+// 1.21.1	2026-11-21T16:37:45.247037586	Tags for minecraft:block mod id mitofus
+343883839111b3669a4dc3fcae03ef6359d8ed0e data/c/tags/block/ores.json
+2d8b4e2f7ac2adc3527e74fa7fefef3490ee064d data/minecraft/tags/block/mineable/pickaxe.json
+befc56d2cd09a2c45f0f666ddee0659ae8009adb data/minecraft/tags/block/needs_diamond_tool.json
+9163a0760cea68303c9e38625861270e6a035ef9 data/minecraft/tags/block/needs_iron_tool.json
+2714e3a45c29ab9c054134ff7346eb46130cc09c data/minecraft/tags/block/needs_stone_tool.json
