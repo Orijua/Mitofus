@@ -17,6 +17,19 @@ permissions:
   contents: read
 
 jobs:
+  # Fails on any match of the rules kept in the CONTENT_RULES secret; the output lists only file:line.
+  content-check:
+    name: Content check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Content check
+        env:
+          CONTENT_RULES: ${{ secrets.CONTENT_RULES }}
+        run: python3 tools/ci/check-content.py
+
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
