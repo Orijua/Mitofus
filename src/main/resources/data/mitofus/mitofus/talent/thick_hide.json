@@ -1,0 +1,23 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "guard",
+  "name": {
+    "translate": "talent_node.mitofus.thick_hide"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.thick_hide.desc"
+  },
+  "icon": "minecraft:leather",
+  "x": 0,
+  "y": 1,
+  "requires": [
+    "mitofus:swordsman_root"
+  ],
+  "effects": [
+    {
+      "type": "stat",
+      "stat": "stamina",
+      "amount": 1
+    }
+  ]
+}

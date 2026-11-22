@@ -1,0 +1,23 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "blade",
+  "name": {
+    "translate": "talent_node.mitofus.nimble_wrists"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.nimble_wrists.desc"
+  },
+  "icon": "minecraft:feather",
+  "x": -4,
+  "y": 3,
+  "requires": [
+    "mitofus:quick_recovery"
+  ],
+  "effects": [
+    {
+      "type": "stat",
+      "stat": "dexterity",
+      "amount": 1
+    }
+  ]
+}

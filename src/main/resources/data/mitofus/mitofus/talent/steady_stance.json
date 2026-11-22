@@ -1,0 +1,23 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "guard",
+  "name": {
+    "translate": "talent_node.mitofus.steady_stance"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.steady_stance.desc"
+  },
+  "icon": "minecraft:iron_boots",
+  "x": -1,
+  "y": 3,
+  "requires": [
+    "mitofus:tough_skin_1"
+  ],
+  "effects": [
+    {
+      "type": "stat",
+      "stat": "stamina",
+      "amount": 1
+    }
+  ]
+}

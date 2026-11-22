@@ -1,0 +1,23 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "warcry",
+  "name": {
+    "translate": "talent_node.mitofus.sharp_mind"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.sharp_mind.desc"
+  },
+  "icon": "minecraft:book",
+  "x": 3,
+  "y": 4,
+  "requires": [
+    "mitofus:cheaper_roar"
+  ],
+  "effects": [
+    {
+      "type": "stat",
+      "stat": "intelligence",
+      "amount": 1
+    }
+  ]
+}

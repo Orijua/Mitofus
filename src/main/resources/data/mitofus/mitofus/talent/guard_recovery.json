@@ -1,0 +1,23 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "guard",
+  "name": {
+    "translate": "talent_node.mitofus.guard_recovery"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.guard_recovery.desc"
+  },
+  "icon": "minecraft:clock",
+  "x": 1,
+  "y": 3,
+  "requires": [
+    "mitofus:iron_guard"
+  ],
+  "effects": [
+    {
+      "type": "skill_boost",
+      "skill": "mitofus:iron_guard",
+      "cooldown_multiplier": 0.85
+    }
+  ]
+}

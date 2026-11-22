@@ -1,0 +1,22 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "warcry",
+  "name": {
+    "translate": "talent_node.mitofus.war_cry"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.war_cry.desc"
+  },
+  "icon": "minecraft:goat_horn",
+  "x": 3,
+  "y": 2,
+  "requires": [
+    "mitofus:battle_focus"
+  ],
+  "effects": [
+    {
+      "type": "grant_skill",
+      "skill": "mitofus:war_cry"
+    }
+  ]
+}

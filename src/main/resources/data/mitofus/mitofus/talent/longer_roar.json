@@ -1,0 +1,23 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "warcry",
+  "name": {
+    "translate": "talent_node.mitofus.longer_roar"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.longer_roar.desc"
+  },
+  "icon": "minecraft:clock",
+  "x": 2,
+  "y": 3,
+  "requires": [
+    "mitofus:war_cry"
+  ],
+  "effects": [
+    {
+      "type": "skill_boost",
+      "skill": "mitofus:war_cry",
+      "cooldown_multiplier": 0.85
+    }
+  ]
+}

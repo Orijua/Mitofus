@@ -1,0 +1,23 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "blade",
+  "name": {
+    "translate": "talent_node.mitofus.quick_recovery"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.quick_recovery.desc"
+  },
+  "icon": "minecraft:clock",
+  "x": -4,
+  "y": 2,
+  "requires": [
+    "mitofus:sharp_edge"
+  ],
+  "effects": [
+    {
+      "type": "skill_boost",
+      "skill": "mitofus:heavy_strike",
+      "cooldown_multiplier": 0.9
+    }
+  ]
+}

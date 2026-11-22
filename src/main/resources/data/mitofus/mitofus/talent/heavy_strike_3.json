@@ -1,0 +1,24 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "blade",
+  "name": {
+    "translate": "talent_node.mitofus.heavy_strike_3"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.heavy_strike_3.desc"
+  },
+  "icon": "minecraft:diamond_axe",
+  "x": -3,
+  "y": 5,
+  "cost": 2,
+  "requires": [
+    "mitofus:blade_mastery_2"
+  ],
+  "effects": [
+    {
+      "type": "skill_boost",
+      "skill": "mitofus:heavy_strike",
+      "damage_multiplier": 1.25
+    }
+  ]
+}

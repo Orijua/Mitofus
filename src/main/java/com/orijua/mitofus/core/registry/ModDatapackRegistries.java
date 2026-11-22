@@ -9,6 +9,7 @@ import com.orijua.mitofus.feature.progression.TitleDefinition;
 import com.orijua.mitofus.feature.quest.QuestDefinition;
 import com.orijua.mitofus.feature.rumor.RumorDefinition;
 import com.orijua.mitofus.feature.skill.SkillDefinition;
+import com.orijua.mitofus.feature.talent.TalentDefinition;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
@@ -26,6 +27,7 @@ public final class ModDatapackRegistries {
     public static final ResourceKey<Registry<TitleDefinition>> TITLE = key("title");
     public static final ResourceKey<Registry<QuestDefinition>> QUEST = key("quest");
     public static final ResourceKey<Registry<RumorDefinition>> RUMOR = key("rumor");
+    public static final ResourceKey<Registry<TalentDefinition>> TALENT = key("talent");
 
     private ModDatapackRegistries() {
     }
@@ -39,6 +41,7 @@ public final class ModDatapackRegistries {
         event.dataPackRegistry(TITLE, TitleDefinition.CODEC, TitleDefinition.CODEC);
         event.dataPackRegistry(QUEST, QuestDefinition.CODEC, QuestDefinition.CODEC);
         event.dataPackRegistry(RUMOR, RumorDefinition.CODEC, RumorDefinition.CODEC);
+        event.dataPackRegistry(TALENT, TalentDefinition.CODEC, TalentDefinition.CODEC);
     }
 
     private static <T> ResourceKey<Registry<T>> key(String name) {
