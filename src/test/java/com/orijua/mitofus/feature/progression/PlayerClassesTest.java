@@ -28,6 +28,15 @@ class PlayerClassesTest {
     }
 
     @Test
+    void boughtTalentsRoundTripAndSurviveLevelsAndGrades() {
+        ResourceLocation node = ResourceLocation.parse("mitofus:sharp_edge");
+        ClassSlot slot = ClassSlot.fresh(0, SWORD).withTalents(List.of(node)).withProgress(7, 3).withGrade(ClassGrade.ADEPT);
+        assertEquals(List.of(node), slot.talents());
+        var json = ClassSlot.CODEC.encodeStart(JsonOps.INSTANCE, slot).getOrThrow();
+        assertEquals(slot, ClassSlot.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
+    }
+
+    @Test
     void anEmptyObjectReadsAsTheDefault() {
         assertEquals(PlayerClasses.DEFAULT, PlayerClasses.CODEC.parse(JsonOps.INSTANCE, new JsonObject()).getOrThrow());
         assertEquals(Optional.empty(), PlayerClasses.DEFAULT.job());

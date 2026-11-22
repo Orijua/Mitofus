@@ -690,7 +690,7 @@
   "message.mitofus.quest_abandoned": "Misión abandonada: %s",
   "message.mitofus.quest_tracking_full": "Ya sigues %s misiones en el HUD",
   "message.mitofus.respec_done": "Puntos devueltos: tienes %s para repartir",
-  "message.mitofus.respec_nothing": "No tienes puntos asignados que devolver",
+  "message.mitofus.respec_nothing": "No tienes puntos ni talentos asignados que devolver",
   "message.mitofus.reset": "Progresión de Mitofus reiniciada",
   "message.mitofus.simulated_kills": "Simuladas %s muertes de %s",
   "message.mitofus.simulated_forges": "Simuladas %s forjas %s",
@@ -1483,5 +1483,16 @@
   "talent_branch.mitofus.root": "Camino",
   "talent_branch.mitofus.blade": "Hoja",
   "talent_branch.mitofus.guard": "Guardia",
-  "talent_branch.mitofus.warcry": "Grito de guerra"
+  "talent_branch.mitofus.warcry": "Grito de guerra",
+  "message.mitofus.respec_done_talents": "Puntos devueltos: tienes %s puntos de estadística y %s de talento para gastar",
+  "message.mitofus.talent_no_class": "No hay ninguna clase en ese hueco",
+  "message.mitofus.talent_owned": "Ya tienes ese talento",
+  "message.mitofus.talent_locked": "Antes consigue los talentos de los que parte",
+  "message.mitofus.talent_grade": "Tu clase necesita un grado mayor para ese talento",
+  "message.mitofus.talent_points": "No tienes puntos de talento suficientes",
+  "message.mitofus.talent_unknown": "Ese talento no se puede comprar",
+  "message.mitofus.help.talent": "compra un talento de la clase de un hueco o devuelve todos los talentos",
+  "message.mitofus.debug_talent_bought": "Talento comprado: %s",
+  "message.mitofus.debug_talent_failed": "No se pudo comprar el talento %s",
+  "message.mitofus.debug_talent_reset": "Talentos devueltos: %s puntos"
 }

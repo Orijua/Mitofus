@@ -44,6 +44,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.common.NeoForge;
+import com.orijua.mitofus.feature.talent.TalentRules;
+import com.orijua.mitofus.feature.talent.TalentService;
 
 /** Level, stats, XP, classes, resets and quests: subcommands of {@code /mitofus} for operators ({@link DebugCommands} lists them all). */
 public final class ProgressionDebugCommands {
@@ -118,6 +120,18 @@ public final class ProgressionDebugCommands {
                                 .then(Commands.literal("up")
                                         .then(Commands.argument("slot", IntegerArgumentType.integer(0, ClassSlotRules.MAX_SLOTS - 1))
                                                 .executes(ctx -> gradeUp(ctx, IntegerArgumentType.getInteger(ctx, "slot"))))),
+                Commands.literal("talent")
+                                .then(Commands.literal("buy")
+                                        .then(Commands.argument("slot", IntegerArgumentType.integer(0, ClassSlotRules.MAX_SLOTS - 1))
+                                                .then(Commands.argument("talent", ResourceLocationArgument.id())
+                                                        .executes(ctx -> buyTalent(ctx, IntegerArgumentType.getInteger(ctx, "slot"),
+                                                                ResourceLocationArgument.getId(ctx, "talent"))))))
+                                .then(Commands.literal("reset")
+                                        .executes(ctx -> {
+                                            int refunded = TalentService.refundAll(DebugSupport.mitofusPlayer(ctx));
+                                            ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_talent_reset", refunded), false);
+                                            return refunded;
+                                        })),
                 Commands.literal("xp")
                                 .executes(ctx -> {
                                     ServerPlayer player = ctx.getSource().getPlayerOrException();
@@ -210,6 +224,17 @@ public final class ProgressionDebugCommands {
         }
         ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_class_level", slot, level), false);
         return level;
+    }
+
+    /** Buys a talent node for the class in a slot, through the same checks as the screen. */
+    private static int buyTalent(CommandContext<CommandSourceStack> ctx, int slot, ResourceLocation node) throws CommandSyntaxException {
+        ServerPlayer player = DebugSupport.mitofusPlayer(ctx);
+        if (TalentService.buy(player, slot, node) != TalentRules.Buy.OK) {
+            ctx.getSource().sendFailure(Component.translatable("message.mitofus.debug_talent_failed", node.toString()));
+            return 0;
+        }
+        ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_talent_bought", node.toString()), false);
+        return 1;
     }
 
     /** Raises the grade of the class in a slot by one, if the class level and the grade requirements allow it. */

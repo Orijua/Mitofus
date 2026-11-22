@@ -18,6 +18,7 @@ import com.orijua.mitofus.feature.sancho.ReadOrbePayload;
 import com.orijua.mitofus.feature.eibar.StartContestPayload;
 import com.orijua.mitofus.feature.progression.AllocateStatPayload;
 import com.orijua.mitofus.feature.progression.ChooseClassPayload;
+import com.orijua.mitofus.feature.talent.BuyTalentPayload;
 import com.orijua.mitofus.feature.progression.ChooseJobPayload;
 import com.orijua.mitofus.feature.quest.NpcQuestPayload;
 import com.orijua.mitofus.feature.quest.QuestActionPayload;
@@ -41,7 +42,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
  * attachments in ModAttachments. The exception is one-off events with no state, like system windows.
  */
 public final class ModNetwork {
-    private static final String PROTOCOL_VERSION = "2";
+    private static final String PROTOCOL_VERSION = "3";
 
     private ModNetwork() {
     }
@@ -52,6 +53,7 @@ public final class ModNetwork {
         registrar.playToServer(AssignSkillPayload.TYPE, AssignSkillPayload.STREAM_CODEC, ServerPayloadHandler::assignSkill);
         registrar.playToServer(AllocateStatPayload.TYPE, AllocateStatPayload.STREAM_CODEC, ServerPayloadHandler::allocateStat);
         registrar.playToServer(ChooseClassPayload.TYPE, ChooseClassPayload.STREAM_CODEC, ServerPayloadHandler::chooseClass);
+        registrar.playToServer(BuyTalentPayload.TYPE, BuyTalentPayload.STREAM_CODEC, ServerPayloadHandler::buyTalent);
         registrar.playToServer(ChooseJobPayload.TYPE, ChooseJobPayload.STREAM_CODEC, ServerPayloadHandler::chooseJob);
         registrar.playToServer(QuestActionPayload.TYPE, QuestActionPayload.STREAM_CODEC, ServerPayloadHandler::questAction);
         registrar.playToServer(LogoutRequestPayload.TYPE, LogoutRequestPayload.STREAM_CODEC, ServerPayloadHandler::logoutRequest);
