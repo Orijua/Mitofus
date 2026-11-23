@@ -1,6 +1,21 @@
 {
-  "parent": "minecraft:item/handheld",
-  "textures": {
-    "layer0": "mitofus:item/wolfram_smithing_hammer"
+  "parent": "minecraft:item/generated",
+  "base": {
+    "parent": "mitofus:item/wolfram_smithing_hammer_3d"
+  },
+  "loader": "neoforge:separate_transforms",
+  "perspectives": {
+    "fixed": {
+      "parent": "minecraft:item/handheld",
+      "textures": {
+        "layer0": "mitofus:item/wolfram_smithing_hammer"
+      }
+    },
+    "gui": {
+      "parent": "minecraft:item/handheld",
+      "textures": {
+        "layer0": "mitofus:item/wolfram_smithing_hammer"
+      }
+    }
   }
 }

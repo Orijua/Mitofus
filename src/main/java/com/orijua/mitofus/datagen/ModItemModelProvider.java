@@ -5,7 +5,11 @@ import com.orijua.mitofus.core.registry.ModItems;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
+import net.neoforged.neoforge.client.model.generators.ModelFile;
+import net.neoforged.neoforge.client.model.generators.loaders.SeparateTransformsModelBuilder;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 /** Item models for plain items (block items come from ModBlockStateProvider). */
@@ -31,8 +35,8 @@ final class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.ADVANCED_HELMET.get());
         basicItem(ModItems.DIAMOND_HELMET.get());
         handheldItem(ModItems.IRON_SMITHING_HAMMER.get());
-        handheldItem(ModItems.WOLFRAM_SMITHING_HAMMER.get());
-        handheldItem(ModItems.MITHRIL_SMITHING_HAMMER.get());
+        hammer3d(ModItems.WOLFRAM_SMITHING_HAMMER.get());
+        hammer3d(ModItems.MITHRIL_SMITHING_HAMMER.get());
         handheldItem(ModItems.COMMANDERS_SWORD.get());
         handheldItem(ModItems.RULERS_SWORD.get());
         basicItem(ModItems.ENHANCEMENT_STONE.get());
@@ -73,5 +77,21 @@ final class ModItemModelProvider extends ItemModelProvider {
     private void vanillaTexture(Item item, String vanillaTexture) {
         withExistingParent(BuiltInRegistries.ITEM.getKey(item).getPath(), mcLoc("item/generated"))
                 .texture("layer0", mcLoc("item/" + vanillaTexture));
+    }
+
+    /**
+     * Flat 32x32 icon in the inventory and in frames, hand-made 3D model (models/item/<id>_3d.json) in hands and on
+     * the ground.
+     */
+    private void hammer3d(Item item) {
+        String id = BuiltInRegistries.ITEM.getKey(item).getPath();
+        ModelFile solid = new ModelFile.UncheckedModelFile(modLoc("item/" + id + "_3d"));
+        ItemModelBuilder builder = getBuilder(id).parent(new ModelFile.UncheckedModelFile("minecraft:item/generated"));
+        SeparateTransformsModelBuilder<ItemModelBuilder> loader = builder.customLoader(SeparateTransformsModelBuilder::begin);
+        loader.base(nested().parent(solid));
+        for (ItemDisplayContext context : new ItemDisplayContext[] {ItemDisplayContext.GUI, ItemDisplayContext.FIXED}) {
+            loader.perspective(context, nested().parent(new ModelFile.UncheckedModelFile("minecraft:item/handheld"))
+                    .texture("layer0", modLoc("item/" + id)));
+        }
     }
 }
