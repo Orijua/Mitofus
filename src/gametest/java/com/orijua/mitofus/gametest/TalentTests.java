@@ -11,9 +11,13 @@ import com.orijua.mitofus.feature.skill.SkillService;
 import com.orijua.mitofus.feature.talent.TalentEffects;
 import com.orijua.mitofus.feature.talent.TalentRules;
 import com.orijua.mitofus.feature.talent.TalentService;
+import com.orijua.mitofus.core.registry.ModItems;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
@@ -132,6 +136,22 @@ public final class TalentTests {
         TalentService.refundAll(player);
         helper.assertFalse(SkillService.get(player).knows(slash), "the refund takes it back");
         helper.assertTrue(SkillService.get(player).knows(Mitofus.id("heavy_strike")), "the class skill stays");
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void theTalentScrollRefundsTalentsAndIsUsedUp(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        ClassService.chooseClass(player, 0, SWORD);
+        ClassService.setClassLevel(player, 0, 5);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.TALENT_SCROLL.get(), 2));
+        helper.assertTrue(ModItems.TALENT_SCROLL.get().use(player.level(), player, InteractionHand.MAIN_HAND).getResult() == InteractionResult.FAIL,
+                "nothing to refund: the scroll is kept");
+        helper.assertTrue(player.getMainHandItem().getCount() == 2, "still two scrolls");
+        buyAll(player, "sharp_edge", "heavy_strike_1");
+        ModItems.TALENT_SCROLL.get().use(player.level(), player, InteractionHand.MAIN_HAND);
+        helper.assertTrue(slot(player).talents().isEmpty() && available(player) == 5, "all points are free again");
+        helper.assertTrue(player.getMainHandItem().getCount() == 1, "one scroll was used");
         helper.succeed();
     }
 }

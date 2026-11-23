@@ -4,6 +4,7 @@ import com.orijua.mitofus.MitofusClient;
 import com.orijua.mitofus.core.client.UiStyle;
 import com.orijua.mitofus.core.registry.Definitions;
 import com.orijua.mitofus.core.registry.ModAttachments;
+import com.orijua.mitofus.feature.talent.TalentEffects;
 import com.orijua.mitofus.core.registry.ModDatapackRegistries;
 import com.orijua.mitofus.feature.progression.ProgressionService;
 import com.orijua.mitofus.feature.skill.PlayerSkills;
@@ -105,8 +106,9 @@ public final class SkillSlotsHudLayer implements LayeredDraw.Layer {
                 graphics.renderItem(icon, left + 2, y + 2);
             }
             long remaining = skills.cooldownRemaining(id.get(), player.level().getGameTime());
-            if (remaining > 0 && def.cooldownTicks() > 0) {
-                int height = Math.round(SIZE * remaining / (float) def.cooldownTicks());
+            int cooldown = TalentEffects.tuning(player, id.get()).cooldownTicks(def.cooldownTicks());
+            if (remaining > 0 && cooldown > 0) {
+                int height = Math.min(SIZE, Math.round(SIZE * remaining / (float) cooldown));
                 // Items are drawn at a higher depth; lift the overlay above them.
                 graphics.pose().pushPose();
                 graphics.pose().translate(0, 0, 200);

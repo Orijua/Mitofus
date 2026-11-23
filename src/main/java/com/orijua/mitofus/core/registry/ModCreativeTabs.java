@@ -67,6 +67,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.IRON_COIN);
                         output.accept(ModItems.COPPER_COIN);
                         output.accept(ModItems.RESPEC_SCROLL);
+                        output.accept(ModItems.TALENT_SCROLL);
                         output.accept(ModItems.BLACKSMITH_SPAWN_EGG);
                         output.accept(ModItems.VILLAGE_CHIEF_SPAWN_EGG);
                         output.accept(ModItems.COACHMAN_SPAWN_EGG);
