@@ -5,7 +5,7 @@ All notable changes to this mod are listed here. The format follows [Keep a Chan
 ## [Unreleased]
 
 ### Added
-- **Own item art, batch 1:** draft textures for the three VR helmets (now flat items, like the basic one), the three smithing hammers, the Commander's and Ruler's swords, the wolfram ingot, raw azurite, the four enhancement stones and the three enhancement scrolls. Items of a family share a silhouette and change palette. They are drafts to be repainted by hand. Redrawn with real 32x32 detail: hammers with a proper head and collar, swords with no gaps in the blade. Provisional 3D bases for the hammers and swords are kept in `art/blockbench/` (not used in game yet).
+- **Own item art, batch 1:** draft textures for the three VR helmets (now flat items, like the basic one), the three smithing hammers, the Commander's and Ruler's swords, the wolfram ingot, raw azurite, the four enhancement stones and the three enhancement scrolls. Items of a family share a silhouette and change palette. They are drafts to be repainted by hand. Redrawn with real 32x32 detail: hammers with a proper head and collar, swords with no gaps in the blade.
 - **Talent trees:** each class earns 1 talent point per class level and spends it in its own tree (stat points, better skills and passives, new skills), shown in a new Talents tab. The swordsman has the first tree. A new Talent Scroll (paper, lapis lazuli and amethyst shard) refunds talents; the respec scroll keeps refunding only stat points. Mana cost and cooldown in the Skills tab and HUD include the talents.
 
 ## [0.1.0-beta.1] - first beta
