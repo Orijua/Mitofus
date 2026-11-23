@@ -7,6 +7,7 @@ import com.orijua.mitofus.core.client.ScrollList;
 import com.orijua.mitofus.core.client.UiStyle;
 import com.orijua.mitofus.core.registry.Definitions;
 import com.orijua.mitofus.core.registry.ModAttachments;
+import com.orijua.mitofus.feature.talent.TalentEffects;
 import com.orijua.mitofus.core.registry.ModDatapackRegistries;
 import com.orijua.mitofus.feature.effect.PassiveDefinition;
 import com.orijua.mitofus.feature.effect.ActiveTraits;
@@ -99,7 +100,7 @@ public class SkillsTab extends MitofusTab {
             for (ResourceLocation id : skills().learned()) {
                 Definitions.get(player().level(), ModDatapackRegistries.SKILL, id).ifPresent(skill ->
                         result.add(new Entry(id, skill.name(), skill.description(), skill.iconStack(),
-                                skill.costLine(false).copy().append(" · ").append(MasteryText.full(player().getData(ModAttachments.SKILL_MASTERY).level(id))))));
+                                skill.costLine(false, TalentEffects.tuning(player(), id)).copy().append(" · ").append(MasteryText.full(player().getData(ModAttachments.SKILL_MASTERY).level(id))))));
             }
         }
         if (filter.showsPassive()) {

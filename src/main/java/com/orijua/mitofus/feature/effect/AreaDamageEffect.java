@@ -53,7 +53,7 @@ public record AreaDamageEffect(double range, double coneDegrees, double damageMu
         double minDot = EffectRules.coneMinDot(coneDegrees);
         // A caster without an attack attribute (some mobs) does no base damage.
         double attack = caster.getAttributes().hasAttribute(Attributes.ATTACK_DAMAGE) ? caster.getAttributeValue(Attributes.ATTACK_DAMAGE) : 0;
-        float damage = EffectRules.areaDamage(attack, damageMultiplier + damageMultiplierPerLevel * (context.skillLevel() - 1), strengthScaling, dexterityScaling,
+        float damage = context.magnitude() * EffectRules.areaDamage(attack, damageMultiplier + damageMultiplierPerLevel * (context.skillLevel() - 1), strengthScaling, dexterityScaling,
                 context.casterStats().strength(), context.casterStats().dexterity());
 
         List<LivingEntity> hit = level.getEntitiesOfClass(LivingEntity.class, new AABB(eye, eye).inflate(range),

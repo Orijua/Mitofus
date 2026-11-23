@@ -1,4 +1,4 @@
-// 1.21.1	2026-11-21T18:31:31.639531676	Recipes
+// 1.21.1	2026-11-23T08:55:21.684509379	Recipes
 7be5589f829243aa027f50c0eda0091490cb7ca3 data/mitofus/advancement/recipes/misc/account_terminal.json
 627cbcf1d8871ce8a07e128438dec5aace43f61e data/mitofus/advancement/recipes/misc/advanced_helmet.json
 af5076814c87a9d4b93e1c8b69da1c0e779d95c1 data/mitofus/advancement/recipes/misc/diamond_helmet.json
@@ -8,6 +8,7 @@ d5a42bb8290387014fad330c8ffb44a03f71687e data/mitofus/advancement/recipes/misc/h
 9064691001cf63ef30932c406e4f2ded17dc4dfc data/mitofus/advancement/recipes/misc/respec_scroll.json
 289091ce4f22e3856e058f8e20a35c01e45c38aa data/mitofus/advancement/recipes/misc/smelter.json
 53a360a18b9cc2d1e9d617f38a52ffb47f8644a4 data/mitofus/advancement/recipes/misc/smithing_anvil.json
+a13a786553573f29f33c5ff40f458d91af963144 data/mitofus/advancement/recipes/misc/talent_scroll.json
 058170e3147701efbb530d84905e435c51db942e data/mitofus/advancement/recipes/misc/wolfram_ingot_from_blasting_deepslate_wolfram_ore.json
 54c209ab11d6087bd6d7bdccfa1cfa57b2809a85 data/mitofus/advancement/recipes/misc/wolfram_ingot_from_blasting_raw_wolfram.json
 738f76486c98101540498982d6c1e5b3026cc6b8 data/mitofus/advancement/recipes/misc/wolfram_ingot_from_blasting_wolfram_ore.json
@@ -80,6 +81,7 @@ d5ab3116ba2b6020a962474ba4edfd08b920520b data/mitofus/recipe/phone.json
 95beb84304a4bc48fa663f477897549f82e1908b data/mitofus/recipe/respec_scroll.json
 22f7396a66e3e7339f74dc27bc92832a65620f50 data/mitofus/recipe/smelter.json
 3c8f3d2a1b7f8abcfc36fdcbce81a951bac897d9 data/mitofus/recipe/smithing_anvil.json
+b9afb1d0302800e063ed7036f6e94407181e3f5f data/mitofus/recipe/talent_scroll.json
 191354ad58c09b151cec6820508333cab7d31b55 data/mitofus/recipe/wolfram_ingot_from_blasting_deepslate_wolfram_ore.json
 170b16aaff155788d4f3d668000fc57a1e4d3531 data/mitofus/recipe/wolfram_ingot_from_blasting_raw_wolfram.json
 f58dcf16ca38f1cd920ea7db9e078c51310a812f data/mitofus/recipe/wolfram_ingot_from_blasting_wolfram_ore.json

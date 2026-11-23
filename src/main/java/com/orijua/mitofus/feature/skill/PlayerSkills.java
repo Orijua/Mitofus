@@ -74,6 +74,17 @@ public record PlayerSkills(List<ResourceLocation> learned, List<Optional<Resourc
         return result;
     }
 
+    /** Forgets the skill: it leaves the learned list and the slots (its cooldown is dropped too). */
+    public PlayerSkills forget(ResourceLocation skill) {
+        List<ResourceLocation> newLearned = new ArrayList<>(learned);
+        newLearned.remove(skill);
+        List<Optional<ResourceLocation>> newSlots = new ArrayList<>(slots);
+        newSlots.replaceAll(existing -> existing.equals(Optional.of(skill)) ? Optional.empty() : existing);
+        Map<ResourceLocation, Long> newCooldowns = new HashMap<>(cooldownUntil);
+        newCooldowns.remove(skill);
+        return new PlayerSkills(List.copyOf(newLearned), List.copyOf(newSlots), Map.copyOf(newCooldowns));
+    }
+
     public PlayerSkills withSlot(int index, Optional<ResourceLocation> skill) {
         List<Optional<ResourceLocation>> newSlots = new ArrayList<>(slots);
         skill.ifPresent(s -> newSlots.replaceAll(existing -> existing.equals(Optional.of(s)) ? Optional.empty() : existing));

@@ -94,7 +94,7 @@ public final class ContentScanner {
                 owner.thirdSlotPassive().ifPresent(classPassives::add);
             }
             talentRules.add(new ContentIndex.TalentRule(entry.getKey(), talent.playerClass(), talent.requires(), boostedSkills,
-                    boostedPassives, grantedSkills, classSkills, Set.copyOf(classPassives), talent.effects().isEmpty(), idleBoost));
+                    boostedPassives, grantedSkills, classSkills, Set.copyOf(classPassives), talent.effects().isEmpty() && !talent.isRoot(), idleBoost));
         }
         for (Map.Entry<ResourceLocation, JobDefinition> entry : entries(access, ModDatapackRegistries.JOB)) {
             String from = "job " + entry.getKey();

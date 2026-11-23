@@ -7,6 +7,7 @@ import com.orijua.mitofus.feature.effect.Condition;
 import com.orijua.mitofus.feature.effect.ConditionType;
 import com.orijua.mitofus.feature.effect.Effect;
 import com.orijua.mitofus.feature.effect.Trait;
+import com.orijua.mitofus.feature.talent.TalentEffects;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -66,9 +67,14 @@ public record SkillDefinition(
 
     /** "mana · cooldown · wear" line shared by the Skills tab and the weapon tooltip. */
     public Component costLine(boolean fromWeaponSlot) {
+        return costLine(fromWeaponSlot, TalentEffects.SkillTuning.NONE);
+    }
+
+    /** The same line with the mana and cooldown a player's talents give (see {@link TalentEffects}). */
+    public Component costLine(boolean fromWeaponSlot, TalentEffects.SkillTuning tuning) {
         int wear = weaponWear(fromWeaponSlot);
-        int mana = SkillCostRules.manaShown(manaCost);
-        int seconds = SkillCostRules.cooldownSeconds(cooldownTicks);
+        int mana = SkillCostRules.manaShown(tuning.mana(manaCost));
+        int seconds = SkillCostRules.cooldownSeconds(tuning.cooldownTicks(cooldownTicks));
         return SkillCostRules.showsWear(wear)
                 ? Component.translatable("screen.mitofus.skill_cost_wear", mana, seconds, wear)
                 : Component.translatable("screen.mitofus.skill_cost", mana, seconds);

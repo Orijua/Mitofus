@@ -50,6 +50,7 @@ final class ModItemModelProvider extends ItemModelProvider {
         vanillaTexture(ModItems.IRON_SMITHING_HAMMER.get(), "mace");
         vanillaTexture(ModItems.MITHRIL_SMITHING_HAMMER.get(), "mace");
         vanillaTexture(ModItems.RESPEC_SCROLL.get(), "paper");
+        vanillaTexture(ModItems.TALENT_SCROLL.get(), "paper");
         vanillaTexture(ModItems.ORBE_AURIFERO.get(), "enchanted_book");
         vanillaTexture(ModItems.WOLFRAM_INGOT.get(), "copper_ingot");
         vanillaTexture(ModItems.RAW_AZURITE.get(), "prismarine_crystals");

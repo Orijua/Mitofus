@@ -6,6 +6,7 @@ import com.orijua.mitofus.core.registry.ModDatapackRegistries;
 import com.orijua.mitofus.feature.progression.ClassService;
 import com.orijua.mitofus.feature.progression.ClassSlot;
 import com.orijua.mitofus.feature.progression.PlayerClasses;
+import com.orijua.mitofus.feature.skill.SkillService;
 import com.orijua.mitofus.feature.world.MitofusWorld;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -59,6 +60,11 @@ public final class TalentService {
             return result;
         }
         player.setData(ModAttachments.PLAYER_CLASSES, classes.withSlot(TalentRules.buy(placed.get(), node)));
+        for (TalentEffect effect : all.get(node).effects()) {
+            if (effect instanceof GrantSkillTalentEffect grant) {
+                SkillService.learn(player, grant.skill());
+            }
+        }
         return result;
     }
 
@@ -73,12 +79,24 @@ public final class TalentService {
                 continue;
             }
             refunded += TalentRules.pointsSpent(all, slot);
+            forgetGrantedSkills(player, all, slot);
             result = result.withSlot(slot.withTalents(List.of()));
         }
         if (result != classes) {
             player.setData(ModAttachments.PLAYER_CLASSES, result);
         }
         return refunded;
+    }
+
+    /** Takes back the skills the bought nodes taught, unless the class itself gives them. */
+    private static void forgetGrantedSkills(ServerPlayer player, Map<ResourceLocation, TalentDefinition> all, ClassSlot slot) {
+        List<ResourceLocation> ownSkills = Definitions.get(player.level(), ModDatapackRegistries.PLAYER_CLASS, slot.classId())
+                .map(playerClass -> playerClass.skills()).orElse(List.of());
+        for (ResourceLocation skill : TalentEffects.grantedSkills(all, slot)) {
+            if (!ownSkills.contains(skill)) {
+                SkillService.forget(player, skill);
+            }
+        }
     }
 
     /** Whether any class of the player has bought a node, to know if a refund would do anything. */

@@ -1,6 +1,7 @@
-// 1.21.1	2026-11-21T20:02:23.949625457	Item Models: mitofus
+// 1.21.1	2026-11-23T08:55:21.681332775	Item Models: mitofus
 56e12ea960efc26c2f0f1f94fb2b2010a860b764 assets/mitofus/models/item/ancient_armor_enhancement_scroll.json
 910178882baa628d9bfaf848be3a69b7bcd8b0f3 assets/mitofus/models/item/ancient_weapon_enhancement_scroll.json
+149b21777b2124b2530441629195a024b016140d assets/mitofus/models/item/appraiser_eye.json
 9186aec3aa11a45a2b24103e84126c200f2ac5c2 assets/mitofus/models/item/apprentice_contract.json
 b4ec6a5c1356385e7d9f18a6ff4e26fd930bff07 assets/mitofus/models/item/armor_enhancement_stone.json
 66063b17cb93c7336607cef31749a6f0ec6dd344 assets/mitofus/models/item/azurite_ingot.json
@@ -16,7 +17,6 @@ c238733bfaede8a505ed5ecb2c6903b399f66c95 assets/mitofus/models/item/commanders_s
 d887a18fb0d9376d51458eede7fb9a48489dcb52 assets/mitofus/models/item/diamond_helmet.json
 0e533ad0445b8a3c68cee68a99661362f4b80875 assets/mitofus/models/item/durandarte.json
 c64ed609ece68994ce23dd2809145040bce13579 assets/mitofus/models/item/enhancement_stone.json
-149b21777b2124b2530441629195a024b016140d assets/mitofus/models/item/appraiser_eye.json
 107bb1bca44640ae9e940cae4c9fe83e4e82b479 assets/mitofus/models/item/gold_coin.json
 7ccdd143defb54cfa4036b3b0fefb58c51ee5048 assets/mitofus/models/item/guadalete_blueprint.json
 1274cb61d816443b7f4612b6b5f618c2e76a4049 assets/mitofus/models/item/guadalete_sword.json
@@ -34,6 +34,7 @@ da297ba6fa75447c667dcbcf080d507f34292528 assets/mitofus/models/item/raw_azurite.
 8ce8b4fbcbb1d5889bcf72af0e16456ebf4db380 assets/mitofus/models/item/rulers_sword.json
 2af470b6f3845c30915965c3b3844b9d2f60ab4a assets/mitofus/models/item/skill_book.json
 63ec6c618a3a23eab4cab9c52d7d3250de9b516e assets/mitofus/models/item/storekeeper_spawn_egg.json
+9186aec3aa11a45a2b24103e84126c200f2ac5c2 assets/mitofus/models/item/talent_scroll.json
 9186aec3aa11a45a2b24103e84126c200f2ac5c2 assets/mitofus/models/item/transfer_contract.json
 d2c9091593298510a2eefa07b65f9a765b5ae185 assets/mitofus/models/item/unappraised_book.json
 63ec6c618a3a23eab4cab9c52d7d3250de9b516e assets/mitofus/models/item/velasco_spawn_egg.json

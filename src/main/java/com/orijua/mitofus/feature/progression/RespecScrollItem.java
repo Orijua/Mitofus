@@ -1,6 +1,5 @@
 package com.orijua.mitofus.feature.progression;
 
-import com.orijua.mitofus.feature.talent.TalentService;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -12,7 +11,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
-/** Right-click to get every allocated stat point and every bought talent node back as free points. Consumed on use. */
+/** Right-click to get every allocated stat point back as free points. Consumed on use. */
 public class RespecScrollItem extends Item {
     public RespecScrollItem(Properties properties) {
         super(properties);
@@ -24,17 +23,13 @@ public class RespecScrollItem extends Item {
         if (player instanceof ServerPlayer serverPlayer) {
             PlayerStats before = ProgressionService.get(serverPlayer);
             PlayerStats after = ProgressionRules.refundAll(before);
-            boolean talents = TalentService.hasBought(serverPlayer);
-            if (after.freePoints() == before.freePoints() && !talents) {
+            if (after.freePoints() == before.freePoints()) {
                 serverPlayer.displayClientMessage(Component.translatable("message.mitofus.respec_nothing"), true);
                 return InteractionResultHolder.fail(stack);
             }
             ProgressionService.set(serverPlayer, after);
-            int talentPoints = TalentService.refundAll(serverPlayer);
             stack.consume(1, player);
-            serverPlayer.displayClientMessage(talentPoints > 0
-                    ? Component.translatable("message.mitofus.respec_done_talents", after.freePoints(), talentPoints)
-                    : Component.translatable("message.mitofus.respec_done", after.freePoints()), true);
+            serverPlayer.displayClientMessage(Component.translatable("message.mitofus.respec_done", after.freePoints()), true);
             level.playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0f, 1.0f);
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);

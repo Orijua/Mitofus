@@ -17,7 +17,7 @@ import java.util.Optional;
  * A node of a class's talent tree, as written in data/&lt;namespace&gt;/mitofus/talent/&lt;id&gt;.json.
  * <ul>
  *   <li>{@code playerClass}: the class whose tree it belongs to; {@code branch} groups the nodes of one specialty.</li>
- *   <li>{@code requires}: nodes that must be owned first. A node with none is a root; roots cost 0 and are owned from the start.</li>
+ *   <li>{@code requires}: nodes that must be owned first. A node with none is a root; roots cost 0, are owned from the start and may have no effects.</li>
  *   <li>{@code cost}: talent points; most nodes cost 1, the strongest at the end of a branch up to {@value #MAX_COST}.</li>
  *   <li>{@code minGrade}: the class grade needed to buy it (Apprentice means no grade needed).</li>
  *   <li>{@code x}, {@code y}: the place on the tree screen, in node cells.</li>

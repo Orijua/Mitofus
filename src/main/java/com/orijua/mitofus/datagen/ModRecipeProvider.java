@@ -129,6 +129,10 @@ final class ModRecipeProvider extends RecipeProvider {
                 .requires(Items.PAPER).requires(Items.LAPIS_LAZULI).requires(ModItems.MITHRIL_INGOT.get())
                 .unlockedBy("has_mithril_ingot", has(ModItems.MITHRIL_INGOT.get()))
                 .save(mitofusOnly(output), Mitofus.id("respec_scroll"));
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.TALENT_SCROLL.get())
+                .requires(Items.PAPER).requires(Items.LAPIS_LAZULI).requires(Items.AMETHYST_SHARD)
+                .unlockedBy("has_amethyst_shard", has(Items.AMETHYST_SHARD))
+                .save(mitofusOnly(output), Mitofus.id("talent_scroll"));
     }
 
     /**

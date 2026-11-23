@@ -15,6 +15,7 @@ import com.orijua.mitofus.feature.sancho.SanchoRareBookItem;
 import com.orijua.mitofus.feature.sancho.UnappraisedItem;
 import com.orijua.mitofus.feature.progression.RespecScrollItem;
 import com.orijua.mitofus.feature.skill.SkillBookItem;
+import com.orijua.mitofus.feature.talent.TalentScrollItem;
 import com.orijua.mitofus.feature.smithing.BlueprintItem;
 import com.orijua.mitofus.feature.smithing.SmithingHammerItem;
 import com.orijua.mitofus.feature.eibar.TransferContractItem;
@@ -174,6 +175,9 @@ public final class ModItems {
 
     public static final DeferredItem<RespecScrollItem> RESPEC_SCROLL = ITEMS.registerItem("respec_scroll",
             RespecScrollItem::new, new Item.Properties().stacksTo(16));
+
+    public static final DeferredItem<TalentScrollItem> TALENT_SCROLL = ITEMS.registerItem("talent_scroll",
+            TalentScrollItem::new, new Item.Properties().stacksTo(16));
 
     private ModItems() {
     }

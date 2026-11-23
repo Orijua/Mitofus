@@ -130,7 +130,7 @@ class TalentDataTest {
         Map<String, Set<String>> cells = new TreeMap<>();
         talents.forEach((id, node) -> {
             JsonObject effects = node;
-            assertTrue(effects.getAsJsonArray("effects").size() > 0, id + " needs effects");
+            assertTrue(effects.getAsJsonArray("effects").size() > 0 || strings(node, "requires").isEmpty(), id + " needs effects (only a root may have none)");
             for (JsonElement element : effects.getAsJsonArray("effects")) {
                 JsonObject effect = element.getAsJsonObject();
                 String type = effect.get("type").getAsString();

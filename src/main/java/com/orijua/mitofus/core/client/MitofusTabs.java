@@ -6,6 +6,7 @@ import com.orijua.mitofus.feature.progression.client.ProfileTab;
 import com.orijua.mitofus.feature.progression.client.StatusTab;
 import com.orijua.mitofus.feature.quest.client.QuestsTab;
 import com.orijua.mitofus.feature.skill.client.SkillsTab;
+import com.orijua.mitofus.feature.talent.client.TalentsTab;
 import net.minecraft.client.Minecraft;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public final class MitofusTabs {
     private static final List<Supplier<MitofusTab>> TABS = List.of(
             StatusTab::new,
             SkillsTab::new,
+            TalentsTab::new,
             ProfileTab::new,
             QuestsTab::new,
             WorkshopTab::new,
