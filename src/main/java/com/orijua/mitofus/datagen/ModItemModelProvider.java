@@ -22,16 +22,29 @@ final class ModItemModelProvider extends ItemModelProvider {
         handheldItem(ModItems.WOLFRAM_SWORD.get());
         handheldItem(ModItems.DURANDARTE.get());
         handheldItem(ModItems.GUADALETE_SWORD.get()); // the user's 32x32 PNG
+        // Batch 1 (draft textures from the art sources, to be repainted by hand): plain item/generated or handheld.
+        basicItem(ModItems.RAW_WOLFRAM.get());
+        basicItem(ModItems.WOLFRAM_INGOT.get());
+        basicItem(ModItems.AZURITE_INGOT.get());
+        basicItem(ModItems.RAW_AZURITE.get());
+        basicItem(ModItems.HELMET.get());
+        basicItem(ModItems.ADVANCED_HELMET.get());
+        basicItem(ModItems.DIAMOND_HELMET.get());
+        handheldItem(ModItems.IRON_SMITHING_HAMMER.get());
+        handheldItem(ModItems.WOLFRAM_SMITHING_HAMMER.get());
+        handheldItem(ModItems.MITHRIL_SMITHING_HAMMER.get());
+        handheldItem(ModItems.COMMANDERS_SWORD.get());
+        handheldItem(ModItems.RULERS_SWORD.get());
+        basicItem(ModItems.ENHANCEMENT_STONE.get());
+        basicItem(ModItems.ARMOR_ENHANCEMENT_STONE.get());
+        basicItem(ModItems.BLESSED_WEAPON_ENHANCEMENT_STONE.get());
+        basicItem(ModItems.BLESSED_ARMOR_ENHANCEMENT_STONE.get());
+        basicItem(ModItems.BLESSED_ENHANCEMENT_SCROLL.get());
+        basicItem(ModItems.ANCIENT_WEAPON_ENHANCEMENT_SCROLL.get());
+        basicItem(ModItems.ANCIENT_ARMOR_ENHANCEMENT_SCROLL.get());
 
         // Placeholders that reuse a vanilla texture until there is an own PNG.
         basicItem(ModItems.DIAMOND_COIN.get());
-        vanillaTexture(ModItems.ENHANCEMENT_STONE.get(), "amethyst_shard");
-        vanillaTexture(ModItems.ARMOR_ENHANCEMENT_STONE.get(), "quartz");
-        vanillaTexture(ModItems.BLESSED_WEAPON_ENHANCEMENT_STONE.get(), "amethyst_shard");
-        vanillaTexture(ModItems.BLESSED_ARMOR_ENHANCEMENT_STONE.get(), "quartz");
-        vanillaTexture(ModItems.BLESSED_ENHANCEMENT_SCROLL.get(), "paper");
-        vanillaTexture(ModItems.ANCIENT_WEAPON_ENHANCEMENT_SCROLL.get(), "globe_banner_pattern");
-        vanillaTexture(ModItems.ANCIENT_ARMOR_ENHANCEMENT_SCROLL.get(), "piglin_banner_pattern");
         basicItem(ModItems.GOLD_COIN.get());
         basicItem(ModItems.IRON_COIN.get());
         basicItem(ModItems.COPPER_COIN.get());
@@ -42,22 +55,9 @@ final class ModItemModelProvider extends ItemModelProvider {
         vanillaTexture(ModItems.APPRENTICE_CONTRACT.get(), "paper");
         vanillaTexture(ModItems.TRANSFER_CONTRACT.get(), "paper");
         vanillaTexture(ModItems.WORKSHOP_LEDGER.get(), "writable_book");
-        // Helmet model example, variant 1 (template): item/generated + own provisional texture.
-        basicItem(ModItems.HELMET.get());
-        // Advanced helmet, variant 3 (3D): hand-written model in src/main/resources (Blockbench), not generated.
-        vanillaTexture(ModItems.DIAMOND_HELMET.get(), "diamond_helmet");
-        vanillaTexture(ModItems.WOLFRAM_SMITHING_HAMMER.get(), "mace");
-        vanillaTexture(ModItems.IRON_SMITHING_HAMMER.get(), "mace");
-        vanillaTexture(ModItems.MITHRIL_SMITHING_HAMMER.get(), "mace");
         vanillaTexture(ModItems.RESPEC_SCROLL.get(), "paper");
         vanillaTexture(ModItems.TALENT_SCROLL.get(), "paper");
         vanillaTexture(ModItems.ORBE_AURIFERO.get(), "enchanted_book");
-        vanillaTexture(ModItems.WOLFRAM_INGOT.get(), "copper_ingot");
-        vanillaTexture(ModItems.RAW_AZURITE.get(), "prismarine_crystals");
-        handheld(ModItems.COMMANDERS_SWORD.get(), "iron_sword");
-        handheld(ModItems.RULERS_SWORD.get(), "golden_sword");
-        vanillaTexture(ModItems.RAW_WOLFRAM.get(), "raw_copper");
-        vanillaTexture(ModItems.AZURITE_INGOT.get(), "prismarine_shard");
 
         // The phone borrows a dark glass block as its texture until it has its own art.
         withExistingParent("phone", mcLoc("item/generated")).texture("layer0", mcLoc("block/black_stained_glass"));
@@ -68,12 +68,6 @@ final class ModItemModelProvider extends ItemModelProvider {
         withExistingParent(ModItems.STOREKEEPER_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         withExistingParent(ModItems.BONE_LORD_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         withExistingParent(ModItems.VELASCO_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
-    }
-
-    /** A tool or weapon (held like a sword) that borrows a vanilla texture. */
-    private void handheld(Item item, String vanillaTexture) {
-        withExistingParent(BuiltInRegistries.ITEM.getKey(item).getPath(), mcLoc("item/handheld"))
-                .texture("layer0", mcLoc("item/" + vanillaTexture));
     }
 
     private void vanillaTexture(Item item, String vanillaTexture) {

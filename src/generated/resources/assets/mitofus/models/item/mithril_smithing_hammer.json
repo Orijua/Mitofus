@@ -1,6 +1,6 @@
 {
-  "parent": "minecraft:item/generated",
+  "parent": "minecraft:item/handheld",
   "textures": {
-    "layer0": "minecraft:item/mace"
+    "layer0": "mitofus:item/mithril_smithing_hammer"
   }
 }

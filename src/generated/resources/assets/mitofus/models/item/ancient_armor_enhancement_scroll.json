@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "minecraft:item/piglin_banner_pattern"
+    "layer0": "mitofus:item/ancient_armor_enhancement_scroll"
   }
 }
