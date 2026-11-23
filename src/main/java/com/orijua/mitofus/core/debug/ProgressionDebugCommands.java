@@ -123,6 +123,12 @@ public final class ProgressionDebugCommands {
                                                     return 1;
                                                 }))),
                 Commands.literal("grade")
+                                .then(Commands.literal("set")
+                                        .then(Commands.argument("class", StringArgumentType.word())
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(placedClasses(ctx), builder))
+                                                .then(Commands.argument("grade", IntegerArgumentType.integer(1, 5))
+                                                        .executes(ctx -> setGrade(ctx, StringArgumentType.getString(ctx, "class"),
+                                                                IntegerArgumentType.getInteger(ctx, "grade"))))))
                                 .then(Commands.literal("up")
                                         .then(Commands.argument("slot", IntegerArgumentType.integer(0, ClassSlotRules.MAX_SLOTS - 1))
                                                 .executes(ctx -> gradeUp(ctx, IntegerArgumentType.getInteger(ctx, "slot"))))),
@@ -314,6 +320,22 @@ public final class ProgressionDebugCommands {
             return 0;
         }
         return 1;
+    }
+
+    /** Debug: puts a placed class at grade 1 (Apprentice) to 5 (Grand Master) with no requirements, so two classes can share a grade to fuse. */
+    private static int setGrade(CommandContext<CommandSourceStack> ctx, String name, int grade) throws CommandSyntaxException {
+        ServerPlayer player = DebugSupport.mitofusPlayer(ctx);
+        var slot = ClassService.slotOf(player, com.orijua.mitofus.Mitofus.id(name));
+        if (slot.isEmpty()) {
+            ctx.getSource().sendFailure(Component.translatable("message.mitofus.debug_class_not_placed", name));
+            return 0;
+        }
+        var placed = ClassService.classes(player).slot(slot.get()).orElseThrow();
+        var newGrade = com.orijua.mitofus.feature.progression.ClassGrade.values()[grade - 1];
+        player.setData(ModAttachments.PLAYER_CLASSES, ClassService.classes(player).withSlot(placed.withGrade(newGrade)));
+        ProgressionService.refreshEffects(player);
+        ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_grade_set", name, newGrade.displayName()), false);
+        return grade;
     }
 
     /** Gives the player any job (basic or legendary) as a quest would, for testing. */

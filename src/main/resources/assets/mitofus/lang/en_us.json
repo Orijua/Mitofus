@@ -735,6 +735,7 @@
   "message.mitofus.class_grade_up": "%s rises to grade %s",
   "message.mitofus.debug_class_level": "Class level of slot %s: %s",
   "message.mitofus.debug_no_class_slot": "There is no class in slot %s",
+  "message.mitofus.debug_grade_set": "%1$s is now %2$s grade",
   "message.mitofus.debug_class_not_placed": "%s is not one of your placed classes",
   "message.mitofus.debug_talent_buyall": "Bought %2$s talent nodes of %1$s (raised its level and grade as needed)",
   "message.mitofus.debug_grade_no_class": "There is no class in slot %s",

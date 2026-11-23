@@ -735,6 +735,7 @@
   "message.mitofus.class_grade_up": "%s sube al grado %s",
   "message.mitofus.debug_class_level": "Nivel de la clase del hueco %s: %s",
   "message.mitofus.debug_no_class_slot": "No hay clase en el hueco %s",
+  "message.mitofus.debug_grade_set": "%1$s pasa a grado %2$s",
   "message.mitofus.debug_class_not_placed": "%s no es una de tus clases colocadas",
   "message.mitofus.debug_talent_buyall": "Compradas %2$s mejoras de talento de %1$s (se subió su nivel y grado si hacía falta)",
   "message.mitofus.debug_grade_no_class": "No hay clase en el hueco %s",
