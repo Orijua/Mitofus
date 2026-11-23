@@ -1,11 +1,14 @@
 # Blockbench models
 
-`advanced_helmet.bbmodel`: provisional 3D model of the advanced helmet (7 cubes, embedded 16x16 palette texture).
+Provisional 3D bases for the three smithing hammers and the Commander's and Ruler's swords. They are **not wired into the game yet**: the items still use the flat 32x32 textures. Each model has:
 
-How to use it:
-1. Open Blockbench and choose File > Open Model > `advanced_helmet.bbmodel`.
-2. Move or resize the cubes, or paint in the Paint tab (the texture is a palette of flat colors, so changing colors is enough).
-3. Export with File > Export > Export Block/Item Model (Java) and save over `src/main/resources/assets/mitofus/models/item/advanced_helmet.json`.
-4. If you change the texture, export it over `src/main/resources/assets/mitofus/textures/item/advanced_helmet_3d.png`.
+- `<item>.bbmodel`: the Blockbench project (texture embedded).
+- `<item>.json`: the same model exported as a Java block/item model.
+- `<item>_3d.png`: its 64x64 texture (about 2 texels per model unit, like the 32x32 items).
 
-The graphics are provisional, not final art.
+How to use them:
+1. Open the `.bbmodel` in Blockbench, adjust the cubes and paint the texture.
+2. Export with File > Export > Export Block/Item Model (Java).
+3. To use one in game, copy the JSON to `src/main/resources/assets/mitofus/models/item/<item>.json` (the item must be removed from the item model datagen so the two do not collide) and the PNG to `src/main/resources/assets/mitofus/textures/item/<item>_3d.png`.
+
+Notes: the display values are the vanilla `item/handheld` ones, with an unrotated `gui` entry and `gui_light: front`; a 3D item in the inventory usually needs its own `gui` transform. Every cube is rotated 45 degrees around Z at (8, 8, 8) so the tool lies on the diagonal like the flat items.
