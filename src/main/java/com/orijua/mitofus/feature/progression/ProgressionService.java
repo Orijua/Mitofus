@@ -6,6 +6,7 @@ import com.orijua.mitofus.core.registry.Definitions;
 import com.orijua.mitofus.feature.effect.BonusType;
 import com.orijua.mitofus.feature.effect.ActiveTraits;
 import com.orijua.mitofus.core.registry.ModAttachments;
+import com.orijua.mitofus.feature.fusion.SynergyService;
 import com.orijua.mitofus.feature.talent.TalentEffects;
 import com.orijua.mitofus.core.registry.ModDataComponents;
 import com.orijua.mitofus.core.registry.ModDatapackRegistries;
@@ -92,6 +93,7 @@ public final class ProgressionService {
         // The bonuses of every class in a slot and of the job add up.
         classes(player).forEach(c -> modifiers.addAll(StatModifier.fromBonuses(new StatSource(c.name()), c.bonusStats())));
         job(player).ifPresent(j -> modifiers.addAll(StatModifier.fromBonuses(new StatSource(j.name()), j.bonusStats())));
+        modifiers.addAll(SynergyService.modifiers(player));
         modifiers.addAll(TalentEffects.statModifiers(player));
         for (var titleId : player.getData(ModAttachments.PLAYER_IDENTITY).titles()) {
             Definitions.get(player.level(), ModDatapackRegistries.TITLE, titleId)

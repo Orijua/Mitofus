@@ -4,6 +4,7 @@ import com.orijua.mitofus.Mitofus;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import com.orijua.mitofus.feature.fusion.FusionScanner;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
@@ -20,9 +21,17 @@ public final class ContentValidationEvents {
         gameBus.addListener(ContentValidationEvents::onRegisterCommands);
     }
 
+    /** The content problems plus those of fusions and synergies. */
+    private static List<String> problems(net.minecraft.core.RegistryAccess access, net.minecraft.world.item.crafting.RecipeManager recipes) {
+        List<String> problems = new java.util.ArrayList<>(ContentValidator.validate(ContentScanner.index(access, recipes)));
+        problems.addAll(FusionScanner.problems(access));
+        problems.sort(null);
+        return problems;
+    }
+
     /** Only warns: a broken reference shouldn't stop the server, but it should be easy to spot. */
     private static void onServerStarted(ServerStartedEvent event) {
-        List<String> problems = ContentValidator.validate(ContentScanner.index(event.getServer().registryAccess(), event.getServer().getRecipeManager()));
+        List<String> problems = problems(event.getServer().registryAccess(), event.getServer().getRecipeManager());
         if (!problems.isEmpty()) {
             Mitofus.LOGGER.warn("Mitofus content has {} problem(s):", problems.size());
             problems.forEach(problem -> Mitofus.LOGGER.warn("  - {}", problem));
@@ -35,7 +44,7 @@ public final class ContentValidationEvents {
                 .then(Commands.literal("validate")
                         .requires(source -> source.hasPermission(2))
                         .executes(ctx -> {
-                            List<String> problems = ContentValidator.validate(ContentScanner.index(ctx.getSource().registryAccess(), ctx.getSource().getServer().getRecipeManager()));
+                            List<String> problems = problems(ctx.getSource().registryAccess(), ctx.getSource().getServer().getRecipeManager());
                             if (problems.isEmpty()) {
                                 ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.content_valid")
                                         .withStyle(ChatFormatting.GREEN), false);

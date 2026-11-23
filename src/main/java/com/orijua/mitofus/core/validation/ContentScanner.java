@@ -11,6 +11,7 @@ import com.orijua.mitofus.feature.npc.BlacksmithNpc;
 import com.orijua.mitofus.feature.progression.GradeRequirement;
 import com.orijua.mitofus.feature.progression.JobDefinition;
 import com.orijua.mitofus.feature.progression.PlayerClassDefinition;
+import com.orijua.mitofus.feature.fusion.FusionScanner;
 import com.orijua.mitofus.feature.talent.GrantSkillTalentEffect;
 import com.orijua.mitofus.feature.talent.PassiveBoostTalentEffect;
 import com.orijua.mitofus.feature.talent.SkillBoostTalentEffect;
@@ -156,6 +157,7 @@ public final class ContentScanner {
         Set<ResourceLocation> questGiverNpcs = new HashSet<>();
         ModEntities.questGivers().forEach(type -> questGiverNpcs.add(BuiltInRegistries.ENTITY_TYPE.getKey(type)));
 
+        rewardedClasses.addAll(FusionScanner.resultClasses(access));
         return new ContentIndex(ids(access, ModDatapackRegistries.SKILL), ids(access, ModDatapackRegistries.PLAYER_CLASS),
                 ids(access, ModDatapackRegistries.QUEST), advancedClasses, rewardedClasses, questRequirements, visibleClassQuests, references,
                 questGivers, questGiverNpcs, deliveriesWithoutGiver, ids(access, ModDatapackRegistries.ITEM_OPTION),

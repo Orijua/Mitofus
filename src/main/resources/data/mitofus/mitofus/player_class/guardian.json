@@ -1,0 +1,22 @@
+{
+  "name": {
+    "translate": "class.mitofus.guardian"
+  },
+  "description": {
+    "translate": "class.mitofus.guardian.desc"
+  },
+  "selectable": false,
+  "bonus_stats": {
+    "strength": 3,
+    "agility": 2,
+    "stamina": 4
+  },
+  "skills": [
+    "mitofus:rending_slash",
+    "mitofus:war_cry"
+  ],
+  "passives": [
+    "mitofus:composure",
+    "mitofus:tough_skin"
+  ]
+}

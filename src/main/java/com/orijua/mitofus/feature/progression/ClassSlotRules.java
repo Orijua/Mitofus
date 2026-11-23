@@ -104,6 +104,11 @@ public final class ClassSlotRules {
         return advance(slot, requirements, jobLevels) == Advance.OK;
     }
 
+    /** The XP multiplier of a late starter: {@code catchUp.multiplier()} while the class is at least {@code minGap} levels below the player, else 1. */
+    public static double catchUpMultiplier(int classLevel, int playerLevel, PlayerClassDefinition.CatchUp catchUp) {
+        return catchUp.enabled() && playerLevel - classLevel >= catchUp.minGap() ? catchUp.multiplier() : 1.0;
+    }
+
     /** Adds level XP to a placed class with the same curve as the player's levels ({@link ProgressionRules#addXp}). */
     public static ClassSlot addClassXp(Balance balance, ClassSlot slot, int amount) {
         PlayerStats result = ProgressionRules.addXp(balance, PlayerStats.DEFAULT.withProgress(slot.classLevel(), slot.classXp(), 0), amount).stats();

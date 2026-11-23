@@ -27,7 +27,22 @@ public record PlayerClassDefinition(
         List<ResourceLocation> skills,
         List<ResourceLocation> passives,
         Optional<ResourceLocation> thirdSlotPassive,
-        List<GradeRequirement> gradeRequirements) {
+        List<GradeRequirement> gradeRequirements,
+        CatchUp catchUp) {
+
+    /**
+     * Extra class XP for a class that sits far below the player's level (a late starter): while the class is at least {@code minGap}
+     * levels below the player, the XP it gets is multiplied by {@code multiplier}. {@code enabled: false} switches it off for the class.
+     */
+    public record CatchUp(boolean enabled, double multiplier, int minGap) {
+        public static final CatchUp DEFAULT = new CatchUp(true, 2.0, 10);
+
+        public static final Codec<CatchUp> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.BOOL.optionalFieldOf("enabled", true).forGetter(CatchUp::enabled),
+                Codec.doubleRange(1.0, 10.0).optionalFieldOf("multiplier", 2.0).forGetter(CatchUp::multiplier),
+                Codec.intRange(1, 1000).optionalFieldOf("min_gap", 10).forGetter(CatchUp::minGap)
+        ).apply(instance, CatchUp::new));
+    }
 
     public static final Codec<PlayerClassDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ComponentSerialization.CODEC.fieldOf("name").forGetter(PlayerClassDefinition::name),
@@ -38,6 +53,7 @@ public record PlayerClassDefinition(
             ResourceLocation.CODEC.listOf().optionalFieldOf("skills", List.of()).forGetter(PlayerClassDefinition::skills),
             ResourceLocation.CODEC.listOf().optionalFieldOf("passives", List.of()).forGetter(PlayerClassDefinition::passives),
             ResourceLocation.CODEC.optionalFieldOf("third_slot_passive").forGetter(PlayerClassDefinition::thirdSlotPassive),
-            GradeRequirement.CODEC.listOf().optionalFieldOf("grade_requirements", List.of()).forGetter(PlayerClassDefinition::gradeRequirements)
+            GradeRequirement.CODEC.listOf().optionalFieldOf("grade_requirements", List.of()).forGetter(PlayerClassDefinition::gradeRequirements),
+            CatchUp.CODEC.optionalFieldOf("catch_up", CatchUp.DEFAULT).forGetter(PlayerClassDefinition::catchUp)
     ).apply(instance, PlayerClassDefinition::new));
 }

@@ -1,0 +1,28 @@
+{
+  "job": "mitofus:farmer",
+  "steps": [
+    {
+      "grade": "apprentice",
+      "job_level": 10,
+      "bonus_stats": {
+        "stamina": 1
+      }
+    },
+    {
+      "grade": "expert",
+      "job_level": 30,
+      "bonus_stats": {
+        "stamina": 1,
+        "strength": 1
+      }
+    },
+    {
+      "grade": "grand_master",
+      "job_level": 60,
+      "bonus_stats": {
+        "stamina": 2,
+        "strength": 1
+      }
+    }
+  ]
+}

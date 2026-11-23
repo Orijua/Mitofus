@@ -1,0 +1,21 @@
+{
+  "name": {
+    "translate": "class.mitofus.paladin"
+  },
+  "description": {
+    "translate": "class.mitofus.paladin.desc"
+  },
+  "selectable": false,
+  "bonus_stats": {
+    "strength": 4,
+    "stamina": 6
+  },
+  "skills": [
+    "mitofus:heavy_strike",
+    "mitofus:war_cry"
+  ],
+  "passives": [
+    "mitofus:tough_skin"
+  ],
+  "third_slot_passive": "mitofus:sword_mastery"
+}

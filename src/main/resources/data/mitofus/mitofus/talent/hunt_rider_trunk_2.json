@@ -1,0 +1,24 @@
+{
+  "class": "mitofus:hunt_rider",
+  "branch": "trunk",
+  "name": {
+    "translate": "talent_node.mitofus.hunt_rider_trunk_2"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.hunt_rider_trunk_2.desc"
+  },
+  "icon": "minecraft:saddle",
+  "x": 0,
+  "y": 2,
+  "cost": 2,
+  "requires": [
+    "mitofus:hunt_rider_trunk_1"
+  ],
+  "effects": [
+    {
+      "type": "stat",
+      "stat": "dexterity",
+      "amount": 2
+    }
+  ]
+}

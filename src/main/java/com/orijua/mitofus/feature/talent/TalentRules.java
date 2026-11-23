@@ -11,7 +11,8 @@ import java.util.Set;
 
 /**
  * The rules of the talent tree, with no Minecraft state. A class earns 1 talent point per class level; a node costs what
- * its JSON says; roots are free and always owned. Points are never stored: they are the class level minus what the bought
+ * its JSON says; roots are free and always owned. A hybrid class also owns the roots and bought nodes of its two parents' trees, and
+ * the points its parents had spent ({@code paidPoints}) count as already paid. Points are never stored: they are the class level minus what the bought
  * nodes cost now, so a datapack that changes a cost or removes a node can never leave a player with negative points.
  */
 public final class TalentRules {
@@ -39,7 +40,7 @@ public final class TalentRules {
     public static Set<ResourceLocation> owned(Map<ResourceLocation, ? extends TalentNode> all, ClassSlot slot) {
         Set<ResourceLocation> owned = new HashSet<>();
         all.forEach((id, node) -> {
-            if (node.playerClass().equals(slot.classId()) && (node.isRoot() || slot.talents().contains(id))) {
+            if (slot.treeClasses().contains(node.playerClass()) && (node.isRoot() || slot.talents().contains(id))) {
                 owned.add(id);
             }
         });
@@ -55,7 +56,7 @@ public final class TalentRules {
     }
 
     public static int pointsAvailable(Map<ResourceLocation, ? extends TalentNode> all, ClassSlot slot) {
-        return Math.max(0, pointsEarned(slot.classLevel()) - pointsSpent(all, slot));
+        return Math.max(0, pointsEarned(slot.classLevel()) + slot.paidPoints() - pointsSpent(all, slot));
     }
 
     /** Whether {@code slot} may buy {@code node} now, and if not, the first thing that stops it. */
@@ -64,7 +65,7 @@ public final class TalentRules {
         if (definition == null) {
             return Buy.UNKNOWN;
         }
-        if (!definition.playerClass().equals(slot.classId())) {
+        if (!slot.treeClasses().contains(definition.playerClass())) {
             return Buy.WRONG_CLASS;
         }
         Set<ResourceLocation> owned = owned(all, slot);

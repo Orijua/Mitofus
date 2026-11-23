@@ -64,4 +64,15 @@ public final class ContentTests {
         helper.assertTrue(nodes == 31, "the swordsman tree should have 31 nodes, found " + nodes);
         helper.succeed();
     }
+
+    /** Every real fusion and synergy is consistent: hybrids are worth more than their parts, parents and jobs exist. */
+    @GameTest(template = TestSupport.EMPTY)
+    public static void realFusionsAndSynergiesAreConsistent(GameTestHelper helper) {
+        var access = helper.getLevel().registryAccess();
+        List<String> problems = com.orijua.mitofus.feature.fusion.FusionScanner.problems(access);
+        helper.assertTrue(problems.isEmpty(), "fusion problems:\n" + String.join("\n", problems));
+        helper.assertTrue(Definitions.all(helper.getLevel(), ModDatapackRegistries.FUSION).size() == 6, "the six first fusions are loaded");
+        helper.assertTrue(Definitions.all(helper.getLevel(), ModDatapackRegistries.SYNERGY).size() == 10, "five synergies and five job defaults are loaded");
+        helper.succeed();
+    }
 }

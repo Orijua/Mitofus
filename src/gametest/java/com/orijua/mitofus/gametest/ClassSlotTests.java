@@ -174,6 +174,7 @@ public final class ClassSlotTests {
         helper.succeed();
     }
 
+    /** Both classes sit far below the player's level 20, so both get the late-starter catch-up (x2) and so the same XP. */
     @GameTest(template = TestSupport.EMPTY)
     public static void xpGoesToEveryPlacedClass(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
@@ -182,10 +183,24 @@ public final class ClassSlotTests {
         ClassService.chooseClass(player, 1, MAGE);
         int amount = ProgressionRules.xpToNextLevel(Balance.current(), 1) + 3;
         ProgressionService.awardXp(player, amount);
+        ClassSlot expected = ClassSlotRules.addClassXp(Balance.current(), ClassSlot.fresh(0, SWORD), amount * 2);
         for (int slot = 0; slot < 2; slot++) {
             ClassSlot placed = classes(player).slot(slot).orElseThrow();
-            helper.assertTrue(placed.classLevel() == 2 && placed.classXp() == 3, "slot " + slot + " got the same XP: " + placed);
+            helper.assertTrue(placed.classLevel() == expected.classLevel() && placed.classXp() == expected.classXp(), "slot " + slot + " got the same XP: " + placed);
         }
+        helper.succeed();
+    }
+
+    /** A class close to the player's level gets the plain XP, with no catch-up. */
+    @GameTest(template = TestSupport.EMPTY)
+    public static void aClassCloseToThePlayerGetsNoCatchUp(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        setLevel(player, 20);
+        ClassService.chooseClass(player, 0, SWORD);
+        ClassService.setClassLevel(player, 0, 15);
+        ProgressionService.awardXp(player, 3);
+        ClassSlot placed = classes(player).slot(0).orElseThrow();
+        helper.assertTrue(placed.classLevel() == 15 && placed.classXp() == 3, "plain XP: " + placed);
         helper.succeed();
     }
 

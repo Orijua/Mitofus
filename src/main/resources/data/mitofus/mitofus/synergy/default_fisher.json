@@ -1,0 +1,28 @@
+{
+  "job": "mitofus:fisher",
+  "steps": [
+    {
+      "grade": "apprentice",
+      "job_level": 10,
+      "bonus_stats": {
+        "agility": 1
+      }
+    },
+    {
+      "grade": "expert",
+      "job_level": 30,
+      "bonus_stats": {
+        "agility": 1,
+        "intelligence": 1
+      }
+    },
+    {
+      "grade": "grand_master",
+      "job_level": 60,
+      "bonus_stats": {
+        "agility": 2,
+        "intelligence": 1
+      }
+    }
+  ]
+}

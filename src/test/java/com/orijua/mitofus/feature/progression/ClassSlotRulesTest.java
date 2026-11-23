@@ -106,4 +106,14 @@ class ClassSlotRulesTest {
     private static ClassSlot at(int level, ClassGrade grade) {
         return new ClassSlot(0, SWORD, level, 0, grade);
     }
+
+    @Test
+    void aLateStarterGetsExtraClassXpOnlyWhileFarBelowThePlayer() {
+        PlayerClassDefinition.CatchUp catchUp = PlayerClassDefinition.CatchUp.DEFAULT;
+        assertEquals(2.0, ClassSlotRules.catchUpMultiplier(1, 60, catchUp));
+        assertEquals(2.0, ClassSlotRules.catchUpMultiplier(50, 60, catchUp), "exactly the gap counts");
+        assertEquals(1.0, ClassSlotRules.catchUpMultiplier(51, 60, catchUp));
+        assertEquals(1.0, ClassSlotRules.catchUpMultiplier(1, 60, new PlayerClassDefinition.CatchUp(false, 2.0, 10)), "it can be switched off");
+        assertEquals(3.0, ClassSlotRules.catchUpMultiplier(1, 60, new PlayerClassDefinition.CatchUp(true, 3.0, 10)), "and set per class");
+    }
 }

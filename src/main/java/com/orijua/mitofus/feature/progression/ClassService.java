@@ -10,6 +10,7 @@ import com.orijua.mitofus.feature.world.MitofusWorld;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.neoforged.neoforge.common.NeoForge;
@@ -140,9 +141,9 @@ public final class ClassService {
      * The player's job levels for the grade requirements: the blacksmith's is their smithing level (as for any job that adds to it,
      * like Sancho's successor); the other jobs have no level yet (0).
      */
-    public static Map<ResourceLocation, Integer> jobLevels(ServerPlayer player) {
+    public static Map<ResourceLocation, Integer> jobLevels(Player player) {
         Map<ResourceLocation, Integer> levels = new HashMap<>();
-        currentJob(player).ifPresent(jobId -> {
+        player.getData(ModAttachments.PLAYER_CLASSES).job().ifPresent(jobId -> {
             boolean smith = jobId.equals(BLACKSMITH) || Definitions.get(player.level(), ModDatapackRegistries.JOB, jobId)
                     .map(job -> job.smithingBonus() > 0).orElse(false);
             int level = smith ? ProgressionService.get(player).smithingLevel() : 0;
@@ -180,8 +181,12 @@ public final class ClassService {
             return;
         }
         PlayerClasses after = before;
+        int playerLevel = ProgressionService.get(player).level();
         for (ClassSlot placed : before.slots()) {
-            after = after.withSlot(ClassSlotRules.addClassXp(Balance.current(), placed, amount));
+            PlayerClassDefinition.CatchUp catchUp = Definitions.get(player.level(), ModDatapackRegistries.PLAYER_CLASS, placed.classId())
+                    .map(PlayerClassDefinition::catchUp).orElse(PlayerClassDefinition.CatchUp.DEFAULT);
+            int boosted = (int) Math.round(amount * ClassSlotRules.catchUpMultiplier(placed.classLevel(), playerLevel, catchUp));
+            after = after.withSlot(ClassSlotRules.addClassXp(Balance.current(), placed, boosted));
         }
         player.setData(ModAttachments.PLAYER_CLASSES, after);
     }
