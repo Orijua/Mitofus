@@ -25,6 +25,8 @@ import com.orijua.mitofus.feature.eibar.VelascoContest;
 import com.orijua.mitofus.feature.eibar.StartContestPayload;
 import com.orijua.mitofus.feature.progression.AllocateStatPayload;
 import com.orijua.mitofus.feature.progression.ChooseClassPayload;
+import com.orijua.mitofus.feature.talent.BuyTalentPayload;
+import com.orijua.mitofus.feature.talent.TalentService;
 import com.orijua.mitofus.feature.progression.ChooseJobPayload;
 import com.orijua.mitofus.feature.progression.ClassService;
 import com.orijua.mitofus.feature.progression.ProgressionService;
@@ -86,6 +88,12 @@ final class ServerPayloadHandler {
     static void chooseClass(ChooseClassPayload payload, IPayloadContext context) {
         if (context.player() instanceof ServerPlayer player && MitofusWorld.is(player.level())) {
             ClassService.chooseClass(player, payload.slot(), payload.playerClass());
+        }
+    }
+
+    static void buyTalent(BuyTalentPayload payload, IPayloadContext context) {
+        if (context.player() instanceof ServerPlayer player && MitofusWorld.is(player.level())) {
+            TalentService.buy(player, payload.slot(), payload.node());
         }
     }
 

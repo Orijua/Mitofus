@@ -690,7 +690,7 @@
   "message.mitofus.quest_abandoned": "Quest abandoned: %s",
   "message.mitofus.quest_tracking_full": "You already follow %s quests on the HUD",
   "message.mitofus.respec_done": "Points refunded: you have %s to spend",
-  "message.mitofus.respec_nothing": "You have no allocated points to refund",
+  "message.mitofus.respec_nothing": "You have no allocated points or talents to refund",
   "message.mitofus.reset": "Mitofus progression reset",
   "message.mitofus.simulated_kills": "Simulated %s kills of %s",
   "message.mitofus.simulated_forges": "Simulated %s %s forges",
@@ -1483,5 +1483,16 @@
   "talent_branch.mitofus.root": "Path",
   "talent_branch.mitofus.blade": "Blade",
   "talent_branch.mitofus.guard": "Guard",
-  "talent_branch.mitofus.warcry": "War cry"
+  "talent_branch.mitofus.warcry": "War cry",
+  "message.mitofus.respec_done_talents": "Points refunded: you have %s stat points and %s talent points to spend",
+  "message.mitofus.talent_no_class": "There is no class in that slot",
+  "message.mitofus.talent_owned": "You already have that talent",
+  "message.mitofus.talent_locked": "First get the talents it comes from",
+  "message.mitofus.talent_grade": "Your class needs a higher grade for that talent",
+  "message.mitofus.talent_points": "Not enough talent points",
+  "message.mitofus.talent_unknown": "That talent can't be bought",
+  "message.mitofus.help.talent": "buys a talent for the class in a slot, or refunds all talents",
+  "message.mitofus.debug_talent_bought": "Talent bought: %s",
+  "message.mitofus.debug_talent_failed": "Could not buy the talent %s",
+  "message.mitofus.debug_talent_reset": "Talents refunded: %s points"
 }

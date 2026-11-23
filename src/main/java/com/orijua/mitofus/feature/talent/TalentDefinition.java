@@ -34,7 +34,7 @@ public record TalentDefinition(
         ClassGrade minGrade,
         int x,
         int y,
-        List<TalentEffect> effects) {
+        List<TalentEffect> effects) implements TalentNode {
 
     public static final int MAX_COST = 3;
 
@@ -57,7 +57,4 @@ public record TalentDefinition(
         return DataResult.success(definition);
     });
 
-    public boolean isRoot() {
-        return requires.isEmpty();
-    }
 }

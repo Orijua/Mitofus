@@ -26,6 +26,7 @@ public final class HelpCommand {
             new Entry("validate", "validate", true),
             new Entry("set", "set smithing|level|class <slot>|classlevel <slot>|job|stat|fatigue|iron|view …", true),
             new Entry("grade", "grade up <slot>", true),
+            new Entry("talent", "talent buy <slot> <talent> | reset", true),
             new Entry("xp", "xp [reset]", true),
             new Entry("give", "give xp <n> | gear <stat> <requirement> [bonus]", true),
             new Entry("reset", "reset all|quests", true),
