@@ -1,0 +1,23 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "warcry",
+  "name": {
+    "translate": "talent_node.mitofus.second_wind"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.second_wind.desc"
+  },
+  "icon": "minecraft:cooked_beef",
+  "x": 2,
+  "y": 4,
+  "requires": [
+    "mitofus:longer_roar"
+  ],
+  "effects": [
+    {
+      "type": "stat",
+      "stat": "stamina",
+      "amount": 1
+    }
+  ]
+}

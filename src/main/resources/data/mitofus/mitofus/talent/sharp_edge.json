@@ -1,0 +1,23 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "blade",
+  "name": {
+    "translate": "talent_node.mitofus.sharp_edge"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.sharp_edge.desc"
+  },
+  "icon": "minecraft:flint",
+  "x": -3,
+  "y": 1,
+  "requires": [
+    "mitofus:swordsman_root"
+  ],
+  "effects": [
+    {
+      "type": "stat",
+      "stat": "strength",
+      "amount": 1
+    }
+  ]
+}

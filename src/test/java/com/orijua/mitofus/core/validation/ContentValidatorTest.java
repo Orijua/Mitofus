@@ -164,6 +164,79 @@ class ContentValidatorTest {
         assertEquals(List.of(), ContentValidator.validate(content));
     }
 
+    private static final ResourceLocation ROOT = id("root");
+    private static final ResourceLocation LEAF = id("leaf");
+    private static final ResourceLocation OTHER_ROOT = id("other_root");
+
+    private static ContentIndex.TalentRule talent(ResourceLocation id, ResourceLocation playerClass, List<ResourceLocation> requires) {
+        return new ContentIndex.TalentRule(id, playerClass, requires, List.of(), List.of(), List.of(), Set.of(), Set.of(), false, false);
+    }
+
+    private static ContentIndex withTalents(Set<ResourceLocation> skills, ContentIndex.TalentRule... rules) {
+        return new ContentIndex(skills, Set.of(WARRIOR, HERO), Set.of(), Set.of(), Set.of(), Map.of(), Set.of(), List.of(), Map.of(), Set.of(),
+                Set.of(), Set.of(), Set.of(), Set.of(), Set.of(), Set.of(), List.of(), Set.of(), List.of(rules));
+    }
+
+    @Test
+    void aCleanTalentTreeHasNoProblems() {
+        assertEquals(List.of(), ContentValidator.validate(withTalents(Set.of(),
+                talent(ROOT, WARRIOR, List.of()), talent(LEAF, WARRIOR, List.of(ROOT)), talent(OTHER_ROOT, HERO, List.of()))));
+    }
+
+    @Test
+    void reportsTalentRequirementsThatAreMissingOrOfAnotherClass() {
+        assertEquals(List.of(
+                "talent test:leaf: requires talent test:gone that does not exist",
+                "talent test:other_leaf: requires talent test:root of another class"),
+                ContentValidator.validate(withTalents(Set.of(), talent(ROOT, WARRIOR, List.of()), talent(OTHER_ROOT, HERO, List.of()),
+                        talent(LEAF, WARRIOR, List.of(id("gone"))), talent(id("other_leaf"), HERO, List.of(ROOT)))));
+    }
+
+    @Test
+    void reportsATreeWithTwoRootsOrNone() {
+        assertEquals(List.of("class test:warrior: its talent tree has 2 roots, it needs exactly one"),
+                ContentValidator.validate(withTalents(Set.of(), talent(ROOT, WARRIOR, List.of()), talent(LEAF, WARRIOR, List.of()))));
+        assertEquals(List.of(
+                "class test:warrior: its talent tree has no root (a node with no requires)",
+                "talent test:leaf: requires talent test:gone that does not exist"),
+                ContentValidator.validate(withTalents(Set.of(), talent(LEAF, WARRIOR, List.of(id("gone"))))));
+    }
+
+    @Test
+    void reportsTalentsThatRequireEachOther() {
+        assertEquals(List.of(
+                "talent test:a: its requires chain loops back to it, so it can never be bought",
+                "talent test:b: its requires chain loops back to it, so it can never be bought"),
+                ContentValidator.validate(withTalents(Set.of(), talent(ROOT, WARRIOR, List.of()),
+                        talent(id("a"), WARRIOR, List.of(id("b"))), talent(id("b"), WARRIOR, List.of(id("a"))))));
+    }
+
+    @Test
+    void reportsBoostsOfThingsTheClassDoesNotHave() {
+        ResourceLocation slash = id("slash");
+        ResourceLocation learned = id("learned");
+        ResourceLocation guard = id("guard");
+        ContentIndex.TalentRule boosts = new ContentIndex.TalentRule(LEAF, WARRIOR, List.of(ROOT), List.of(slash, learned), List.of(guard), List.of(),
+                Set.of(), Set.of(), false, false);
+        ContentIndex.TalentRule teaches = new ContentIndex.TalentRule(id("teacher"), WARRIOR, List.of(ROOT), List.of(), List.of(), List.of(learned),
+                Set.of(), Set.of(), false, false);
+        assertEquals(List.of(
+                "talent test:leaf: boosts passive test:guard that the class does not have",
+                "talent test:leaf: boosts skill test:slash that the class neither has nor learns from a talent",
+                "talent test:leaf: skill test:slash does not exist"),
+                ContentValidator.validate(withTalents(Set.of(learned), talent(ROOT, WARRIOR, List.of()), boosts, teaches)));
+    }
+
+    @Test
+    void reportsTalentsThatGiveNothing() {
+        ContentIndex.TalentRule empty = new ContentIndex.TalentRule(LEAF, WARRIOR, List.of(ROOT), List.of(), List.of(), List.of(), Set.of(), Set.of(), true, false);
+        ContentIndex.TalentRule idle = new ContentIndex.TalentRule(id("idle"), WARRIOR, List.of(ROOT), List.of(), List.of(), List.of(), Set.of(), Set.of(), false, true);
+        assertEquals(List.of(
+                "talent test:idle: a skill_boost changes no multiplier, so it gives nothing",
+                "talent test:leaf: has no effects, so owning it gives nothing"),
+                ContentValidator.validate(withTalents(Set.of(), talent(ROOT, WARRIOR, List.of()), empty, idle)));
+    }
+
     /** Content with warrior and the trial quest but no skills, plus the given references. */
     private static ContentIndex references(Reference... references) {
         return new ContentIndex(Set.of(), Set.of(WARRIOR), Set.of(TRIAL), Set.of(), Set.of(), Map.of(), Set.of(), List.of(references));

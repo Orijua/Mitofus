@@ -1,0 +1,22 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "blade",
+  "name": {
+    "translate": "talent_node.mitofus.rending_slash"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.rending_slash.desc"
+  },
+  "icon": "minecraft:redstone",
+  "x": -5,
+  "y": 3,
+  "requires": [
+    "mitofus:nimble_wrists"
+  ],
+  "effects": [
+    {
+      "type": "grant_skill",
+      "skill": "mitofus:rending_slash"
+    }
+  ]
+}

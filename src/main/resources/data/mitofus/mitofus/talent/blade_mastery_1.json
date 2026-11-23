@@ -1,0 +1,34 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "blade",
+  "name": {
+    "translate": "talent_node.mitofus.blade_mastery_1"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.blade_mastery_1.desc"
+  },
+  "icon": "minecraft:iron_sword",
+  "x": -3,
+  "y": 3,
+  "requires": [
+    "mitofus:heavy_strike_1"
+  ],
+  "effects": [
+    {
+      "type": "passive_boost",
+      "passive": "mitofus:sword_mastery",
+      "bonuses": [
+        {
+          "type": "damage",
+          "amount": 0.03,
+          "with_item": "minecraft:swords"
+        },
+        {
+          "type": "damage",
+          "amount": 0.03,
+          "with_item": "minecraft:axes"
+        }
+      ]
+    }
+  ]
+}

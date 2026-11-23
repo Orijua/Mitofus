@@ -1,0 +1,22 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "guard",
+  "name": {
+    "translate": "talent_node.mitofus.iron_guard"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.iron_guard.desc"
+  },
+  "icon": "minecraft:shield",
+  "x": 1,
+  "y": 2,
+  "requires": [
+    "mitofus:thick_hide"
+  ],
+  "effects": [
+    {
+      "type": "grant_skill",
+      "skill": "mitofus:iron_guard"
+    }
+  ]
+}

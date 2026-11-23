@@ -1,0 +1,23 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "warcry",
+  "name": {
+    "translate": "talent_node.mitofus.fleet_foot"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.fleet_foot.desc"
+  },
+  "icon": "minecraft:leather_boots",
+  "x": 4,
+  "y": 2,
+  "requires": [
+    "mitofus:battle_focus"
+  ],
+  "effects": [
+    {
+      "type": "stat",
+      "stat": "agility",
+      "amount": 1
+    }
+  ]
+}

@@ -1,6 +1,8 @@
 package com.orijua.mitofus.gametest;
 
 import com.orijua.mitofus.Mitofus;
+import com.orijua.mitofus.core.registry.Definitions;
+import com.orijua.mitofus.core.registry.ModDatapackRegistries;
 import com.orijua.mitofus.core.validation.ContentIndex;
 import com.orijua.mitofus.core.validation.ContentScanner;
 import com.orijua.mitofus.core.validation.ContentValidator;
@@ -48,6 +50,18 @@ public final class ContentTests {
                 && r.kind() == ContentIndex.Kind.OPTION), "recipes' fixed options");
         helper.assertTrue(content.references().stream().anyMatch(r -> r.from().startsWith("forging recipe ")
                 && r.kind() == ContentIndex.Kind.JOB), "recipes' required job");
+        helper.assertTrue(content.talents().contains(Mitofus.id("swordsman_root")), "talent nodes");
+        helper.assertTrue(content.talentRules().stream().anyMatch(r -> r.playerClass().equals(Mitofus.id("swordsman"))
+                && !r.boostedSkills().isEmpty()), "talent boosts of the swordsman");
+        helper.succeed();
+    }
+
+    /** The swordsman's tree decodes from its JSON (the datapack registry would drop a node that does not decode). */
+    @GameTest(template = TestSupport.EMPTY)
+    public static void swordsmanTalentTreeLoads(GameTestHelper helper) {
+        long nodes = Definitions.all(helper.getLevel(), ModDatapackRegistries.TALENT).stream()
+                .filter(entry -> entry.value().playerClass().equals(Mitofus.id("swordsman"))).count();
+        helper.assertTrue(nodes == 31, "the swordsman tree should have 31 nodes, found " + nodes);
         helper.succeed();
     }
 }

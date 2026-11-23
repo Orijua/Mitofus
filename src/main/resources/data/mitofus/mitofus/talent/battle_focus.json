@@ -1,0 +1,23 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "warcry",
+  "name": {
+    "translate": "talent_node.mitofus.battle_focus"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.battle_focus.desc"
+  },
+  "icon": "minecraft:sugar",
+  "x": 3,
+  "y": 1,
+  "requires": [
+    "mitofus:swordsman_root"
+  ],
+  "effects": [
+    {
+      "type": "stat",
+      "stat": "agility",
+      "amount": 1
+    }
+  ]
+}

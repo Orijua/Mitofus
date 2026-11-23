@@ -1,0 +1,23 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "blade",
+  "name": {
+    "translate": "talent_node.mitofus.heavy_strike_1"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.heavy_strike_1.desc"
+  },
+  "icon": "minecraft:iron_axe",
+  "x": -3,
+  "y": 2,
+  "requires": [
+    "mitofus:sharp_edge"
+  ],
+  "effects": [
+    {
+      "type": "skill_boost",
+      "skill": "mitofus:heavy_strike",
+      "damage_multiplier": 1.1
+    }
+  ]
+}

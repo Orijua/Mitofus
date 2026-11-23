@@ -1,0 +1,24 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "guard",
+  "name": {
+    "translate": "talent_node.mitofus.hardy"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.hardy.desc"
+  },
+  "icon": "minecraft:golden_apple",
+  "x": 0,
+  "y": 4,
+  "requires": [
+    "mitofus:tough_skin_2",
+    "mitofus:guard_recovery"
+  ],
+  "effects": [
+    {
+      "type": "stat",
+      "stat": "stamina",
+      "amount": 2
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "guard",
+  "name": {
+    "translate": "talent_node.mitofus.immovable"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.immovable.desc"
+  },
+  "icon": "minecraft:anvil",
+  "x": 1,
+  "y": 5,
+  "requires": [
+    "mitofus:hardy"
+  ],
+  "effects": [
+    {
+      "type": "passive_boost",
+      "passive": "mitofus:tough_skin",
+      "bonuses": [
+        {
+          "type": "knockback_resistance",
+          "amount": 0.1
+        }
+      ]
+    }
+  ]
+}

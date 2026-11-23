@@ -1,0 +1,23 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "blade",
+  "name": {
+    "translate": "talent_node.mitofus.efficient_blows"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.efficient_blows.desc"
+  },
+  "icon": "minecraft:lapis_lazuli",
+  "x": -3,
+  "y": 4,
+  "requires": [
+    "mitofus:blade_mastery_1"
+  ],
+  "effects": [
+    {
+      "type": "skill_boost",
+      "skill": "mitofus:heavy_strike",
+      "mana_cost_multiplier": 0.85
+    }
+  ]
+}

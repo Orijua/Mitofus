@@ -1,0 +1,21 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "root",
+  "name": {
+    "translate": "talent_node.mitofus.swordsman_root"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.swordsman_root.desc"
+  },
+  "icon": "minecraft:iron_sword",
+  "x": 0,
+  "y": 0,
+  "cost": 0,
+  "effects": [
+    {
+      "type": "stat",
+      "stat": "strength",
+      "amount": 1
+    }
+  ]
+}

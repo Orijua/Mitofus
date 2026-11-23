@@ -11,6 +11,11 @@ import com.orijua.mitofus.feature.npc.BlacksmithNpc;
 import com.orijua.mitofus.feature.progression.GradeRequirement;
 import com.orijua.mitofus.feature.progression.JobDefinition;
 import com.orijua.mitofus.feature.progression.PlayerClassDefinition;
+import com.orijua.mitofus.feature.talent.GrantSkillTalentEffect;
+import com.orijua.mitofus.feature.talent.PassiveBoostTalentEffect;
+import com.orijua.mitofus.feature.talent.SkillBoostTalentEffect;
+import com.orijua.mitofus.feature.talent.TalentDefinition;
+import com.orijua.mitofus.feature.talent.TalentEffect;
 import com.orijua.mitofus.feature.progression.TitleDefinition;
 import com.orijua.mitofus.feature.quest.QuestDefinition;
 import com.orijua.mitofus.feature.quest.goal.DeliverGoal;
@@ -62,6 +67,34 @@ public final class ContentScanner {
                 references.add(new Reference(from, Kind.JOB, requirement.job()));
                 gradeRules.add(new ContentIndex.GradeRule(from, requirement.grade(), requirement.job(), requirement.jobLevel()));
             }
+        }
+        List<ContentIndex.TalentRule> talentRules = new ArrayList<>();
+        for (Map.Entry<ResourceLocation, TalentDefinition> entry : entries(access, ModDatapackRegistries.TALENT)) {
+            TalentDefinition talent = entry.getValue();
+            PlayerClassDefinition owner = access.registry(ModDatapackRegistries.PLAYER_CLASS)
+                    .map(registry -> registry.get(talent.playerClass())).orElse(null);
+            List<ResourceLocation> boostedSkills = new ArrayList<>();
+            List<ResourceLocation> boostedPassives = new ArrayList<>();
+            List<ResourceLocation> grantedSkills = new ArrayList<>();
+            boolean idleBoost = false;
+            for (TalentEffect effect : talent.effects()) {
+                if (effect instanceof SkillBoostTalentEffect boost) {
+                    boostedSkills.add(boost.skill());
+                    idleBoost |= !boost.changesAnything();
+                } else if (effect instanceof PassiveBoostTalentEffect boost) {
+                    boostedPassives.add(boost.passive());
+                } else if (effect instanceof GrantSkillTalentEffect grant) {
+                    grantedSkills.add(grant.skill());
+                }
+            }
+            Set<ResourceLocation> classSkills = owner == null ? Set.of() : Set.copyOf(owner.skills());
+            Set<ResourceLocation> classPassives = new HashSet<>();
+            if (owner != null) {
+                classPassives.addAll(owner.passives());
+                owner.thirdSlotPassive().ifPresent(classPassives::add);
+            }
+            talentRules.add(new ContentIndex.TalentRule(entry.getKey(), talent.playerClass(), talent.requires(), boostedSkills,
+                    boostedPassives, grantedSkills, classSkills, Set.copyOf(classPassives), talent.effects().isEmpty(), idleBoost));
         }
         for (Map.Entry<ResourceLocation, JobDefinition> entry : entries(access, ModDatapackRegistries.JOB)) {
             String from = "job " + entry.getKey();
@@ -126,7 +159,8 @@ public final class ContentScanner {
         return new ContentIndex(ids(access, ModDatapackRegistries.SKILL), ids(access, ModDatapackRegistries.PLAYER_CLASS),
                 ids(access, ModDatapackRegistries.QUEST), advancedClasses, rewardedClasses, questRequirements, visibleClassQuests, references,
                 questGivers, questGiverNpcs, deliveriesWithoutGiver, ids(access, ModDatapackRegistries.ITEM_OPTION),
-                ids(access, ModDatapackRegistries.PASSIVE), ids(access, ModDatapackRegistries.JOB), advancedJobs, rewardedJobs, gradeRules);
+                ids(access, ModDatapackRegistries.PASSIVE), ids(access, ModDatapackRegistries.JOB), advancedJobs, rewardedJobs, gradeRules,
+                ids(access, ModDatapackRegistries.TALENT), talentRules);
     }
 
     private static <T> Set<ResourceLocation> ids(RegistryAccess access, ResourceKey<Registry<T>> key) {

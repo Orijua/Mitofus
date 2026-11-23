@@ -25,6 +25,8 @@ import java.util.Set;
  * @param advancedJobs      jobs with {@code "selectable": false}: only a quest's {@code job_reward} can grant them
  * @param rewardedJobs      every job some quest grants with {@code job_reward}
  * @param gradeRules        every entry of every class's {@code grade_requirements}
+ * @param talents           the talent nodes that exist
+ * @param talentRules       the facts of every talent node the tree checks need
  */
 public record ContentIndex(
         Set<ResourceLocation> skills,
@@ -43,7 +45,22 @@ public record ContentIndex(
         Set<ResourceLocation> jobs,
         Set<ResourceLocation> advancedJobs,
         Set<ResourceLocation> rewardedJobs,
-        List<GradeRule> gradeRules) {
+        List<GradeRule> gradeRules,
+        Set<ResourceLocation> talents,
+        List<TalentRule> talentRules) {
+
+    /** Content without talent nodes. */
+    public ContentIndex(Set<ResourceLocation> skills, Set<ResourceLocation> classes, Set<ResourceLocation> quests,
+                        Set<ResourceLocation> advancedClasses, Set<ResourceLocation> rewardedClasses,
+                        Map<ResourceLocation, ResourceLocation> questRequirements, Set<ResourceLocation> visibleClassQuests,
+                        List<Reference> references, Map<ResourceLocation, ResourceLocation> questGivers,
+                        Set<ResourceLocation> questGiverNpcs, Set<String> deliveriesWithoutGiver, Set<ResourceLocation> itemOptions,
+                        Set<ResourceLocation> passives, Set<ResourceLocation> jobs, Set<ResourceLocation> advancedJobs,
+                        Set<ResourceLocation> rewardedJobs, List<GradeRule> gradeRules) {
+        this(skills, classes, quests, advancedClasses, rewardedClasses, questRequirements, visibleClassQuests, references,
+                questGivers, questGiverNpcs, deliveriesWithoutGiver, itemOptions, passives, jobs, advancedJobs, rewardedJobs,
+                gradeRules, Set.of(), List.of());
+    }
 
     /** Content without jobs, passives or grades. */
     public ContentIndex(Set<ResourceLocation> skills, Set<ResourceLocation> classes, Set<ResourceLocation> quests,
@@ -52,7 +69,7 @@ public record ContentIndex(
                         List<Reference> references, Map<ResourceLocation, ResourceLocation> questGivers,
                         Set<ResourceLocation> questGiverNpcs, Set<String> deliveriesWithoutGiver, Set<ResourceLocation> itemOptions) {
         this(skills, classes, quests, advancedClasses, rewardedClasses, questRequirements, visibleClassQuests, references,
-                questGivers, questGiverNpcs, deliveriesWithoutGiver, itemOptions, Set.of(), Set.of(), Set.of(), Set.of(), List.of());
+                questGivers, questGiverNpcs, deliveriesWithoutGiver, itemOptions, Set.of(), Set.of(), Set.of(), Set.of(), List.of(), Set.of(), List.of());
     }
 
     /** Content without NPC quests, as most tests build it. */
@@ -85,6 +102,16 @@ public record ContentIndex(
 
     /** One entry of a class's {@code grade_requirements}: {@code from} (e.g. "class test:swordsman") needs {@code jobLevel} of {@code job} for {@code grade}. */
     public record GradeRule(String from, ClassGrade grade, ResourceLocation job, int jobLevel) {
+    }
+
+    /**
+     * What the tree checks need to know about one talent node. {@code classSkills} and {@code classPassives} are what the node's class
+     * gives on its own, so a boost can be matched to something the class really has.
+     */
+    public record TalentRule(ResourceLocation id, ResourceLocation playerClass, List<ResourceLocation> requires,
+                             List<ResourceLocation> boostedSkills, List<ResourceLocation> boostedPassives,
+                             List<ResourceLocation> grantedSkills, Set<ResourceLocation> classSkills,
+                             Set<ResourceLocation> classPassives, boolean emptyEffects, boolean idleSkillBoost) {
     }
 
     /** "{@code from} needs the {@code kind} {@code target} to exist", e.g. class warrior → skill sancho_link. */

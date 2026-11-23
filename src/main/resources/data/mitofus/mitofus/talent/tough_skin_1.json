@@ -1,0 +1,28 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "guard",
+  "name": {
+    "translate": "talent_node.mitofus.tough_skin_1"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.tough_skin_1.desc"
+  },
+  "icon": "minecraft:iron_chestplate",
+  "x": -1,
+  "y": 2,
+  "requires": [
+    "mitofus:thick_hide"
+  ],
+  "effects": [
+    {
+      "type": "passive_boost",
+      "passive": "mitofus:tough_skin",
+      "bonuses": [
+        {
+          "type": "armor",
+          "amount": 1
+        }
+      ]
+    }
+  ]
+}

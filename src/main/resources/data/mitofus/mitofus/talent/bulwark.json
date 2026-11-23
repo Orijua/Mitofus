@@ -1,0 +1,31 @@
+{
+  "class": "mitofus:swordsman",
+  "branch": "guard",
+  "name": {
+    "translate": "talent_node.mitofus.bulwark"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.bulwark.desc"
+  },
+  "icon": "minecraft:netherite_chestplate",
+  "x": 0,
+  "y": 6,
+  "cost": 3,
+  "requires": [
+    "mitofus:tough_skin_3",
+    "mitofus:immovable"
+  ],
+  "min_grade": "adept",
+  "effects": [
+    {
+      "type": "stat",
+      "stat": "stamina",
+      "amount": 3
+    },
+    {
+      "type": "skill_boost",
+      "skill": "mitofus:iron_guard",
+      "cooldown_multiplier": 0.8
+    }
+  ]
+}

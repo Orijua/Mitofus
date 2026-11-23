@@ -3,7 +3,9 @@ package com.orijua.mitofus.core.validation;
 import com.orijua.mitofus.feature.progression.ClassGrade;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -68,11 +70,95 @@ public final class ContentValidator {
                 problems.add("quest " + quest + ": giver " + giver + " has no quest window, so nobody can accept it");
             }
         });
+        validateTalents(content, problems);
         for (String owner : content.deliveriesWithoutGiver()) {
             problems.add(owner + ": a deliver goal needs a quest with a giver to hand the items to");
         }
         problems.sort(null);
         return problems;
+    }
+
+    /** The talent trees: every node's prerequisites exist in its own class, each tree has one root and no loops, boosts point at something the class has. */
+    private static void validateTalents(ContentIndex content, List<String> problems) {
+        Map<ResourceLocation, ContentIndex.TalentRule> byId = new HashMap<>();
+        content.talentRules().forEach(rule -> byId.put(rule.id(), rule));
+        Map<ResourceLocation, Integer> roots = new HashMap<>();
+        Map<ResourceLocation, List<ResourceLocation>> requirements = new HashMap<>();
+        for (ContentIndex.TalentRule rule : content.talentRules()) {
+            String from = "talent " + rule.id();
+            if (!content.classes().contains(rule.playerClass())) {
+                problems.add(from + ": class " + rule.playerClass() + " does not exist");
+            }
+            if (rule.requires().isEmpty()) {
+                roots.merge(rule.playerClass(), 1, Integer::sum);
+            }
+            if (rule.emptyEffects()) {
+                problems.add(from + ": has no effects, so owning it gives nothing");
+            }
+            if (rule.idleSkillBoost()) {
+                problems.add(from + ": a skill_boost changes no multiplier, so it gives nothing");
+            }
+            for (ResourceLocation required : rule.requires()) {
+                ContentIndex.TalentRule other = byId.get(required);
+                if (other == null) {
+                    problems.add(from + ": requires talent " + required + " that does not exist");
+                } else if (!other.playerClass().equals(rule.playerClass())) {
+                    problems.add(from + ": requires talent " + required + " of another class");
+                }
+            }
+            requirements.put(rule.id(), rule.requires());
+            for (ResourceLocation skill : rule.boostedSkills()) {
+                boolean granted = content.talentRules().stream()
+                        .anyMatch(other -> other.playerClass().equals(rule.playerClass()) && other.grantedSkills().contains(skill));
+                if (!rule.classSkills().contains(skill) && !granted) {
+                    problems.add(from + ": boosts skill " + skill + " that the class neither has nor learns from a talent");
+                }
+                if (!content.skills().contains(skill)) {
+                    problems.add(from + ": skill " + skill + " does not exist");
+                }
+            }
+            for (ResourceLocation skill : rule.grantedSkills()) {
+                if (!content.skills().contains(skill)) {
+                    problems.add(from + ": skill " + skill + " does not exist");
+                }
+            }
+            for (ResourceLocation passive : rule.boostedPassives()) {
+                if (!rule.classPassives().contains(passive)) {
+                    problems.add(from + ": boosts passive " + passive + " that the class does not have");
+                }
+            }
+        }
+        roots.forEach((playerClass, count) -> {
+            if (count > 1) {
+                problems.add("class " + playerClass + ": its talent tree has " + count + " roots, it needs exactly one");
+            }
+        });
+        Set<ResourceLocation> withoutRoot = new HashSet<>();
+        for (ContentIndex.TalentRule rule : content.talentRules()) {
+            if (!roots.containsKey(rule.playerClass()) && withoutRoot.add(rule.playerClass())) {
+                problems.add("class " + rule.playerClass() + ": its talent tree has no root (a node with no requires)");
+            }
+        }
+        for (ContentIndex.TalentRule rule : content.talentRules()) {
+            if (talentLoops(rule.id(), requirements)) {
+                problems.add("talent " + rule.id() + ": its requires chain loops back to it, so it can never be bought");
+            }
+        }
+    }
+
+    private static boolean talentLoops(ResourceLocation start, Map<ResourceLocation, List<ResourceLocation>> requirements) {
+        Set<ResourceLocation> seen = new HashSet<>();
+        ArrayDeque<ResourceLocation> pending = new ArrayDeque<>(requirements.getOrDefault(start, List.of()));
+        while (!pending.isEmpty()) {
+            ResourceLocation current = pending.poll();
+            if (current.equals(start)) {
+                return true;
+            }
+            if (seen.add(current)) {
+                pending.addAll(requirements.getOrDefault(current, List.of()));
+            }
+        }
+        return false;
     }
 
     /** Follows requires_quest from {@code start}; true if the chain comes back to it. */
