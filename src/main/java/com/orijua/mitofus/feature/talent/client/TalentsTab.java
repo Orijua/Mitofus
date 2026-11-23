@@ -8,6 +8,7 @@ import com.orijua.mitofus.core.registry.ModAttachments;
 import com.orijua.mitofus.core.registry.ModDatapackRegistries;
 import com.orijua.mitofus.feature.progression.ClassSlot;
 import com.orijua.mitofus.feature.progression.PlayerClassDefinition;
+import com.orijua.mitofus.feature.fusion.client.FusionText;
 import com.orijua.mitofus.feature.talent.BuyTalentPayload;
 import com.orijua.mitofus.feature.talent.TalentDefinition;
 import com.orijua.mitofus.feature.talent.TalentRules;
@@ -68,8 +69,7 @@ public class TalentsTab extends MitofusTab {
         int buttonWidth = 78;
         for (int i = 0; i < slots.size(); i++) {
             int index = i;
-            Component name = Definitions.get(player().level(), ModDatapackRegistries.PLAYER_CLASS, slots.get(i).classId())
-                    .map(PlayerClassDefinition::name).orElse(Component.literal(slots.get(i).classId().toString()));
+            Component name = FusionText.className(player().level(), slots.get(i).classId());
             addWidget.accept(Button.builder(name, b -> selected = index)
                     .bounds(left + i * (buttonWidth + 4), top, buttonWidth, 18).build(MitofusButton::new));
         }
@@ -83,19 +83,58 @@ public class TalentsTab extends MitofusTab {
     private Map<ResourceLocation, TalentDefinition> tree(ClassSlot slot) {
         Map<ResourceLocation, TalentDefinition> mine = new java.util.HashMap<>();
         TalentService.all(player().level()).forEach((id, node) -> {
-            if (node.playerClass().equals(slot.classId())) {
+            if (slot.treeClasses().contains(node.playerClass())) {
                 mine.put(id, node);
             }
         });
+        offsets = offsets(slot, mine);
         return mine;
     }
 
+    /** Where each class's nodes are moved on screen: nowhere for a normal class; for a hybrid, one parent to the left, one to the right and the trunk below. */
+    private Map<ResourceLocation, int[]> offsets = Map.of();
+
+    private static Map<ResourceLocation, int[]> offsets(ClassSlot slot, Map<ResourceLocation, TalentDefinition> tree) {
+        Map<ResourceLocation, int[]> result = new java.util.HashMap<>();
+        if (!slot.isHybrid()) {
+            return result;
+        }
+        int lowestParentRow = 0;
+        for (int i = 0; i < slot.origin().size(); i++) {
+            ResourceLocation parent = slot.origin().get(i);
+            int minX = Integer.MAX_VALUE;
+            int maxX = Integer.MIN_VALUE;
+            for (TalentDefinition node : tree.values()) {
+                if (node.playerClass().equals(parent)) {
+                    minX = Math.min(minX, node.x());
+                    maxX = Math.max(maxX, node.x());
+                    lowestParentRow = Math.max(lowestParentRow, node.y());
+                }
+            }
+            if (maxX != Integer.MIN_VALUE) {
+                result.put(parent, new int[]{i == 0 ? -1 - maxX : 1 - minX, 0});
+            }
+        }
+        result.put(slot.classId(), new int[]{0, lowestParentRow + 2});
+        return result;
+    }
+
+    private int offsetX(TalentDefinition node) {
+        int[] offset = offsets.get(node.playerClass());
+        return offset == null ? 0 : offset[0];
+    }
+
+    private int offsetY(TalentDefinition node) {
+        int[] offset = offsets.get(node.playerClass());
+        return offset == null ? 0 : offset[1];
+    }
+
     private int nodeX(TalentDefinition node) {
-        return left + width / 2 + node.x() * CELL_X - NODE / 2;
+        return left + width / 2 + (node.x() + offsetX(node)) * CELL_X - NODE / 2;
     }
 
     private int nodeY(TalentDefinition node) {
-        return top + HEADER + 4 + node.y() * CELL_Y;
+        return top + HEADER + 4 + (node.y() + offsetY(node)) * CELL_Y;
     }
 
     @Override
@@ -144,6 +183,20 @@ public class TalentsTab extends MitofusTab {
                 connect(graphics, required, node, owned.contains(requiredId) && owned.contains(id) ? OWNED : LOCKED);
             }
         }));
+        // The two parent trees join the merge node of the hybrid: their last nodes (the ones nothing needs) lead to it.
+        if (slot.isHybrid()) {
+            tree.entrySet().stream().filter(e -> e.getValue().playerClass().equals(slot.classId()) && e.getValue().isRoot()).findFirst().ifPresent(merge ->
+                    tree.forEach((id, node) -> {
+                        boolean parent = slot.origin().contains(node.playerClass());
+                        boolean leaf = tree.values().stream().noneMatch(other -> other.requires().contains(id));
+                        if (parent && leaf) {
+                            connect(graphics, node, merge.getValue(), owned.contains(id) ? OWNED : LOCKED);
+                        }
+                    }));
+            Component origin = Component.translatable("screen.mitofus.talent_trunk_origin", Component.translatable("screen.mitofus.hybrid_origin",
+                    FusionText.className(player().level(), slot.origin().get(0)), FusionText.className(player().level(), slot.origin().get(1))));
+            UiStyle.text(graphics, font(), origin, left, top + HEADER - 5, UiStyle.MUTED);
+        }
         List<Component> tooltip = null;
         for (Map.Entry<ResourceLocation, TalentDefinition> entry : tree.entrySet()) {
             TalentDefinition node = entry.getValue();
