@@ -18,7 +18,7 @@ import net.minecraft.world.level.Level;
 
 /**
  * The connection helmet, in three tiers: right-click to put it on. The body lies down where the player stands (a
- * {@link VrHelmetBlock}, which exists only while they are connected) and, after a short "Connecting…", the player
+ * {@link SleepingBody}, which exists only while they are connected) and, after a short "Connecting…", the player
  * appears in Mitofus. The helmet shows when it is bound to a player (the binding travels with the item).
  */
 public class HelmetItem extends Item {

@@ -3,7 +3,6 @@ package com.orijua.mitofus.feature.vrhelmet;
 import com.orijua.mitofus.core.config.RuleBalance;
 import com.orijua.mitofus.Mitofus;
 import com.orijua.mitofus.core.registry.ModAttachments;
-import com.orijua.mitofus.core.registry.ModBlocks;
 import net.minecraft.world.item.ItemStack;
 import com.orijua.mitofus.core.registry.ModDataComponents;
 import com.orijua.mitofus.core.config.FatigueBalance;
@@ -105,7 +104,7 @@ public final class VrHelmetService {
     }
 
     /**
-     * Putting a helmet on: the body lies down where the player stands (a body block of the helmet's tier, bound like the
+     * Putting a helmet on: the body lies down where the player stands (a body entity of the helmet's tier, bound like the
      * helmet) and the connection starts. If it cannot start, nothing is placed and the helmet stays in hand; if it starts,
      * the helmet goes onto the body and comes back when the player disconnects or the wait is cancelled.
      */
@@ -139,10 +138,9 @@ public final class VrHelmetService {
 
     /** The body lies down at {@code pos}, bound like the helmet (or to the player if the helmet was not bound yet). */
     private static void placeBody(ServerPlayer player, ServerLevel level, BlockPos pos, HelmetOn on) {
-        level.setBlock(pos, ModBlocks.bodyOf(on.tier()).defaultBlockState().setValue(VrHelmetBlock.FACING, on.facing()), 3);
-        if (level.getBlockEntity(pos) instanceof VrHelmetBlockEntity body) {
-            body.bind(on.owner().orElse(player.getUUID()));
-        }
+        float yaw = on.facing().getOpposite().toYRot();
+        SleepingBody.spawn(level, pos, on.tier(), on.owner().orElse(player.getUUID()), yaw);
+        player.setData(ModAttachments.VR_HELMET.get(), state(player).withBodyYaw(yaw));
         if (on.owner().isEmpty()) {
             player.displayClientMessage(Component.translatable("message.mitofus.vrhelmet.bound"), true);
         }
@@ -178,15 +176,24 @@ public final class VrHelmetService {
      */
     public static void takeBodyAway(ServerPlayer player, GlobalPos body) {
         ServerLevel level = player.server.getLevel(body.dimension());
-        if (level == null || !(level.getBlockState(body.pos()).getBlock() instanceof VrHelmetBlock block)) {
+        if (level == null) {
             return;
         }
-        Optional<UUID> owner = level.getBlockEntity(body.pos()) instanceof VrHelmetBlockEntity entity ? entity.owner() : Optional.empty();
-        level.removeBlock(body.pos(), false);
-        ItemStack helmet = HelmetItem.stackFor(block.tier(), owner);
+        for (SleepingBody lying : SleepingBody.at(level, body.pos())) {
+            lying.discard();
+        }
+        // The helmet always comes back, bound to the player, even if the body could not be found (its chunk was not loaded:
+        // the body then removes itself when it loads, see SleepingBody#tick).
+        ItemStack helmet = HelmetItem.stackFor(player.getData(ModAttachments.VR_HELMET_TIER.get()), Optional.of(player.getUUID()));
         if (!player.getInventory().add(helmet)) {
             player.drop(helmet, false);
         }
+    }
+
+    /** Whether {@code body} is the one {@code player} is connected through. */
+    public static boolean isBodyOf(ServerPlayer player, SleepingBody body) {
+        return state(player).vrhelmet().filter(at -> at.dimension() == body.level().dimension()
+                && at.pos().equals(body.blockPosition())).isPresent();
     }
 
     /** Lying down in the vrhelmet at {@code vrhelmet}: the connection starts. */
@@ -206,12 +213,7 @@ public final class VrHelmetService {
         if (MitofusWorld.of(server).isEmpty()) {
             return Begin.NO_MITOFUS;
         }
-        // Own design: a vrhelmet is bound to the first player who uses it; for anyone else it does nothing.
-        VrHelmetBlockEntity bound = player.level().getBlockEntity(vrhelmet) instanceof VrHelmetBlockEntity entity ? entity : null;
-        if (bound != null && VrHelmetOwnerRules.access(bound.owner(), player.getUUID()) == VrHelmetOwnerRules.Access.STRANGER) {
-            return Begin.NOT_YOURS;
-        }
-        if (PENDING.containsKey(player.getUUID())) {
+                if (PENDING.containsKey(player.getUUID())) {
             return Begin.ALREADY_CONNECTING;
         }
         // Own design: after the disconnection of a double death in Mitofus the vrhelmet stays locked for a while.
@@ -221,10 +223,6 @@ public final class VrHelmetService {
         // Own design: below the minimum energy the vrhelmet refuses; the real world refills it.
         if (!FatigueRules.canConnect(FatigueBalance.current(), FatigueService.energy(player))) {
             return Begin.TOO_TIRED;
-        }
-        if (bound != null && bound.owner().isEmpty()) {
-            bound.bind(player.getUUID());
-            player.displayClientMessage(Component.translatable("message.mitofus.vrhelmet.bound"), true);
         }
         start(player, GlobalPos.of(player.level().dimension(), vrhelmet));
         return Begin.STARTED;
@@ -280,7 +278,7 @@ public final class VrHelmetService {
         }
         BlockPos pos = pending.vrhelmet().pos();
         boolean here = player.level().dimension() == pending.vrhelmet().dimension();
-        boolean vrHelmetStillThere = here && (pending.helmet() != null || player.level().getBlockState(pos).getBlock() instanceof VrHelmetBlock);
+        boolean vrHelmetStillThere = here && (pending.helmet() != null || !SleepingBody.at(player.serverLevel(), pos).isEmpty());
         if (!vrHelmetStillThere) {
             cancel(player, true);
             return;
@@ -327,8 +325,18 @@ public final class VrHelmetService {
 
     private static void onLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            // The player is leaving: nobody is left to close a screen for.
-            PENDING.remove(player.getUUID());
+            // The player is leaving: nobody is left to close a screen for, and a helmet still held comes back to them.
+            Pending pending = PENDING.remove(player.getUUID());
+            if (pending != null && pending.helmet() != null) {
+                giveBackHelmet(player, pending.helmet());
+            }
+            // Connected: the body goes away with them and lies down again when they log in (see reconcile).
+            state(player).vrhelmet().ifPresent(body -> {
+                ServerLevel level = player.server.getLevel(body.dimension());
+                if (level != null) {
+                    SleepingBody.at(level, body.pos()).forEach(SleepingBody::discard);
+                }
+            });
         }
     }
 
@@ -405,6 +413,7 @@ public final class VrHelmetService {
         switch (VrHelmetRules.coherence(state, MitofusWorld.is(player.level()))) {
             case CONNECTED_OUTSIDE -> {
                 player.setData(ModAttachments.VR_HELMET.get(), state.withoutBody());
+                state.vrhelmet().ifPresent(body -> takeBodyAway(player, body));
                 // RESTED_COOLDOWN is kept: logging in outside Mitofus is not a way around the wait either.
                 player.setData(ModAttachments.RESTED_SECONDS.get(), 0);
                 Mitofus.LOGGER.warn("{} logged in outside Mitofus ({}) still connected to {}: the body is released",
@@ -412,8 +421,15 @@ public final class VrHelmetService {
             }
             case DISCONNECTED_INSIDE -> Mitofus.LOGGER.warn("{} logged in inside Mitofus ({}) without a body in a vrhelmet",
                     player.getGameProfile().getName(), player.level().dimension().location());
-            case OK -> {
-            }
+            case OK -> state.vrhelmet().ifPresent(body -> layBodyDown(player, body, state.bodyYaw()));
+        }
+    }
+
+    /** The body of a connected player lies down again where it was (it goes away when they log out). */
+    private static void layBodyDown(ServerPlayer player, GlobalPos at, float yaw) {
+        ServerLevel level = player.server.getLevel(at.dimension());
+        if (level != null && SleepingBody.at(level, at.pos()).isEmpty()) {
+            SleepingBody.spawn(level, at.pos(), player.getData(ModAttachments.VR_HELMET_TIER.get()), player.getUUID(), yaw);
         }
     }
 
@@ -432,11 +448,11 @@ public final class VrHelmetService {
         return ResidenceService.posOf(player);
     }
 
-    /** The tier of the vrhelmet block at {@code vrhelmet}; the basic one if there is no vrhelmet there. */
+    /** The tier of the body lying at {@code vrhelmet}; the basic one if there is no vrhelmet there. */
     public static VrHelmetTier tierAt(MinecraftServer server, GlobalPos vrhelmet) {
         ServerLevel level = server.getLevel(vrhelmet.dimension());
-        if (level != null && level.getBlockState(vrhelmet.pos()).getBlock() instanceof VrHelmetBlock block) {
-            return block.tier();
+        if (level != null) {
+            return SleepingBody.at(level, vrhelmet.pos()).stream().findFirst().map(SleepingBody::tier).orElse(VrHelmetTier.BASIC);
         }
         return VrHelmetTier.BASIC;
     }

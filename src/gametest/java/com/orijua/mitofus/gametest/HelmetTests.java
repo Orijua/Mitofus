@@ -4,8 +4,6 @@ import com.orijua.mitofus.Mitofus;
 import com.orijua.mitofus.core.registry.ModBlocks;
 import com.orijua.mitofus.core.registry.ModDataComponents;
 import com.orijua.mitofus.core.registry.ModItems;
-import com.orijua.mitofus.feature.vrhelmet.VrHelmetBlock;
-import com.orijua.mitofus.feature.vrhelmet.VrHelmetBlockEntity;
 import com.orijua.mitofus.feature.vrhelmet.VrHelmetRules;
 import com.orijua.mitofus.feature.vrhelmet.VrHelmetService;
 import com.orijua.mitofus.feature.vrhelmet.VrHelmetService.Begin;
@@ -64,9 +62,9 @@ public final class HelmetTests {
             BlockPos pos = bodyPos(helper, player);
             helper.assertTrue(VrHelmetService.putOn(player, helmet, VrHelmetTier.ADVANCED) == Begin.STARTED, "the connection starts");
             helper.assertTrue(helmet.isEmpty(), "the helmet is held during the wait");
-            helper.assertTrue(helper.getLevel().getBlockState(pos).isAir(), "no body during the wait: it would push the player");
+            helper.assertFalse(TestSupport.hasBody(helper, pos), "no body during the wait: it would push the player");
             VrHelmetTests.tickMany(player, VrHelmetRules.CONNECT_TICKS - 1);
-            helper.assertTrue(VrHelmetService.isConnecting(player) && helper.getLevel().getBlockState(pos).isAir(), "still no body one tick before the end");
+            helper.assertTrue(VrHelmetService.isConnecting(player) && !TestSupport.hasBody(helper, pos), "still no body one tick before the end");
             // The body appearing after the real dimension crossing needs a real connection (a fake player has none): manual test.
             VrHelmetService.cancel(player, false);
             helper.assertTrue(player.getInventory().countItem(ModItems.ADVANCED_HELMET.get()) == 1, "cancelling gives the helmet back");
@@ -78,14 +76,14 @@ public final class HelmetTests {
     public static void disconnectingTakesTheBodyAwayAndGivesTheHelmetBack(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
         BlockPos at = new BlockPos(0, 1, 1);
-        helper.setBlock(at, ModBlocks.ADVANCED_BODY.get());
-        ((VrHelmetBlockEntity) helper.getLevel().getBlockEntity(helper.absolutePos(at))).bind(player.getUUID());
+        com.orijua.mitofus.feature.vrhelmet.SleepingBody.spawn(helper.getLevel(), helper.absolutePos(at), VrHelmetTier.ADVANCED, player.getUUID(), 0.0f);
+        player.setData(com.orijua.mitofus.core.registry.ModAttachments.VR_HELMET_TIER.get(), VrHelmetTier.ADVANCED);
         FatigueService.setEnergy(player, 1.0);
         BlockPos landing = helper.absolutePos(new BlockPos(1, 1, 1));
         VrHelmetTests.inMitofus(helper, landing, () -> TestSupport.withAllDefaults(() -> {
             helper.assertTrue(VrHelmetService.connect(player, net.minecraft.core.GlobalPos.of(helper.getLevel().dimension(), helper.absolutePos(at))), "it connects");
             helper.assertTrue(VrHelmetService.disconnect(player, VrHelmetService.Reason.MANUAL), "disconnecting works");
-            helper.assertTrue(helper.getLevel().getBlockState(helper.absolutePos(at)).isAir(), "the body is gone");
+            helper.assertFalse(TestSupport.hasBody(helper, helper.absolutePos(at)), "the body is gone");
             helper.assertTrue(player.getInventory().countItem(ModItems.ADVANCED_HELMET.get()) == 1, "the helmet is back in the inventory");
             ItemStack back = ItemStack.EMPTY;
             for (ItemStack stack : player.getInventory().items) {
@@ -109,7 +107,7 @@ public final class HelmetTests {
             helper.assertTrue(VrHelmetService.putOn(player, helmet, VrHelmetTier.BASIC) == Begin.STARTED, "the connection starts");
             VrHelmetService.cancel(player, false);
             helper.assertFalse(VrHelmetService.isConnecting(player), "the wait is over");
-            helper.assertTrue(helper.getLevel().getBlockState(pos).isAir(), "the body is gone");
+            helper.assertFalse(TestSupport.hasBody(helper, pos), "the body is gone");
             helper.assertTrue(player.getInventory().countItem(ModItems.HELMET.get()) == 1, "and the helmet is back");
         });
         helper.succeed();
@@ -125,7 +123,7 @@ public final class HelmetTests {
             helmet.set(ModDataComponents.VR_HELMET_OWNER.get(), UUID.randomUUID());
             helper.assertTrue(VrHelmetService.putOn(player, helmet, VrHelmetTier.BASIC) == Begin.NOT_YOURS, "it is not theirs");
             helper.assertTrue(helmet.getCount() == 1, "the helmet stays in hand");
-            helper.assertTrue(helper.getLevel().getBlockState(bodyPos(helper, player)).isAir(), "and no body is left");
+            helper.assertFalse(TestSupport.hasBody(helper, bodyPos(helper, player)), "and no body is left");
             helper.assertFalse(VrHelmetService.isConnecting(player), "nothing starts");
         });
         helper.succeed();

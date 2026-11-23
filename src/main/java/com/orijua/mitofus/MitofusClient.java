@@ -153,6 +153,7 @@ public class MitofusClient {
         event.registerEntityRenderer(ModEntities.VELASCO.get(), context -> new NpcRenderer<>(context, NpcRenderer.VELASCO));
         event.registerEntityRenderer(ModEntities.LEVANTE_THUG.get(), LevanteThugRenderer::new);
         event.registerEntityRenderer(ModEntities.MENCIA.get(), MenciaRenderer::new);
+        event.registerEntityRenderer(ModEntities.SLEEPING_BODY.get(), com.orijua.mitofus.feature.vrhelmet.client.SleepingBodyRenderer::new);
     }
 
     private static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {

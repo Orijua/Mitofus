@@ -1,7 +1,6 @@
 package com.orijua.mitofus.core.registry;
 
 import com.orijua.mitofus.Mitofus;
-import com.orijua.mitofus.feature.vrhelmet.VrHelmetBlockEntity;
 import com.orijua.mitofus.feature.smelting.SmelterBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -15,10 +14,6 @@ public final class ModBlockEntities {
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SmelterBlockEntity>> SMELTER =
             BLOCK_ENTITIES.register("smelter", () -> BlockEntityType.Builder.of(SmelterBlockEntity::new, ModBlocks.SMELTER.get()).build(null));
-
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<VrHelmetBlockEntity>> VR_HELMET =
-            BLOCK_ENTITIES.register("vrhelmet", () -> BlockEntityType.Builder.of(VrHelmetBlockEntity::new,
-                    ModBlocks.BODY.get(), ModBlocks.ADVANCED_BODY.get(), ModBlocks.DIAMOND_BODY.get()).build(null));
 
     private ModBlockEntities() {
     }

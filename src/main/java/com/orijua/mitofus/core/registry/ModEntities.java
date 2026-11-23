@@ -2,6 +2,7 @@ package com.orijua.mitofus.core.registry;
 
 import com.orijua.mitofus.Mitofus;
 import com.orijua.mitofus.feature.mob.BoneLord;
+import com.orijua.mitofus.feature.vrhelmet.SleepingBody;
 import com.orijua.mitofus.feature.npc.ApprenticeSmith;
 import com.orijua.mitofus.feature.npc.BlacksmithNpc;
 import com.orijua.mitofus.feature.coach.CoachmanNpc;
@@ -95,6 +96,14 @@ public final class ModEntities {
                     .sized(0.6f, 1.95f)
                     .clientTrackingRange(10)
                     .build("mencia"));
+
+    // The body of a player connected to Mitofus: it lies in the real world while they are away.
+    public static final DeferredHolder<EntityType<?>, EntityType<SleepingBody>> SLEEPING_BODY = ENTITIES.register("sleeping_body",
+            () -> EntityType.Builder.<SleepingBody>of(SleepingBody::new, MobCategory.MISC)
+                    .sized(1.8f, 0.4f)
+                    .clientTrackingRange(10)
+                    .updateInterval(20)
+                    .build("sleeping_body"));
 
     private ModEntities() {
     }

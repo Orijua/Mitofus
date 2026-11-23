@@ -35,13 +35,6 @@ public final class VrHelmetTierTests {
     private VrHelmetTierTests() {
     }
 
-    private static Block block(VrHelmetTier tier) {
-        return switch (tier) {
-            case BASIC -> ModBlocks.BODY.get();
-            case ADVANCED -> ModBlocks.ADVANCED_BODY.get();
-            case DIAMOND -> ModBlocks.DIAMOND_BODY.get();
-        };
-    }
 
     private static GlobalPos at(GameTestHelper helper) {
         return GlobalPos.of(helper.getLevel().dimension(), helper.absolutePos(VR_HELMET));
@@ -85,7 +78,7 @@ public final class VrHelmetTierTests {
     /** A connection from a block of {@code tier} with {@code energy}; returns the player. */
     private static ServerPlayer connected(GameTestHelper helper, VrHelmetTier tier, double energy) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
-        helper.setBlock(VR_HELMET, block(tier));
+        TestSupport.lieBody(helper, VR_HELMET, tier);
         FatigueService.setEnergy(player, energy);
         helper.assertTrue(VrHelmetService.connect(player, at(helper)), "it connects");
         return player;
@@ -105,10 +98,10 @@ public final class VrHelmetTierTests {
     public static void aPositionWithoutVrHelmetCountsAsBasic(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
         player.setData(ModAttachments.VR_HELMET_TIER.get(), VrHelmetTier.ADVANCED);
-        helper.setBlock(VR_HELMET, Blocks.AIR);
+        TestSupport.removeBody(helper, VR_HELMET);
         inMitofus(helper, () -> {
             helper.assertTrue(VrHelmetService.connect(player, at(helper)), "it connects");
-            helper.assertTrue(tier(player) == VrHelmetTier.BASIC, "no vrhelmet block there: the basic tier");
+            helper.assertTrue(tier(player) == VrHelmetTier.BASIC, "no body there: the basic tier");
         });
         helper.succeed();
     }
@@ -117,7 +110,7 @@ public final class VrHelmetTierTests {
     public static void aFailedTripLeavesTheTierAlone(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
         player.setData(ModAttachments.VR_HELMET_TIER.get(), VrHelmetTier.ADVANCED);
-        helper.setBlock(VR_HELMET, block(VrHelmetTier.DIAMOND));
+        TestSupport.lieBody(helper, VR_HELMET, VrHelmetTier.DIAMOND);
         VrHelmetTests.inMitofus(helper, helper.absolutePos(new BlockPos(1, 1, 1)), () -> {
             // No Mitofus landing known: the connection is refused before anything is written.
             long seed = helper.getLevel().getSeed();
@@ -137,11 +130,11 @@ public final class VrHelmetTierTests {
     @GameTest(template = TestSupport.EMPTY)
     public static void breakingAnAdvancedVrHelmetWhileConnectingCancels(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
-        helper.setBlock(VR_HELMET, block(VrHelmetTier.ADVANCED));
+        TestSupport.lieBody(helper, VR_HELMET, VrHelmetTier.ADVANCED);
         inMitofus(helper, () -> {
             VrHelmetService.start(player, at(helper));
             helper.assertTrue(VrHelmetService.isConnecting(player), "lying down starts the wait");
-            helper.setBlock(VR_HELMET, Blocks.AIR);
+            TestSupport.removeBody(helper, VR_HELMET);
             VrHelmetService.tick(player);
             helper.assertFalse(VrHelmetService.isConnecting(player), "the vrhelmet gone cancels");
             helper.assertTrue(VrHelmetService.state(player).vrhelmet().isEmpty(), "and nothing connected");
@@ -155,7 +148,7 @@ public final class VrHelmetTierTests {
         inMitofus(helper, () -> {
             for (VrHelmetTier tier : VrHelmetTier.values()) {
                 ServerPlayer player = TestSupport.fakePlayer(helper);
-                helper.setBlock(VR_HELMET, block(tier));
+                TestSupport.lieBody(helper, VR_HELMET, tier);
                 VrHelmetService.start(player, at(helper));
                 VrHelmetTests.tickMany(player, VrHelmetRules.CONNECT_TICKS);
                 helper.assertTrue(VrHelmetService.state(player).isConnected(), "the " + tier + " vrhelmet connects after the wait");
@@ -471,7 +464,7 @@ public final class VrHelmetTierTests {
             helper.assertTrue(VrHelmetService.disconnect(player, VrHelmetService.Reason.MANUAL), "it disconnects");
             helper.assertTrue(cooldown(player) == 1800, "the wait survives disconnecting: " + cooldown(player));
             FatigueService.setEnergy(player, 1.0);
-            helper.setBlock(VR_HELMET, block(VrHelmetTier.DIAMOND));
+            TestSupport.lieBody(helper, VR_HELMET, VrHelmetTier.DIAMOND);
             helper.assertTrue(VrHelmetService.connect(player, at(helper)), "it connects again");
             helper.assertTrue(rested(player) == 0, "no new rested: " + rested(player));
             helper.assertTrue(cooldown(player) == 1800, "the wait goes on: " + cooldown(player));
@@ -520,7 +513,7 @@ public final class VrHelmetTierTests {
             helper.assertTrue(rested(player) == 600 && cooldown(player) == 0, "no wait is opened: " + cooldown(player));
             helper.assertTrue(VrHelmetService.disconnect(player, VrHelmetService.Reason.MANUAL), "it disconnects");
             FatigueService.setEnergy(player, 1.0);
-            helper.setBlock(VR_HELMET, block(VrHelmetTier.DIAMOND));
+            TestSupport.lieBody(helper, VR_HELMET, VrHelmetTier.DIAMOND);
             helper.assertTrue(VrHelmetService.connect(player, at(helper)), "it connects again");
             helper.assertTrue(rested(player) == 600, "rested again at once: " + rested(player));
         }));

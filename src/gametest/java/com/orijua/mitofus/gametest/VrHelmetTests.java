@@ -5,6 +5,7 @@ import com.orijua.mitofus.core.config.Balance;
 import com.orijua.mitofus.core.registry.ModAttachments;
 import com.orijua.mitofus.core.registry.ModBlocks;
 import com.orijua.mitofus.core.registry.ModItems;
+import com.orijua.mitofus.feature.vrhelmet.VrHelmetTier;
 import com.orijua.mitofus.feature.vrhelmet.VrHelmetRules;
 import com.orijua.mitofus.feature.vrhelmet.VrHelmetService;
 import com.orijua.mitofus.feature.vrhelmet.VrHelmetState;
@@ -280,7 +281,7 @@ public final class VrHelmetTests {
     @GameTest(template = TestSupport.EMPTY)
     public static void connectingTakesThreeSecondsThenConnects(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
-        helper.setBlock(new BlockPos(0, 1, 1), ModBlocks.BODY.get());
+        TestSupport.lieBody(helper, new BlockPos(0, 1, 1), VrHelmetTier.BASIC);
         BlockPos covadonga = helper.absolutePos(new BlockPos(1, 1, 1));
         inMitofus(helper, covadonga, () -> {
             VrHelmetService.start(player, at(helper, new BlockPos(0, 1, 1)));
@@ -299,18 +300,18 @@ public final class VrHelmetTests {
     public static void losingTheVrHelmetOrBeingOutOfReachCancelsTheConnection(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
         BlockPos vrhelmet = new BlockPos(0, 1, 1);
-        helper.setBlock(vrhelmet, ModBlocks.BODY.get());
+        TestSupport.lieBody(helper, vrhelmet, VrHelmetTier.BASIC);
         inMitofus(helper, helper.absolutePos(new BlockPos(1, 1, 1)), () -> {
             player.setPos(helper.absoluteVec(new Vec3(0.5, 1, 0.5)));
             VrHelmetService.start(player, at(helper, vrhelmet));
-            helper.setBlock(vrhelmet, Blocks.AIR);
+            TestSupport.removeBody(helper, vrhelmet);
             VrHelmetService.tick(player);
             helper.assertFalse(VrHelmetService.isConnecting(player), "the vrhelmet gone cancels");
             helper.assertTrue(VrHelmetService.state(player).vrhelmet().isEmpty(), "and nothing connected");
 
             // Standing still but already out of reach (a VR helmet farther than MAX_DISTANCE): cancelled too.
             BlockPos far = new BlockPos(0, 1, 6);
-            helper.setBlock(far, ModBlocks.BODY.get());
+            TestSupport.lieBody(helper, far, VrHelmetTier.BASIC);
             player.setPos(helper.absoluteVec(new Vec3(0.5, 1, 0.5)));
             helper.assertFalse(VrHelmetRules.inReach(player.distanceToSqr(helper.absolutePos(far).getCenter())),
                     "the vrhelmet is out of reach");
@@ -327,7 +328,7 @@ public final class VrHelmetTests {
     /** The wait starts with the player at {@link #SPOT} beside a VR helmet at (0, 1, 1). */
     private static GlobalPos startWaiting(GameTestHelper helper, ServerPlayer player) {
         BlockPos vrhelmet = new BlockPos(0, 1, 1);
-        helper.setBlock(vrhelmet, ModBlocks.BODY.get());
+        TestSupport.lieBody(helper, vrhelmet, VrHelmetTier.BASIC);
         player.setPos(helper.absoluteVec(SPOT));
         GlobalPos global = at(helper, vrhelmet);
         VrHelmetService.start(player, global);
@@ -463,7 +464,7 @@ public final class VrHelmetTests {
     @GameTest(template = TestSupport.EMPTY)
     public static void cancellingForgetsTheConnectionAndCanStartAgain(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
-        helper.setBlock(new BlockPos(0, 1, 1), ModBlocks.BODY.get());
+        TestSupport.lieBody(helper, new BlockPos(0, 1, 1), VrHelmetTier.BASIC);
         inMitofus(helper, helper.absolutePos(new BlockPos(1, 1, 1)), () -> {
             GlobalPos vrhelmet = at(helper, new BlockPos(0, 1, 1));
             VrHelmetService.start(player, vrhelmet);
@@ -501,7 +502,7 @@ public final class VrHelmetTests {
     @GameTest(template = TestSupport.EMPTY)
     public static void takingDamageCancelsTheWait(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
-        helper.setBlock(new BlockPos(0, 1, 1), ModBlocks.BODY.get());
+        TestSupport.lieBody(helper, new BlockPos(0, 1, 1), VrHelmetTier.BASIC);
         inMitofus(helper, helper.absolutePos(new BlockPos(1, 1, 1)), () -> {
             try {
                 VrHelmetService.start(player, at(helper, new BlockPos(0, 1, 1)));
@@ -519,7 +520,7 @@ public final class VrHelmetTests {
     @GameTest(template = TestSupport.EMPTY)
     public static void dyingWhileConnectingDoesNotConnectOnRespawn(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
-        helper.setBlock(new BlockPos(0, 1, 1), ModBlocks.BODY.get());
+        TestSupport.lieBody(helper, new BlockPos(0, 1, 1), VrHelmetTier.BASIC);
         inMitofus(helper, helper.absolutePos(new BlockPos(1, 1, 1)), () -> {
             try {
                 GlobalPos vrhelmet = at(helper, new BlockPos(0, 1, 1));
@@ -554,7 +555,7 @@ public final class VrHelmetTests {
             return;
         }
         BlockPos vrhelmet = new BlockPos(0, 1, 1);
-        helper.setBlock(vrhelmet, ModBlocks.BODY.get());
+        TestSupport.lieBody(helper, vrhelmet, VrHelmetTier.BASIC);
         // Another level plays Mitofus while the clicks happen; the test level takes over for the arrival (a fake player cannot cross dimensions).
         inMitofus(helper, helper.absolutePos(new BlockPos(1, 1, 1)), () -> {
             try {
@@ -581,7 +582,7 @@ public final class VrHelmetTests {
     @GameTest(template = TestSupport.EMPTY)
     public static void respawnAloneDropsAPendingConnection(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
-        helper.setBlock(new BlockPos(0, 1, 1), ModBlocks.BODY.get());
+        TestSupport.lieBody(helper, new BlockPos(0, 1, 1), VrHelmetTier.BASIC);
         inMitofus(helper, helper.absolutePos(new BlockPos(1, 1, 1)), () -> {
             try {
                 VrHelmetService.start(player, at(helper, new BlockPos(0, 1, 1)));
@@ -620,7 +621,7 @@ public final class VrHelmetTests {
     @GameTest(template = TestSupport.EMPTY)
     public static void changingDimensionCancelsThePendingConnection(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
-        helper.setBlock(new BlockPos(0, 1, 1), ModBlocks.BODY.get());
+        TestSupport.lieBody(helper, new BlockPos(0, 1, 1), VrHelmetTier.BASIC);
         outsideMitofus(helper, () -> {
             try {
                 VrHelmetService.start(player, at(helper, new BlockPos(0, 1, 1)));
@@ -979,7 +980,7 @@ public final class VrHelmetTests {
     public static void stoppingTheServerForgetsEveryConnection(GameTestHelper helper) {
         ServerPlayer first = TestSupport.fakePlayer(helper);
         ServerPlayer second = TestSupport.fakePlayer(helper);
-        helper.setBlock(new BlockPos(0, 1, 1), ModBlocks.BODY.get());
+        TestSupport.lieBody(helper, new BlockPos(0, 1, 1), VrHelmetTier.BASIC);
         inMitofus(helper, helper.absolutePos(new BlockPos(1, 1, 1)), () -> {
             try {
                 VrHelmetService.start(first, at(helper, new BlockPos(0, 1, 1)));

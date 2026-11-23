@@ -1,7 +1,6 @@
 package com.orijua.mitofus.core.registry;
 
 import com.orijua.mitofus.Mitofus;
-import com.orijua.mitofus.feature.vrhelmet.VrHelmetBlock;
 import com.orijua.mitofus.feature.vrhelmet.VrHelmetTier;
 import com.orijua.mitofus.feature.economy.AccountTerminalBlock;
 import com.orijua.mitofus.feature.sancho.GoldenTableBlock;
@@ -35,33 +34,6 @@ public final class ModBlocks {
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.STONE)
                     .lightLevel(state -> state.getValue(SmelterBlock.LIT) ? 13 : 0));
-
-    // The sleeping body of a player who put on the connection helmet (feature/VR helmet): it exists only while they are
-    // connected; the helmet item places it and takes it back (it has no item of its own).
-    public static final DeferredBlock<VrHelmetBlock> BODY = BLOCKS.registerBlock("body",
-            properties -> new VrHelmetBlock(VrHelmetTier.BASIC, properties), vrHelmetProperties());
-    public static final DeferredBlock<VrHelmetBlock> ADVANCED_BODY = BLOCKS.registerBlock("advanced_body",
-            properties -> new VrHelmetBlock(VrHelmetTier.ADVANCED, properties), vrHelmetProperties());
-    public static final DeferredBlock<VrHelmetBlock> DIAMOND_BODY = BLOCKS.registerBlock("diamond_body",
-            properties -> new VrHelmetBlock(VrHelmetTier.DIAMOND, properties), vrHelmetProperties());
-
-    /** The body block of a helmet tier. */
-    public static VrHelmetBlock bodyOf(VrHelmetTier tier) {
-        return switch (tier) {
-            case BASIC -> BODY.get();
-            case ADVANCED -> ADVANCED_BODY.get();
-            case DIAMOND -> DIAMOND_BODY.get();
-        };
-    }
-
-    private static BlockBehaviour.Properties vrHelmetProperties() {
-        return BlockBehaviour.Properties.of()
-                .mapColor(MapColor.METAL)
-                .strength(3.0f, 6.0f)
-                .requiresCorrectToolForDrops()
-                .sound(SoundType.METAL)
-                .noOcclusion();
-    }
 
     // The account terminal: shows the account and the work (feature/economy); works in the real world, like the VR helmet.
     public static final DeferredBlock<AccountTerminalBlock> ACCOUNT_TERMINAL = BLOCKS.registerBlock("account_terminal",

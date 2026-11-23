@@ -20,10 +20,6 @@ final class ModBlockLoot extends BlockLootSubProvider {
     protected void generate() {
         dropSelf(ModBlocks.SMITHING_ANVIL.get());
         dropSelf(ModBlocks.SMELTER.get());
-        // The body drops the helmet through VrHelmetBlock#getDrops (the helmet keeps its owner), not through a table.
-        add(ModBlocks.BODY.get(), noDrop());
-        add(ModBlocks.ADVANCED_BODY.get(), noDrop());
-        add(ModBlocks.DIAMOND_BODY.get(), noDrop());
         dropSelf(ModBlocks.ACCOUNT_TERMINAL.get());
         // Like iron ore: the raw material (more with Fortune), the ore itself with Silk Touch.
         add(ModBlocks.WOLFRAM_ORE.get(), block -> createOreDrop(block, ModItems.RAW_WOLFRAM.get()));

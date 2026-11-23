@@ -436,7 +436,7 @@ public final class MitofusOnlyTests {
         Set<ResourceLocation> expectedItems = new TreeSet<>(List.of(com.orijua.mitofus.core.registry.ModItems.HELMET.getId(), com.orijua.mitofus.core.registry.ModItems.ADVANCED_HELMET.getId(),
                 com.orijua.mitofus.core.registry.ModItems.DIAMOND_HELMET.getId(),
                 ModBlocks.ACCOUNT_TERMINAL.getId(), com.orijua.mitofus.core.registry.ModItems.PHONE.getId()));
-        Set<ResourceLocation> expectedBlocks = new TreeSet<>(List.of(ModBlocks.BODY.getId(), ModBlocks.ADVANCED_BODY.getId(), ModBlocks.DIAMOND_BODY.getId(), ModBlocks.ACCOUNT_TERMINAL.getId()));
+        Set<ResourceLocation> expectedBlocks = new TreeSet<>(List.of(ModBlocks.ACCOUNT_TERMINAL.getId()));
         Set<ResourceLocation> actualItems = new TreeSet<>();
         for (ResourceLocation id : BuiltInRegistries.ITEM.keySet()) {
             if (id.getNamespace().equals(Mitofus.MODID) && !MitofusOnly.isMitofusItem(id)) {
