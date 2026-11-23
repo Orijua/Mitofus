@@ -7,6 +7,8 @@ import com.orijua.mitofus.core.client.UiStyle;
 import com.orijua.mitofus.core.registry.Definitions;
 import com.orijua.mitofus.core.registry.ModAttachments;
 import com.orijua.mitofus.core.registry.ModDatapackRegistries;
+import com.orijua.mitofus.feature.fusion.client.FusionScreen;
+import com.orijua.mitofus.feature.fusion.client.FusionText;
 import com.orijua.mitofus.feature.progression.ChooseClassPayload;
 import com.orijua.mitofus.feature.progression.ChooseJobPayload;
 import com.orijua.mitofus.feature.progression.ClassSlot;
@@ -18,12 +20,14 @@ import com.orijua.mitofus.feature.progression.PlayerIdentity;
 import com.orijua.mitofus.feature.progression.ProgressionService;
 import com.orijua.mitofus.feature.progression.StatType;
 import com.orijua.mitofus.feature.progression.TitleDefinition;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
@@ -106,8 +110,13 @@ public class ProfileTab extends MitofusTab {
             addRow(addWidget, classes.size(), layout.classButtons(), i -> {
                 Definitions.Entry<PlayerClassDefinition> entry = classes.get(i);
                 return Button.builder(entry.value().name(), b -> PacketDistributor.sendToServer(new ChooseClassPayload(slot, entry.id())))
-                        .tooltip(Tooltip.create(classTooltip(entry.value())));
+                        .tooltip(Tooltip.create(classTooltip(entry.id(), entry.value())));
             });
+        }
+        if (!Definitions.all(player().level(), ModDatapackRegistries.FUSION).isEmpty()) {
+            addWidget.accept(Button.builder(Component.translatable("screen.mitofus.fusions"),
+                            b -> Minecraft.getInstance().setScreen(new FusionScreen(Minecraft.getInstance().screen)))
+                    .bounds(left + width - 70, top - 2, 70, 14).build(MitofusButton::new));
         }
         if (classes().job().isEmpty()) {
             List<Definitions.Entry<JobDefinition>> jobs = Definitions.all(player().level(), ModDatapackRegistries.JOB).stream()
@@ -116,7 +125,7 @@ public class ProfileTab extends MitofusTab {
             addRow(addWidget, jobs.size(), layout.jobRow(), i -> {
                 Definitions.Entry<JobDefinition> entry = jobs.get(i);
                 return Button.builder(entry.value().name(), b -> PacketDistributor.sendToServer(new ChooseJobPayload(entry.id())))
-                        .tooltip(Tooltip.create(entry.value().description()));
+                        .tooltip(Tooltip.create(jobTooltip(entry.id(), entry.value())));
             });
         }
     }
@@ -139,10 +148,21 @@ public class ProfileTab extends MitofusTab {
         return !builtFor.equals(signature());
     }
 
-    private static Component classTooltip(PlayerClassDefinition definition) {
+    /** The class description and bonuses, then what it would give with the player's job at each step. */
+    private static Component classTooltip(ResourceLocation id, PlayerClassDefinition definition) {
         MutableComponent text = definition.description().copy();
         if (!definition.bonusStats().isEmpty()) {
             text.append("\n").append(bonusText(definition.bonusStats()));
+        }
+        classes().job().ifPresent(job -> text.append(FusionText.synergyLines(player().level(), id, job)));
+        return text;
+    }
+
+    /** The job description, then what each class the player has placed would give with it at each step. */
+    private static Component jobTooltip(ResourceLocation id, JobDefinition definition) {
+        MutableComponent text = definition.description().copy();
+        for (ClassSlot placed : classes().slots()) {
+            text.append(FusionText.synergyLines(player().level(), placed.classId(), id));
         }
         return text;
     }
@@ -168,8 +188,7 @@ public class ProfileTab extends MitofusTab {
         UiStyle.heading(graphics, font(), Component.translatable("screen.mitofus.class"), left, top);
         int classY = top + layout.classLines();
         for (ClassSlot placed : classes().slots()) {
-            Component name = Definitions.get(player().level(), ModDatapackRegistries.PLAYER_CLASS, placed.classId())
-                    .map(PlayerClassDefinition::name).orElse(Component.literal(placed.classId().toString()));
+            Component name = FusionText.slotName(player().level(), placed);
             UiStyle.text(graphics, font(), Component.translatable("screen.mitofus.class_slot_level", placed.slot() + 1, name,
                     placed.classLevel(), placed.grade().displayName()), left, classY, UiStyle.TEXT);
             classY += LINE;

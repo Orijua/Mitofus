@@ -1,0 +1,8 @@
+{
+  "parents": [
+    "mitofus:swordsman",
+    "mitofus:mage"
+  ],
+  "result_class": "mitofus:spellsword",
+  "cost": 10
+}

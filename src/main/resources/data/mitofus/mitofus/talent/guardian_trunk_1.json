@@ -1,0 +1,24 @@
+{
+  "class": "mitofus:guardian",
+  "branch": "trunk",
+  "name": {
+    "translate": "talent_node.mitofus.guardian_trunk_1"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.guardian_trunk_1.desc"
+  },
+  "icon": "minecraft:shield",
+  "x": 0,
+  "y": 1,
+  "cost": 1,
+  "requires": [
+    "mitofus:guardian_root"
+  ],
+  "effects": [
+    {
+      "type": "stat",
+      "stat": "stamina",
+      "amount": 1
+    }
+  ]
+}

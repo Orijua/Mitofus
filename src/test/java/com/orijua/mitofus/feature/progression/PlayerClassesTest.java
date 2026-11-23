@@ -59,4 +59,13 @@ class PlayerClassesTest {
         assertFalse(classes.hasClass(SWORD));
         assertEquals(Optional.empty(), classes.slot(1));
     }
+
+    @Test
+    void aHybridSlotKeepsItsOriginAndPaidPointsThroughTheCodec() {
+        ClassSlot hybrid = new ClassSlot(0, MAGE, 40, 5, ClassGrade.ADEPT, List.of(), List.of(MAGE, SWORD), 7);
+        ClassSlot read = ClassSlot.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE,
+                ClassSlot.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, hybrid).getOrThrow()).getOrThrow();
+        assertEquals(hybrid, read);
+        assertEquals(List.of(MAGE, SWORD, MAGE), read.treeClasses());
+    }
 }

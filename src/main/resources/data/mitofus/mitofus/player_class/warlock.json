@@ -1,0 +1,21 @@
+{
+  "name": {
+    "translate": "class.mitofus.warlock"
+  },
+  "description": {
+    "translate": "class.mitofus.warlock.desc"
+  },
+  "selectable": false,
+  "bonus_stats": {
+    "intelligence": 9,
+    "stamina": 1
+  },
+  "skills": [
+    "mitofus:flame_bolt",
+    "mitofus:mana_shield"
+  ],
+  "passives": [
+    "mitofus:mana_reserve"
+  ],
+  "third_slot_passive": "mitofus:composure"
+}

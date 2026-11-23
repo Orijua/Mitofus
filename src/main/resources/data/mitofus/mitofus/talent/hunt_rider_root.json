@@ -1,0 +1,15 @@
+{
+  "class": "mitofus:hunt_rider",
+  "branch": "root",
+  "name": {
+    "translate": "talent_node.mitofus.hunt_rider_root"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.hunt_rider_root.desc"
+  },
+  "icon": "minecraft:saddle",
+  "x": 0,
+  "y": 0,
+  "cost": 0,
+  "effects": []
+}

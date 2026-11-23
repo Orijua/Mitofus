@@ -1,0 +1,8 @@
+{
+  "parents": [
+    "mitofus:archer",
+    "mitofus:mage"
+  ],
+  "result_class": "mitofus:arcane_marksman",
+  "cost": 10
+}

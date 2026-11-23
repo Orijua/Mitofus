@@ -1,0 +1,15 @@
+{
+  "class": "mitofus:spellsword",
+  "branch": "root",
+  "name": {
+    "translate": "talent_node.mitofus.spellsword_root"
+  },
+  "description": {
+    "translate": "talent_node.mitofus.spellsword_root.desc"
+  },
+  "icon": "minecraft:enchanted_golden_apple",
+  "x": 0,
+  "y": 0,
+  "cost": 0,
+  "effects": []
+}

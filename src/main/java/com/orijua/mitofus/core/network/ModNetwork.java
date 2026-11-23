@@ -18,6 +18,7 @@ import com.orijua.mitofus.feature.sancho.ReadOrbePayload;
 import com.orijua.mitofus.feature.eibar.StartContestPayload;
 import com.orijua.mitofus.feature.progression.AllocateStatPayload;
 import com.orijua.mitofus.feature.progression.ChooseClassPayload;
+import com.orijua.mitofus.feature.fusion.FuseClassesPayload;
 import com.orijua.mitofus.feature.talent.BuyTalentPayload;
 import com.orijua.mitofus.feature.progression.ChooseJobPayload;
 import com.orijua.mitofus.feature.quest.NpcQuestPayload;
@@ -54,6 +55,7 @@ public final class ModNetwork {
         registrar.playToServer(AllocateStatPayload.TYPE, AllocateStatPayload.STREAM_CODEC, ServerPayloadHandler::allocateStat);
         registrar.playToServer(ChooseClassPayload.TYPE, ChooseClassPayload.STREAM_CODEC, ServerPayloadHandler::chooseClass);
         registrar.playToServer(BuyTalentPayload.TYPE, BuyTalentPayload.STREAM_CODEC, ServerPayloadHandler::buyTalent);
+        registrar.playToServer(FuseClassesPayload.TYPE, FuseClassesPayload.STREAM_CODEC, ServerPayloadHandler::fuseClasses);
         registrar.playToServer(ChooseJobPayload.TYPE, ChooseJobPayload.STREAM_CODEC, ServerPayloadHandler::chooseJob);
         registrar.playToServer(QuestActionPayload.TYPE, QuestActionPayload.STREAM_CODEC, ServerPayloadHandler::questAction);
         registrar.playToServer(LogoutRequestPayload.TYPE, LogoutRequestPayload.STREAM_CODEC, ServerPayloadHandler::logoutRequest);

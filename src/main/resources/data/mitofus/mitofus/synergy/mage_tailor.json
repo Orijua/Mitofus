@@ -1,0 +1,29 @@
+{
+  "class": "mitofus:mage",
+  "job": "mitofus:tailor",
+  "steps": [
+    {
+      "grade": "apprentice",
+      "job_level": 10,
+      "bonus_stats": {
+        "intelligence": 1
+      }
+    },
+    {
+      "grade": "expert",
+      "job_level": 30,
+      "bonus_stats": {
+        "intelligence": 2,
+        "dexterity": 1
+      }
+    },
+    {
+      "grade": "grand_master",
+      "job_level": 60,
+      "bonus_stats": {
+        "intelligence": 3,
+        "dexterity": 2
+      }
+    }
+  ]
+}
