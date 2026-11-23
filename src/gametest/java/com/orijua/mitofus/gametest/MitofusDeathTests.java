@@ -947,7 +947,7 @@ public final class MitofusDeathTests {
             helper.assertTrue(command(helper, player, "mitofus death") == 1, "the debug death command works while locked");
             helper.assertTrue(command(helper, player, "mitofus goto sierra_nevada") == 1, "goto is not blocked by the lock");
             helper.assertTrue(MitofusDeathService.lockRemaining(player) == LOCK, "and does not change it");
-            helper.assertTrue(command(helper, player, "mitofus death reset") == 1, "the reset command works");
+            helper.assertTrue(command(helper, player, "mitofus reset death") == 1, "the reset command works");
             helper.assertTrue(MitofusDeathService.deaths(player).equals(MitofusDeaths.EMPTY) && MitofusDeathService.lockRemaining(player) == 0L,
                     "and clears the lock: " + MitofusDeathService.deaths(player));
             helper.assertTrue(VrHelmetService.connect(player, at(helper, new BlockPos(0, 1, 0))), "so it connects");

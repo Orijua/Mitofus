@@ -80,15 +80,15 @@ public final class CommandTests {
     public static void debugPassiveGivesAndRemovesPassives(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
         helper.assertTrue(ActiveTraits.total(player, BonusType.MAX_MANA) == 0, "no extra mana without passives");
-        execute(helper, player, "mitofus passive give mitofus:mana_reserve");
+        execute(helper, player, "mitofus give passive mitofus:mana_reserve");
         helper.assertTrue(ActiveTraits.total(player, BonusType.MAX_MANA) == 20, "Mana reserve gives +20 maximum mana, whatever the class");
-        execute(helper, player, "mitofus passive list");
-        execute(helper, player, "mitofus passive remove mitofus:mana_reserve");
+        execute(helper, player, "mitofus list passives");
+        execute(helper, player, "mitofus remove passive mitofus:mana_reserve");
         helper.assertTrue(ActiveTraits.total(player, BonusType.MAX_MANA) == 0, "removed");
-        execute(helper, player, "mitofus passive give mitofus:mana_reserve");
-        execute(helper, player, "mitofus passive clear");
+        execute(helper, player, "mitofus give passive mitofus:mana_reserve");
+        execute(helper, player, "mitofus reset passives");
         helper.assertTrue(player.getData(ModAttachments.PASSIVE_OVERRIDES).isEmpty(), "clear forgets the overrides");
-        helper.assertTrue(execute(helper, player, "mitofus passive give mitofus:nope") == 0, "unknown passive refused");
+        helper.assertTrue(execute(helper, player, "mitofus give passive mitofus:nope") == 0, "unknown passive refused");
         helper.succeed();
     }
 
@@ -96,7 +96,7 @@ public final class CommandTests {
     public static void debugMasterySetsLevelAndUses(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
         ResourceLocation strike = Mitofus.id("heavy_strike");
-        execute(helper, player, "mitofus skill learn mitofus:heavy_strike");
+        execute(helper, player, "mitofus give skill mitofus:heavy_strike");
         helper.assertTrue(SkillService.get(player).knows(strike), "learned");
         execute(helper, player, "mitofus mastery mitofus:heavy_strike level 5");
         helper.assertTrue(player.getData(ModAttachments.SKILL_MASTERY).level(strike) == 5, "level 5");
@@ -204,14 +204,14 @@ public final class CommandTests {
     @GameTest(template = TestSupport.EMPTY)
     public static void questCompleteMarksTheWholeChainDone(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
-        run(helper, player, "mitofus quest complete mitofus:quality_test");
+        run(helper, player, "mitofus give quest mitofus:quality_test");
         PlayerQuests quests = QuestService.get(player);
         helper.assertTrue(quests.isCompleted(SanchoStory.SMITH_CHAIN_END), "the quest itself");
         helper.assertTrue(quests.isCompleted(Mitofus.id("first_commission")), "and the one before it");
         helper.assertTrue(quests.isCompleted(Mitofus.id("smith_firewood")), "back to the start of the chain");
         helper.assertTrue(player.getInventory().countItem(ModItems.ENHANCEMENT_STONE.get()) == 3, "the requested quest gives its 3 stones");
 
-        run(helper, player, "mitofus quest complete mitofus:quality_test");
+        run(helper, player, "mitofus give quest mitofus:quality_test");
         helper.assertTrue(player.getInventory().countItem(ModItems.ENHANCEMENT_STONE.get()) == 3, "and not again");
         helper.assertTrue(QuestService.get(player).timesCompleted(SanchoStory.SMITH_CHAIN_END) == 1, "done ones are not done twice");
 
@@ -224,7 +224,7 @@ public final class CommandTests {
     @GameTest(template = TestSupport.EMPTY)
     public static void questCompleteGivesOnlyTheRequestedQuestRewardsOnce(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
-        run(helper, player, "mitofus quest complete mitofus:covadonga_talents");
+        run(helper, player, "mitofus give quest mitofus:covadonga_talents");
         helper.assertTrue(QuestService.get(player).isCompleted(Mitofus.id("watch_commander")), "the chain is done");
         helper.assertTrue(player.getInventory().countItem(ModItems.GOLD_COIN.get()) == 5, "5 gold");
         helper.assertTrue(player.getInventory().countItem(Items.EMERALD) == 0, "no plain emeralds");
@@ -234,7 +234,7 @@ public final class CommandTests {
         PlayerStats stats = ProgressionService.get(player);
         helper.assertTrue(stats.level() == expected.level() && stats.xp() == expected.xp(), "only the 500 XP of the quest: " + stats);
 
-        run(helper, player, "mitofus quest complete mitofus:covadonga_talents");
+        run(helper, player, "mitofus give quest mitofus:covadonga_talents");
         helper.assertTrue(player.getInventory().countItem(ModItems.GOLD_COIN.get()) == 5, "repeating gives nothing more");
         PlayerStats again = ProgressionService.get(player);
         helper.assertTrue(again.level() == stats.level() && again.xp() == stats.xp(), "nor XP: " + again);
@@ -245,14 +245,14 @@ public final class CommandTests {
     @GameTest(template = TestSupport.EMPTY)
     public static void classLevelByNameAndTalentBuyAll(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
-        helper.assertTrue(execute(helper, player, "mitofus set class 0 swordsman") == 1, "class placed");
+        helper.assertTrue(execute(helper, player, "mitofus set class swordsman 1") == 1, "class placed");
         helper.assertTrue(execute(helper, player, "mitofus set classlevel swordsman 7") == 7, "level set by name");
         helper.assertTrue(execute(helper, player, "mitofus set classlevel mage 7") == 0, "a class that is not placed fails");
-        helper.assertTrue(execute(helper, player, "mitofus talent buyall swordsman") > 0, "nodes bought");
-        helper.assertTrue(execute(helper, player, "mitofus grade set swordsman 1") == 1, "grade set by class");
+        helper.assertTrue(execute(helper, player, "mitofus give talents swordsman") > 0, "nodes bought");
+        helper.assertTrue(execute(helper, player, "mitofus set grade swordsman 1") == 1, "grade set by class");
         helper.assertTrue(com.orijua.mitofus.feature.progression.ClassService.classes(player).slot(0).orElseThrow().grade()
                 == com.orijua.mitofus.feature.progression.ClassGrade.APPRENTICE, "grade lowered to 1");
-        helper.assertTrue(execute(helper, player, "mitofus grade set mage 2") == 0, "a class that is not placed fails");
+        helper.assertTrue(execute(helper, player, "mitofus set grade mage 2") == 0, "a class that is not placed fails");
         var slot = com.orijua.mitofus.feature.progression.ClassService.classes(player).slot(0).orElseThrow();
         helper.assertTrue(com.orijua.mitofus.feature.fusion.FusionRules.treeComplete(
                 com.orijua.mitofus.feature.talent.TalentService.all(helper.getLevel()), slot), "its tree is complete");
@@ -262,7 +262,7 @@ public final class CommandTests {
     @GameTest(template = TestSupport.EMPTY)
     public static void questCompleteOfNunoRequestGives16Gold(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
-        run(helper, player, "mitofus quest complete mitofus:nuno_secret_request");
+        run(helper, player, "mitofus give quest mitofus:nuno_secret_request");
         helper.assertTrue(player.getInventory().countItem(ModItems.GOLD_COIN.get()) == 16, "16 gold");
         helper.succeed();
     }

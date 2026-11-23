@@ -79,8 +79,9 @@ public final class WorldDebugCommands {
                                             DeathBalance.current().doubleDeathWindowMinutes(), pending,
                                             DeathBalance.current().reconnectLockMinutes(), lockLeft), false);
                                     return 1;
-                                })
-                                .then(Commands.literal("reset")
+                                }),
+                Commands.literal("reset")
+                                .then(Commands.literal("death")
                                         .executes(ctx -> {
                                             ServerPlayer player = ctx.getSource().getPlayerOrException();
                                             player.removeData(ModAttachments.MITOFUS_DEATHS.get());

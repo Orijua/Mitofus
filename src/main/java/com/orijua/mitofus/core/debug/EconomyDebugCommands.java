@@ -45,13 +45,7 @@ public final class EconomyDebugCommands {
                                 })
                                 .then(Commands.literal("offer")
                                         .executes(EconomyDebugCommands::terminalOffer)
-                                        .then(Commands.literal("reset")
-                                                .executes(ctx -> {
-                                                    ServerPlayer player = ctx.getSource().getPlayerOrException();
-                                                    player.removeData(ModAttachments.OFFER_BOUGHT.get());
-                                                    ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_terminal_offer_reset"), false);
-                                                    return 1;
-                                                }))),
+                                        ),
                 Commands.literal("purse")
                                 .executes(ctx -> {
                                     ServerPlayer player = ctx.getSource().getPlayerOrException();
@@ -73,8 +67,16 @@ public final class EconomyDebugCommands {
                                                 "message.mitofus.debug_trade_entry", key.asString(), pressure, percent), false);
                                     });
                                     return 1;
-                                })
-                                .then(Commands.literal("reset")
+                                }),
+                Commands.literal("reset")
+                                .then(Commands.literal("offer")
+                                        .executes(ctx -> {
+                                            ServerPlayer player = ctx.getSource().getPlayerOrException();
+                                            player.removeData(ModAttachments.OFFER_BOUGHT.get());
+                                            ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_terminal_offer_reset"), false);
+                                            return 1;
+                                        }))
+                                .then(Commands.literal("trade")
                                         .executes(ctx -> {
                                             ServerPlayer player = ctx.getSource().getPlayerOrException();
                                             player.removeData(ModAttachments.TRADE_SATURATION.get());

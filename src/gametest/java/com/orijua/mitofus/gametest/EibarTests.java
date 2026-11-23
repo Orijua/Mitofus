@@ -66,7 +66,7 @@ public final class EibarTests {
         helper.succeed();
     }
 
-    /** Completing "Sancho's Legacy" without the book (as /mitofus quest complete does) also makes the successor. */
+    /** Completing "Sancho's Legacy" without the book (as /mitofus give quest does) also makes the successor. */
     @GameTest(template = TestSupport.EMPTY)
     public static void theCompletedLegacyAlsoMakesTheSuccessor(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
