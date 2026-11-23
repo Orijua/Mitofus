@@ -241,6 +241,20 @@ public final class CommandTests {
         helper.succeed();
     }
 
+    /** Playtest: the class level by name (the Profile counts slots from 1, the commands from 0) and the whole tree in one command. */
+    @GameTest(template = TestSupport.EMPTY)
+    public static void classLevelByNameAndTalentBuyAll(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        helper.assertTrue(execute(helper, player, "mitofus set class 0 swordsman") == 1, "class placed");
+        helper.assertTrue(execute(helper, player, "mitofus set classlevel swordsman 7") == 7, "level set by name");
+        helper.assertTrue(execute(helper, player, "mitofus set classlevel mage 7") == 0, "a class that is not placed fails");
+        helper.assertTrue(execute(helper, player, "mitofus talent buyall swordsman") > 0, "nodes bought");
+        var slot = com.orijua.mitofus.feature.progression.ClassService.classes(player).slot(0).orElseThrow();
+        helper.assertTrue(com.orijua.mitofus.feature.fusion.FusionRules.treeComplete(
+                com.orijua.mitofus.feature.talent.TalentService.all(helper.getLevel()), slot), "its tree is complete");
+        helper.succeed();
+    }
+
     @GameTest(template = TestSupport.EMPTY)
     public static void questCompleteOfNunoRequestGives16Gold(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);

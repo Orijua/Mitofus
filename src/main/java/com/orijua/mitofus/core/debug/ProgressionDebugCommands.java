@@ -78,6 +78,12 @@ public final class ProgressionDebugCommands {
                                                 .then(Commands.argument("level", IntegerArgumentType.integer(1, 10_000))
                                                         .executes(ctx -> setClassLevel(ctx, IntegerArgumentType.getInteger(ctx, "slot"),
                                                                 IntegerArgumentType.getInteger(ctx, "level"))))))
+                                .then(Commands.literal("classlevel")
+                                        .then(Commands.argument("class", StringArgumentType.word())
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(placedClasses(ctx), builder))
+                                                .then(Commands.argument("level", IntegerArgumentType.integer(1, 10_000))
+                                                        .executes(ctx -> setClassLevelByName(ctx, StringArgumentType.getString(ctx, "class"),
+                                                                IntegerArgumentType.getInteger(ctx, "level"))))))
                                 .then(Commands.literal("job")
                                         .then(Commands.argument("job", StringArgumentType.word())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
@@ -121,6 +127,10 @@ public final class ProgressionDebugCommands {
                                         .then(Commands.argument("slot", IntegerArgumentType.integer(0, ClassSlotRules.MAX_SLOTS - 1))
                                                 .executes(ctx -> gradeUp(ctx, IntegerArgumentType.getInteger(ctx, "slot"))))),
                 Commands.literal("talent")
+                                .then(Commands.literal("buyall")
+                                        .then(Commands.argument("class", StringArgumentType.word())
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(placedClasses(ctx), builder))
+                                                .executes(ctx -> buyAllTalents(ctx, StringArgumentType.getString(ctx, "class")))))
                                 .then(Commands.literal("buy")
                                         .then(Commands.argument("slot", IntegerArgumentType.integer(0, ClassSlotRules.MAX_SLOTS - 1))
                                                 .then(Commands.argument("talent", ResourceLocationArgument.id())
@@ -224,6 +234,57 @@ public final class ProgressionDebugCommands {
         }
         ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_class_level", slot, level), false);
         return level;
+    }
+
+    /** The classes the command's player has placed, as the names the commands take. */
+    private static java.util.List<String> placedClasses(CommandContext<CommandSourceStack> ctx) {
+        if (!(ctx.getSource().getEntity() instanceof ServerPlayer player)) {
+            return java.util.List.of();
+        }
+        return ClassService.classes(player).slots().stream().map(slot -> slot.classId().getPath()).toList();
+    }
+
+    /** Like {@code classlevel <slot>} but by class name, so the Profile's slot numbers (from 1) cannot be confused with the command's (from 0). */
+    private static int setClassLevelByName(CommandContext<CommandSourceStack> ctx, String name, int level) throws CommandSyntaxException {
+        ServerPlayer player = DebugSupport.mitofusPlayer(ctx);
+        var slot = ClassService.slotOf(player, com.orijua.mitofus.Mitofus.id(name));
+        if (slot.isEmpty()) {
+            ctx.getSource().sendFailure(Component.translatable("message.mitofus.debug_class_not_placed", name));
+            return 0;
+        }
+        return setClassLevel(ctx, slot.get(), level);
+    }
+
+    /** Raises the class level (enough points for the whole tree) and buys every node of its tree, for testing fusions. */
+    private static int buyAllTalents(CommandContext<CommandSourceStack> ctx, String name) throws CommandSyntaxException {
+        ServerPlayer player = DebugSupport.mitofusPlayer(ctx);
+        var slot = ClassService.slotOf(player, com.orijua.mitofus.Mitofus.id(name));
+        if (slot.isEmpty()) {
+            ctx.getSource().sendFailure(Component.translatable("message.mitofus.debug_class_not_placed", name));
+            return 0;
+        }
+        var all = TalentService.all(player.level());
+        int bought = 0;
+        boolean progress = true;
+        while (progress) {
+            progress = false;
+            for (ResourceLocation node : all.keySet()) {
+                var placed = ClassService.classes(player).slot(slot.get()).orElseThrow();
+                var check = TalentRules.check(all, placed, node);
+                if (check == TalentRules.Buy.POINTS) {
+                    ClassService.setClassLevel(player, slot.get(), placed.classLevel() + all.get(node).cost());
+                } else if (check == TalentRules.Buy.GRADE) {
+                    player.setData(ModAttachments.PLAYER_CLASSES, ClassService.classes(player).withSlot(placed.withGrade(all.get(node).minGrade())));
+                }
+                if (TalentService.buy(player, slot.get(), node) == TalentRules.Buy.OK) {
+                    bought++;
+                    progress = true;
+                }
+            }
+        }
+        int total = bought;
+        ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_talent_buyall", name, total), false);
+        return total;
     }
 
     /** Buys a talent node for the class in a slot, through the same checks as the screen. */

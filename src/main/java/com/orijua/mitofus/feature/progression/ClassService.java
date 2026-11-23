@@ -111,6 +111,11 @@ public final class ClassService {
         return true;
     }
 
+    /** Debug: the slot (0 to 2) that holds {@code classId}, or empty. Slots are numbered from 0 here but shown from 1 in the Profile. */
+    public static Optional<Integer> slotOf(ServerPlayer player, ResourceLocation classId) {
+        return classes(player).slots().stream().filter(s -> s.classId().equals(classId)).map(ClassSlot::slot).findFirst();
+    }
+
     /** Like {@link #chooseClass} for the job: once, only selectable ones, only in Mitofus. */
     public static boolean chooseJob(ServerPlayer player, ResourceLocation jobId) {
         if (!MitofusWorld.is(player.level())) {

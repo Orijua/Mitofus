@@ -11,6 +11,7 @@ import com.orijua.mitofus.feature.progression.TitleEarnedEvent;
 import com.orijua.mitofus.feature.quest.QuestCompletedEvent;
 import com.orijua.mitofus.feature.quest.QuestDiscoveredEvent;
 import com.orijua.mitofus.feature.smithing.ItemForgedEvent;
+import com.orijua.mitofus.feature.talent.TalentRules;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -42,7 +43,9 @@ public final class NotificationEvents {
         int points = (event.newLevel() - event.previousLevel()) * Balance.current().statPointsPerLevel();
         send(event.player(), Kind.LEVEL_UP, List.of(
                 Component.translatable("notification.mitofus.level_up.body", event.newLevel()),
-                Component.translatable("notification.mitofus.level_up.points", points)));
+                Component.translatable("notification.mitofus.level_up.points", points),
+                Component.translatable("notification.mitofus.level_up.talent_points",
+                        TalentRules.pointsEarned(event.newLevel() - event.previousLevel()))));
     }
 
     private static void onTitleEarned(TitleEarnedEvent event) {
