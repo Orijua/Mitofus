@@ -113,7 +113,7 @@ public final class XpRateTests {
         ProgressionService.set(player, PlayerStats.DEFAULT);
         ProgressionService.awardXp(player, 10);
         helper.assertTrue(execute(helper, player, "mitofus xp") == 1, "xp shows");
-        helper.assertTrue(execute(helper, player, "mitofus xp reset") == 1, "xp reset runs");
+        helper.assertTrue(execute(helper, player, "mitofus reset xp") == 1, "xp reset runs");
         helper.assertTrue(XpRateService.get(player).equals(XpRate.EMPTY), "and clears the measurement");
         helper.succeed();
     }

@@ -42,6 +42,9 @@ public class TalentsTab extends MitofusTab {
 
     /** Position of the shown class in the player's slot list. */
     private int selected;
+    /** How far the player has dragged the tree; it is drawn clipped to the window below the header. */
+    private final TreePan pan = new TreePan();
+    private int shownSelected = -1;
     /** What the widgets were built for: a class placed or removed rebuilds the tab. */
     private String builtFor = "";
 
@@ -70,7 +73,10 @@ public class TalentsTab extends MitofusTab {
         for (int i = 0; i < slots.size(); i++) {
             int index = i;
             Component name = FusionText.className(player().level(), slots.get(i).classId());
-            addWidget.accept(Button.builder(name, b -> selected = index)
+            addWidget.accept(Button.builder(name, b -> {
+                selected = index;
+                pan.reset();
+            })
                     .bounds(left + i * (buttonWidth + 4), top, buttonWidth, 18).build(MitofusButton::new));
         }
     }
@@ -130,17 +136,39 @@ public class TalentsTab extends MitofusTab {
     }
 
     private int nodeX(TalentDefinition node) {
-        return left + width / 2 + (node.x() + offsetX(node)) * CELL_X - NODE / 2;
+        return left + width / 2 + (node.x() + offsetX(node)) * CELL_X - NODE / 2 + pan.x();
     }
 
     private int nodeY(TalentDefinition node) {
-        return top + HEADER + 4 + (node.y() + offsetY(node)) * CELL_Y;
+        return top + HEADER + 4 + (node.y() + offsetY(node)) * CELL_Y + pan.y();
+    }
+
+    /** Whether a point is in the part of the window where the tree is drawn (below the header). */
+    private boolean inTreeArea(double mouseX, double mouseY) {
+        return mouseX >= left && mouseX < left + width && mouseY >= top + HEADER && mouseY < top + height;
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY) {
+        if (shown().isPresent() && inTreeArea(mouseX, mouseY)) {
+            pan.press(mouseX, mouseY);
+        }
+        return false;
+    }
+
+    @Override
+    public void mouseDragged(double mouseX, double mouseY, double dx, double dy) {
+        pan.drag(mouseX, mouseY, dx, dy);
+    }
+
+    /** A press that did not move buys the node under the mouse; one that moved only dragged the tree. */
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY) {
+        if (!pan.release()) {
+            return false;
+        }
         Optional<ClassSlot> slot = shown();
-        if (slot.isEmpty()) {
+        if (slot.isEmpty() || !inTreeArea(mouseX, mouseY)) {
             return false;
         }
         for (Map.Entry<ResourceLocation, TalentDefinition> entry : tree(slot.get()).entrySet()) {
@@ -155,7 +183,7 @@ public class TalentsTab extends MitofusTab {
     private boolean isOver(TalentDefinition node, double mouseX, double mouseY) {
         int x = nodeX(node);
         int y = nodeY(node);
-        return mouseX >= x && mouseX < x + NODE && mouseY >= y && mouseY < y + NODE;
+        return inTreeArea(mouseX, mouseY) && mouseX >= x && mouseX < x + NODE && mouseY >= y && mouseY < y + NODE;
     }
 
     @Override
@@ -175,7 +203,13 @@ public class TalentsTab extends MitofusTab {
             UiStyle.text(graphics, font(), Component.translatable("screen.mitofus.talents_no_tree"), left, top + HEADER + 6, UiStyle.MUTED);
             return;
         }
+        if (shownSelected != selected) {
+            shownSelected = selected;
+            pan.reset();
+        }
+        clampPan(tree);
         var owned = TalentRules.owned(all, slot);
+        graphics.enableScissor(left, top + HEADER, left + width, top + height);
         // Lines first, so the nodes sit on top of them.
         tree.forEach((id, node) -> node.requires().forEach(requiredId -> {
             TalentDefinition required = tree.get(requiredId);
@@ -193,9 +227,11 @@ public class TalentsTab extends MitofusTab {
                             connect(graphics, node, merge.getValue(), owned.contains(id) ? OWNED : LOCKED);
                         }
                     }));
+            graphics.disableScissor();
             Component origin = Component.translatable("screen.mitofus.talent_trunk_origin", Component.translatable("screen.mitofus.hybrid_origin",
                     FusionText.className(player().level(), slot.origin().get(0)), FusionText.className(player().level(), slot.origin().get(1))));
             UiStyle.text(graphics, font(), origin, left, top + HEADER - 5, UiStyle.MUTED);
+            graphics.enableScissor(left, top + HEADER, left + width, top + height);
         }
         List<Component> tooltip = null;
         for (Map.Entry<ResourceLocation, TalentDefinition> entry : tree.entrySet()) {
@@ -215,9 +251,27 @@ public class TalentsTab extends MitofusTab {
                 tooltip = tooltip(node, status, isOwned);
             }
         }
+        graphics.disableScissor();
         if (tooltip != null) {
             graphics.renderComponentTooltip(font(), tooltip, mouseX, mouseY);
         }
+    }
+
+    /** Keeps the dragged tree within reach of the window, from where it is drawn with no drag. */
+    private void clampPan(Map<ResourceLocation, TalentDefinition> tree) {
+        int dragX = pan.x();
+        int dragY = pan.y();
+        int minX = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        int minY = Integer.MAX_VALUE;
+        int maxY = Integer.MIN_VALUE;
+        for (TalentDefinition node : tree.values()) {
+            minX = Math.min(minX, nodeX(node) - dragX);
+            maxX = Math.max(maxX, nodeX(node) - dragX + NODE);
+            minY = Math.min(minY, nodeY(node) - dragY);
+            maxY = Math.max(maxY, nodeY(node) - dragY + NODE);
+        }
+        pan.clamp(minX, maxX, minY, maxY, left, left + width, top + HEADER, top + height);
     }
 
     private void connect(GuiGraphics graphics, TalentDefinition from, TalentDefinition to, int color) {

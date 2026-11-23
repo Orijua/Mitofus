@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Passives that a debug command gave or took away on top of what the class gives ({@code /mitofus passive}).
+ * Passives that a debug command gave or took away on top of what the class gives ({@code /mitofus give passive}).
  * Empty in normal play. {@code granted} count at any level and with any class; {@code revoked} hide a class passive.
  */
 public record PassiveOverrides(List<ResourceLocation> granted, List<ResourceLocation> revoked) {

@@ -18,6 +18,8 @@ import java.util.List;
  *   <li>{@code /mitofus reset quests}: forgets accepted, completed and discovered quests.</li>
  *   <li>{@code /mitofus give xp <amount>}: awards XP; {@code /mitofus reset all} resets every system.</li>
  *   <li>{@code /mitofus give gear <stat> <requirement> [bonus]}: gives a sword that requires points of a stat and, with a bonus, a chestplate that gives them.</li>
+ *   <li>Standard: {@code /mitofus <verb> <what> [class] [value]} with the verbs set, give, remove, reset and list; classes by name,
+ *   slots from 1 (see mod-tools/CLAUDE.md in the docs).</li>
  *   <li>{@code /mitofus appraisal unappraise|reveal <n>|complete|info}: on the rated equipment in the main hand: marks it
  *   unappraised, reveals n data without spending an Eye, appraises it in full, or shows its seed, revealed data and all its data.</li>
  *   <li>{@code /mitofus set smithing <level>}: sets the smithing level (its experience).</li>
@@ -26,14 +28,14 @@ import java.util.List;
  *   <li>{@code /mitofus set view <value>}: sets View.</li>
  *   <li>{@code /mitofus set iron <amount>}: sets the iron of the purse.</li>
  *   <li>{@code /mitofus purse}: shows the coins of the purse.</li>
- *   <li>{@code /mitofus trade}: lists the pressure and the price percentage of each trade key; {@code reset} clears them.</li>
- *   <li>{@code /mitofus xp}: shows level, XP, XP missing and the measured XP per hour; {@code reset} clears the measurement.
+ *   <li>{@code /mitofus trade}: lists the pressure and the price percentage of each trade key; {@code /mitofus reset trade} clears them.</li>
+ *   <li>{@code /mitofus xp}: shows level, XP, XP missing and the measured XP per hour; {@code /mitofus reset xp} clears the measurement.
  *   {@code simulate kill} refuses mobs that give no XP (villagers and the mod's peaceful NPCs).</li>
  *   <li>{@code /mitofus spawn <mob> <elite|normal> <level>}: spawns that mob two blocks in front of the player with that level, elite or normal; only in Mitofus.</li>
  *   <li>{@code /mitofus spawn apprentice <grade> [level]}: hires an apprentice of that grade where the player stands.</li>
  *   <li>{@code /mitofus goto <place>}: to the surface in front of a structure (covadonga, altamira, torre_del_oro,
  *   eibar) or on dry ground at a place of the map (sierra_nevada...); refused in the sea.</li>
- *   <li>{@code /mitofus quest complete <quest>}: marks it and the quests before it in its chain done; only the named
+ *   <li>{@code /mitofus give quest <quest>}: marks it and the quests before it in its chain done; only the named
  *   quest, and only if it was not done yet, gives its item and XP rewards (not its class reward nor its loans; the ones before it give nothing).</li>
  * </ul>
  * Every subcommand is operator-only (permission level 2) except {@code help} and {@code logout}; {@code /mitofus <subcommand>} still works

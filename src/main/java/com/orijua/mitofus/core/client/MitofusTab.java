@@ -57,6 +57,15 @@ public abstract class MitofusTab {
         return false;
     }
 
+    /** Left button held and the mouse moved by ({@code dx}, {@code dy}); after a click that no widget took. */
+    public void mouseDragged(double mouseX, double mouseY, double dx, double dy) {
+    }
+
+    /** Left button released. Return true if the tab changed, so its widgets are rebuilt. */
+    public boolean mouseReleased(double mouseX, double mouseY) {
+        return false;
+    }
+
     /** Return true when the data behind the widgets changed (e.g. a class was chosen) so the window rebuilds them. */
     public boolean needsRebuild() {
         return false;

@@ -50,28 +50,30 @@ public final class SkillDebugCommands {
     private SkillDebugCommands() {
     }
 
-    /** {@code passive}, {@code skill} and {@code mastery}, to be hung under {@code /mitofus} (operators only). */
+    /** {@code give passive|skill}, {@code remove}, {@code list}, {@code reset passives} and {@code mastery}, to be hung under {@code /mitofus} (operators only). */
     static List<LiteralArgumentBuilder<CommandSourceStack>> nodes() {
         return List.of(
-                Commands.literal("passive")
-                        .then(Commands.literal("list").executes(SkillDebugCommands::listPassives))
-                        .then(Commands.literal("give")
+                Commands.literal("give")
+                        .then(Commands.literal("passive")
                                 .then(Commands.argument("passive", ResourceLocationArgument.id()).suggests(PASSIVES)
                                         .executes(ctx -> changePassive(ctx, true))))
-                        .then(Commands.literal("remove")
+                        .then(Commands.literal("skill")
+                                .then(Commands.argument("skill", ResourceLocationArgument.id()).suggests(SKILLS)
+                                        .executes(SkillDebugCommands::learnSkill))),
+                Commands.literal("remove")
+                        .then(Commands.literal("passive")
                                 .then(Commands.argument("passive", ResourceLocationArgument.id()).suggests(PASSIVES)
-                                        .executes(ctx -> changePassive(ctx, false))))
-                        .then(Commands.literal("clear").executes(ctx -> {
+                                        .executes(ctx -> changePassive(ctx, false)))),
+                Commands.literal("list")
+                        .then(Commands.literal("passives").executes(SkillDebugCommands::listPassives)),
+                Commands.literal("reset")
+                        .then(Commands.literal("passives").executes(ctx -> {
                             ServerPlayer player = ctx.getSource().getPlayerOrException();
                             player.setData(ModAttachments.PASSIVE_OVERRIDES, PassiveOverrides.EMPTY);
                             ProgressionService.refreshEffects(player);
                             ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_passive_cleared"), false);
                             return 1;
                         })),
-                Commands.literal("skill")
-                        .then(Commands.literal("learn")
-                                .then(Commands.argument("skill", ResourceLocationArgument.id()).suggests(SKILLS)
-                                        .executes(SkillDebugCommands::learnSkill))),
                 Commands.literal("mastery")
                         .then(Commands.literal("list").executes(SkillDebugCommands::listMastery))
                         .then(Commands.argument("skill", ResourceLocationArgument.id()).suggests(SKILLS)
