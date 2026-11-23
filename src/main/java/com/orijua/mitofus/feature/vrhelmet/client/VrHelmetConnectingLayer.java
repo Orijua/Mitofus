@@ -9,7 +9,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 
 /**
  * The "Connecting…" screen while the player lies in the VR helmet: the view fades to dark and a Mitofus panel shows a
@@ -23,11 +22,18 @@ public final class VrHelmetConnectingLayer implements LayeredDraw.Layer {
     public void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
         Minecraft minecraft = Minecraft.getInstance();
         float fraction = ClientVrHelmet.fraction(Util.getMillis());
-        if (fraction < 0.0f || minecraft.player == null) {
+        if (fraction < 0.0f) {
+            // The screen has ended (the player arrived or it was cancelled): the dark fades out rather than vanishing in one frame.
+            float fading = ClientVrHelmet.fadeOutDark(Util.getMillis());
+            if (fading > 0.0f) {
+                graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), (Math.round(fading * 255) << 24));
+            }
             return;
         }
-        // The dark comes in over the first half and stays.
-        float dark = Mth.clamp(fraction * 2.0f, 0.0f, 1.0f) * 0.92f;
+        if (minecraft.player == null) {
+            return;
+        }
+        float dark = ClientVrHelmet.dark(fraction);
         graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), (Math.round(dark * 255) << 24));
 
         Font font = minecraft.font;

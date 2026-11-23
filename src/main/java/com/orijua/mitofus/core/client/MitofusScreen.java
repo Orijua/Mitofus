@@ -95,6 +95,23 @@ public class MitofusScreen extends Screen implements MitofusStyledScreen {
     }
 
     @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (button == 0) {
+            current().mouseDragged(mouseX, mouseY, dragX, dragY);
+        }
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        boolean changed = button == 0 && current().mouseReleased(mouseX, mouseY);
+        if (changed) {
+            rebuildWidgets();
+        }
+        return super.mouseReleased(mouseX, mouseY, button) || changed;
+    }
+
+    @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(graphics, mouseX, mouseY, partialTick);
         UiStyle.panel(graphics, left, top, panelWidth, PANEL_HEIGHT);

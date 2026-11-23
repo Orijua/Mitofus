@@ -48,7 +48,7 @@ import java.util.function.ToLongFunction;
  * {@link VrHelmetService#connect} refuse with {@code Begin.LOCKED} / false while {@link #lockRemaining} is above 0.
  * Fatigue, the normal logout, the manual disconnection and the damage to the body never lock; the death counter going
  * back to 0 at the disconnection does not clear the lock; the lock survives death and logging out, and
- * {@code /mitofus death reset} and {@code resetAll} clear it. Operator debug commands ({@code /mitofus goto})
+ * {@code /mitofus reset death} and {@code resetAll} clear it. Operator debug commands ({@code /mitofus goto})
  * are not blocked: they are tools to move around for testing and do not go through the VR helmet.
  *
  * <p>How it works: when the player dies in Mitofus ({@link VrHelmetService#died}), the inventory is put aside in the

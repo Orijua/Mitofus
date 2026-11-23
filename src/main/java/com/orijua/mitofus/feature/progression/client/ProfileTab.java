@@ -5,6 +5,7 @@ import com.orijua.mitofus.core.client.MitofusTab;
 import com.orijua.mitofus.core.client.ScrollList;
 import com.orijua.mitofus.core.client.UiStyle;
 import com.orijua.mitofus.core.registry.Definitions;
+import com.orijua.mitofus.core.config.Balance;
 import com.orijua.mitofus.core.registry.ModAttachments;
 import com.orijua.mitofus.core.registry.ModDatapackRegistries;
 import com.orijua.mitofus.feature.fusion.client.FusionScreen;
@@ -12,6 +13,7 @@ import com.orijua.mitofus.feature.fusion.client.FusionText;
 import com.orijua.mitofus.feature.progression.ChooseClassPayload;
 import com.orijua.mitofus.feature.progression.ChooseJobPayload;
 import com.orijua.mitofus.feature.progression.ClassSlot;
+import com.orijua.mitofus.feature.progression.ProgressionRules;
 import com.orijua.mitofus.feature.progression.ClassSlotRules;
 import com.orijua.mitofus.feature.progression.JobDefinition;
 import com.orijua.mitofus.feature.progression.PlayerClassDefinition;
@@ -191,6 +193,9 @@ public class ProfileTab extends MitofusTab {
             Component name = FusionText.slotName(player().level(), placed);
             UiStyle.text(graphics, font(), Component.translatable("screen.mitofus.class_slot_level", placed.slot() + 1, name,
                     placed.classLevel(), placed.grade().displayName()), left, classY, UiStyle.TEXT);
+            Component xp = Component.translatable("screen.mitofus.class_xp", placed.classXp(),
+                    ProgressionRules.xpToNextLevel(Balance.current(), placed.classLevel()));
+            UiStyle.text(graphics, font(), xp, left + width - font().width(xp), classY, UiStyle.MUTED);
             classY += LINE;
         }
         if (layout.classButtons() >= 0) {

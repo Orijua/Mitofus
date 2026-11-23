@@ -66,18 +66,26 @@ public final class ProgressionDebugCommands {
                                         .then(Commands.argument("level", IntegerArgumentType.integer(1, 1000))
                                                 .executes(ctx -> setLevel(ctx, IntegerArgumentType.getInteger(ctx, "level")))))
                                 .then(Commands.literal("class")
-                                        .then(Commands.argument("slot", IntegerArgumentType.integer(0, ClassSlotRules.MAX_SLOTS - 1))
-                                                .then(Commands.argument("class", StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
-                                                                Definitions.all(ctx.getSource().getLevel(), ModDatapackRegistries.PLAYER_CLASS).stream()
-                                                                        .map(entry -> entry.id().getPath()), builder))
-                                                        .executes(ctx -> setClass(ctx, IntegerArgumentType.getInteger(ctx, "slot"),
+                                        .then(Commands.argument("class", StringArgumentType.word())
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                                        Definitions.all(ctx.getSource().getLevel(), ModDatapackRegistries.PLAYER_CLASS).stream()
+                                                                .map(entry -> entry.id().getPath()), builder))
+                                                .executes(ctx -> setClass(ctx, OptionalInt.empty(), StringArgumentType.getString(ctx, "class")))
+                                                .then(Commands.argument("slot", IntegerArgumentType.integer(1, ClassSlotRules.MAX_SLOTS))
+                                                        .executes(ctx -> setClass(ctx, OptionalInt.of(IntegerArgumentType.getInteger(ctx, "slot") - 1),
                                                                 StringArgumentType.getString(ctx, "class"))))))
                                 .then(Commands.literal("classlevel")
-                                        .then(Commands.argument("slot", IntegerArgumentType.integer(0, ClassSlotRules.MAX_SLOTS - 1))
+                                        .then(Commands.argument("class", StringArgumentType.word())
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(placedClasses(ctx), builder))
                                                 .then(Commands.argument("level", IntegerArgumentType.integer(1, 10_000))
-                                                        .executes(ctx -> setClassLevel(ctx, IntegerArgumentType.getInteger(ctx, "slot"),
+                                                        .executes(ctx -> setClassLevelByName(ctx, StringArgumentType.getString(ctx, "class"),
                                                                 IntegerArgumentType.getInteger(ctx, "level"))))))
+                                .then(Commands.literal("grade")
+                                        .then(Commands.argument("class", StringArgumentType.word())
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(placedClasses(ctx), builder))
+                                                .then(Commands.argument("grade", IntegerArgumentType.integer(1, 5))
+                                                        .executes(ctx -> setGrade(ctx, StringArgumentType.getString(ctx, "class"),
+                                                                IntegerArgumentType.getInteger(ctx, "grade"))))))
                                 .then(Commands.literal("job")
                                         .then(Commands.argument("job", StringArgumentType.word())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
@@ -116,22 +124,6 @@ public final class ProgressionDebugCommands {
                                                     ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_view", value), false);
                                                     return 1;
                                                 }))),
-                Commands.literal("grade")
-                                .then(Commands.literal("up")
-                                        .then(Commands.argument("slot", IntegerArgumentType.integer(0, ClassSlotRules.MAX_SLOTS - 1))
-                                                .executes(ctx -> gradeUp(ctx, IntegerArgumentType.getInteger(ctx, "slot"))))),
-                Commands.literal("talent")
-                                .then(Commands.literal("buy")
-                                        .then(Commands.argument("slot", IntegerArgumentType.integer(0, ClassSlotRules.MAX_SLOTS - 1))
-                                                .then(Commands.argument("talent", ResourceLocationArgument.id())
-                                                        .executes(ctx -> buyTalent(ctx, IntegerArgumentType.getInteger(ctx, "slot"),
-                                                                ResourceLocationArgument.getId(ctx, "talent"))))))
-                                .then(Commands.literal("reset")
-                                        .executes(ctx -> {
-                                            int refunded = TalentService.refundAll(DebugSupport.mitofusPlayer(ctx));
-                                            ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_talent_reset", refunded), false);
-                                            return refunded;
-                                        })),
                 Commands.literal("xp")
                                 .executes(ctx -> {
                                     ServerPlayer player = ctx.getSource().getPlayerOrException();
@@ -145,14 +137,28 @@ public final class ProgressionDebugCommands {
                                             progress.level(), progress.xp(), progress.needed(), progress.remaining(), etaText, perHour,
                                             XpRateRules.coveredSeconds(rate), XpRateRules.WINDOW_MINUTES), false);
                                     return 1;
-                                })
-                                .then(Commands.literal("reset")
-                                        .executes(ctx -> {
-                                            XpRateService.reset(ctx.getSource().getPlayerOrException());
-                                            ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_xp_reset"), false);
-                                            return 1;
-                                        })),
+                                }),
                 Commands.literal("give")
+                                .then(Commands.literal("grade")
+                                        .then(Commands.argument("class", StringArgumentType.word())
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(placedClasses(ctx), builder))
+                                                .executes(ctx -> gradeUp(ctx, StringArgumentType.getString(ctx, "class")))))
+                                .then(Commands.literal("talents")
+                                        .then(Commands.argument("class", StringArgumentType.word())
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(placedClasses(ctx), builder))
+                                                .executes(ctx -> buyAllTalents(ctx, StringArgumentType.getString(ctx, "class")))))
+                                .then(Commands.literal("talent")
+                                        .then(Commands.argument("class", StringArgumentType.word())
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(placedClasses(ctx), builder))
+                                                .then(Commands.argument("talent", ResourceLocationArgument.id())
+                                                        .executes(ctx -> buyTalent(ctx, StringArgumentType.getString(ctx, "class"),
+                                                                ResourceLocationArgument.getId(ctx, "talent"))))))
+                                .then(Commands.literal("quest")
+                                        .then(Commands.argument("quest", ResourceLocationArgument.id())
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(
+                                                        Definitions.all(ctx.getSource().getLevel(), ModDatapackRegistries.QUEST).stream()
+                                                                .map(Definitions.Entry::id), builder))
+                                                .executes(ProgressionDebugCommands::completeQuest)))
                                 .then(Commands.literal("xp")
                                         .then(Commands.argument("amount", IntegerArgumentType.integer(1))
                                                 .executes(ctx -> {
@@ -172,6 +178,18 @@ public final class ProgressionDebugCommands {
                                                         .then(Commands.argument("bonus", IntegerArgumentType.integer(1, 100_000))
                                                                 .executes(ctx -> giveGear(ctx, OptionalInt.of(IntegerArgumentType.getInteger(ctx, "bonus")))))))),
                 Commands.literal("reset")
+                                .then(Commands.literal("talents")
+                                        .executes(ctx -> {
+                                            int refunded = TalentService.refundAll(DebugSupport.mitofusPlayer(ctx));
+                                            ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_talent_reset", refunded), false);
+                                            return refunded;
+                                        }))
+                                .then(Commands.literal("xp")
+                                        .executes(ctx -> {
+                                            XpRateService.reset(ctx.getSource().getPlayerOrException());
+                                            ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_xp_reset"), false);
+                                            return 1;
+                                        }))
                                 .then(Commands.literal("all")
                                         .executes(ctx -> {
                                             ServerPlayer player = ctx.getSource().getPlayerOrException();
@@ -186,14 +204,7 @@ public final class ProgressionDebugCommands {
                                             player.setData(ModAttachments.PLAYER_QUESTS, PlayerQuests.EMPTY);
                                             ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.quests_reset"), false);
                                             return 1;
-                                        })),
-                Commands.literal("quest")
-                                .then(Commands.literal("complete")
-                                        .then(Commands.argument("quest", ResourceLocationArgument.id())
-                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(
-                                                        Definitions.all(ctx.getSource().getLevel(), ModDatapackRegistries.QUEST).stream()
-                                                                .map(Definitions.Entry::id), builder))
-                                                .executes(ProgressionDebugCommands::completeQuest))));
+                                        })));
     }
 
     private static int setSmithing(CommandContext<CommandSourceStack> ctx, int level) throws CommandSyntaxException {
@@ -205,9 +216,18 @@ public final class ProgressionDebugCommands {
     }
 
     /** Puts any class (basic or hidden) in a slot whatever the player's level, for testing; it keeps the skills already learned. */
-    private static int setClass(CommandContext<CommandSourceStack> ctx, int slot, String name) throws CommandSyntaxException {
+    private static int setClass(CommandContext<CommandSourceStack> ctx, OptionalInt chosenSlot, String name) throws CommandSyntaxException {
         ServerPlayer player = DebugSupport.mitofusPlayer(ctx);
         ResourceLocation id = com.orijua.mitofus.Mitofus.id(name);
+        // With no slot given: the class's own slot if it has one, else the first free slot, else the first.
+        int slot = chosenSlot.orElseGet(() -> ClassService.slotOf(player, id).orElseGet(() -> {
+            for (int i = 0; i < ClassSlotRules.MAX_SLOTS; i++) {
+                if (ClassService.classes(player).slot(i).isEmpty()) {
+                    return i;
+                }
+            }
+            return 0;
+        }));
         if (!ClassService.forceClass(player, slot, id)) {
             ctx.getSource().sendFailure(Component.translatable("message.mitofus.debug_no_class", name));
             return 0;
@@ -219,17 +239,73 @@ public final class ProgressionDebugCommands {
     private static int setClassLevel(CommandContext<CommandSourceStack> ctx, int slot, int level) throws CommandSyntaxException {
         ServerPlayer player = DebugSupport.mitofusPlayer(ctx);
         if (!ClassService.setClassLevel(player, slot, level)) {
-            ctx.getSource().sendFailure(Component.translatable("message.mitofus.debug_no_class_slot", slot));
+            ctx.getSource().sendFailure(Component.translatable("message.mitofus.debug_no_class_slot", slot + 1));
             return 0;
         }
-        ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_class_level", slot, level), false);
+        ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_class_level", slot + 1, level), false);
         return level;
     }
 
-    /** Buys a talent node for the class in a slot, through the same checks as the screen. */
-    private static int buyTalent(CommandContext<CommandSourceStack> ctx, int slot, ResourceLocation node) throws CommandSyntaxException {
+    /** The classes the command's player has placed, as the names the commands take. */
+    private static java.util.List<String> placedClasses(CommandContext<CommandSourceStack> ctx) {
+        if (!(ctx.getSource().getEntity() instanceof ServerPlayer player)) {
+            return java.util.List.of();
+        }
+        return ClassService.classes(player).slots().stream().map(slot -> slot.classId().getPath()).toList();
+    }
+
+    /** Like {@code classlevel <slot>} but by class name, so the Profile's slot numbers (from 1) cannot be confused with the command's (from 0). */
+    private static int setClassLevelByName(CommandContext<CommandSourceStack> ctx, String name, int level) throws CommandSyntaxException {
         ServerPlayer player = DebugSupport.mitofusPlayer(ctx);
-        if (TalentService.buy(player, slot, node) != TalentRules.Buy.OK) {
+        var slot = ClassService.slotOf(player, com.orijua.mitofus.Mitofus.id(name));
+        if (slot.isEmpty()) {
+            ctx.getSource().sendFailure(Component.translatable("message.mitofus.debug_class_not_placed", name));
+            return 0;
+        }
+        return setClassLevel(ctx, slot.get(), level);
+    }
+
+    /** Raises the class level (enough points for the whole tree) and buys every node of its tree, for testing fusions. */
+    private static int buyAllTalents(CommandContext<CommandSourceStack> ctx, String name) throws CommandSyntaxException {
+        ServerPlayer player = DebugSupport.mitofusPlayer(ctx);
+        var slot = ClassService.slotOf(player, com.orijua.mitofus.Mitofus.id(name));
+        if (slot.isEmpty()) {
+            ctx.getSource().sendFailure(Component.translatable("message.mitofus.debug_class_not_placed", name));
+            return 0;
+        }
+        var all = TalentService.all(player.level());
+        int bought = 0;
+        boolean progress = true;
+        while (progress) {
+            progress = false;
+            for (ResourceLocation node : all.keySet()) {
+                var placed = ClassService.classes(player).slot(slot.get()).orElseThrow();
+                var check = TalentRules.check(all, placed, node);
+                if (check == TalentRules.Buy.POINTS) {
+                    ClassService.setClassLevel(player, slot.get(), placed.classLevel() + all.get(node).cost());
+                } else if (check == TalentRules.Buy.GRADE) {
+                    player.setData(ModAttachments.PLAYER_CLASSES, ClassService.classes(player).withSlot(placed.withGrade(all.get(node).minGrade())));
+                }
+                if (TalentService.buy(player, slot.get(), node) == TalentRules.Buy.OK) {
+                    bought++;
+                    progress = true;
+                }
+            }
+        }
+        int total = bought;
+        ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_talent_buyall", name, total), false);
+        return total;
+    }
+
+    /** Buys a talent node for the class in a slot, through the same checks as the screen. */
+    private static int buyTalent(CommandContext<CommandSourceStack> ctx, String className, ResourceLocation node) throws CommandSyntaxException {
+        ServerPlayer player = DebugSupport.mitofusPlayer(ctx);
+        var slot = ClassService.slotOf(player, com.orijua.mitofus.Mitofus.id(className));
+        if (slot.isEmpty()) {
+            ctx.getSource().sendFailure(Component.translatable("message.mitofus.debug_class_not_placed", className));
+            return 0;
+        }
+        if (TalentService.buy(player, slot.get(), node) != TalentRules.Buy.OK) {
             ctx.getSource().sendFailure(Component.translatable("message.mitofus.debug_talent_failed", node.toString()));
             return 0;
         }
@@ -238,9 +314,15 @@ public final class ProgressionDebugCommands {
     }
 
     /** Raises the grade of the class in a slot by one, if the class level and the grade requirements allow it. */
-    private static int gradeUp(CommandContext<CommandSourceStack> ctx, int slot) throws CommandSyntaxException {
+    private static int gradeUp(CommandContext<CommandSourceStack> ctx, String className) throws CommandSyntaxException {
         ServerPlayer player = DebugSupport.mitofusPlayer(ctx);
-        ClassSlotRules.Advance result = ClassService.advanceGrade(player, slot);
+        var found = ClassService.slotOf(player, com.orijua.mitofus.Mitofus.id(className));
+        if (found.isEmpty()) {
+            ctx.getSource().sendFailure(Component.translatable("message.mitofus.debug_class_not_placed", className));
+            return 0;
+        }
+        int slot = found.get() + 1;
+        ClassSlotRules.Advance result = ClassService.advanceGrade(player, slot - 1);
         String failure = switch (result) {
             case OK -> null;
             case NO_CLASS -> "message.mitofus.debug_grade_no_class";
@@ -253,6 +335,22 @@ public final class ProgressionDebugCommands {
             return 0;
         }
         return 1;
+    }
+
+    /** Debug: puts a placed class at grade 1 (Apprentice) to 5 (Grand Master) with no requirements, so two classes can share a grade to fuse. */
+    private static int setGrade(CommandContext<CommandSourceStack> ctx, String name, int grade) throws CommandSyntaxException {
+        ServerPlayer player = DebugSupport.mitofusPlayer(ctx);
+        var slot = ClassService.slotOf(player, com.orijua.mitofus.Mitofus.id(name));
+        if (slot.isEmpty()) {
+            ctx.getSource().sendFailure(Component.translatable("message.mitofus.debug_class_not_placed", name));
+            return 0;
+        }
+        var placed = ClassService.classes(player).slot(slot.get()).orElseThrow();
+        var newGrade = com.orijua.mitofus.feature.progression.ClassGrade.values()[grade - 1];
+        player.setData(ModAttachments.PLAYER_CLASSES, ClassService.classes(player).withSlot(placed.withGrade(newGrade)));
+        ProgressionService.refreshEffects(player);
+        ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_grade_set", name, newGrade.displayName()), false);
+        return grade;
     }
 
     /** Gives the player any job (basic or legendary) as a quest would, for testing. */

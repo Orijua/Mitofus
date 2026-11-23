@@ -48,10 +48,9 @@ public final class FusionText {
         }
         Component jobName = Definitions.get(level, ModDatapackRegistries.JOB, job)
                 .map(definition -> definition.name()).orElse(Component.literal(job.toString()));
-        text.append("\n").append(Component.translatable("screen.mitofus.synergy_header", jobName));
-        for (SynergyDefinition.Step step : steps) {
-            text.append("\n").append(Component.translatable("screen.mitofus.synergy_line", step.grade().displayName(), step.jobLevel(), statsText(step.stats())));
-        }
+        // One short line: the best step's bonus, which is what the pair ends up giving.
+        text.append("\n").append(Component.translatable("screen.mitofus.synergy_header", jobName))
+                .append(" ").append(statsText(steps.get(steps.size() - 1).stats()));
         return text;
     }
 }

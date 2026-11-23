@@ -59,7 +59,7 @@ public final class ModAttachments {
     public static final Supplier<AttachmentType<SkillMastery>> SKILL_MASTERY =
             playerData("skill_mastery", () -> SkillMastery.EMPTY, SkillMastery.CODEC, SkillMastery.STREAM_CODEC, true);
 
-    /** Class passives given or taken away by {@code /mitofus passive}. Empty in normal play; synced, kept on death, cleared by {@link #resetAll}. */
+    /** Class passives given or taken away by {@code /mitofus give passive}. Empty in normal play; synced, kept on death, cleared by {@link #resetAll}. */
     public static final Supplier<AttachmentType<PassiveOverrides>> PASSIVE_OVERRIDES =
             playerData("passive_overrides", () -> PassiveOverrides.EMPTY, PassiveOverrides.CODEC, PassiveOverrides.STREAM_CODEC, true);
 

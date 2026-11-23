@@ -33,6 +33,8 @@ public class FusionScreen extends Screen implements MitofusStyledScreen {
 
     private final Screen parent;
     private List<Definitions.Entry<FusionDefinition>> fusions = List.of();
+    /** The class the list is filtered by (only the fusions it takes part in are shown), or null for every fusion. */
+    private net.minecraft.resources.ResourceLocation selected;
     private int left;
     private int top;
     private int panelHeight;
@@ -46,13 +48,34 @@ public class FusionScreen extends Screen implements MitofusStyledScreen {
     @Override
     protected void init() {
         var level = minecraft.level;
-        fusions = Definitions.all(level, ModDatapackRegistries.FUSION);
+        var placed = minecraft.player.getData(com.orijua.mitofus.core.registry.ModAttachments.PLAYER_CLASSES).slots().stream()
+                .filter(slot -> !slot.isHybrid()).map(com.orijua.mitofus.feature.progression.ClassSlot::classId).toList();
+        if (selected != null && !placed.contains(selected)) {
+            selected = null;
+        }
+        fusions = Definitions.all(level, ModDatapackRegistries.FUSION).stream()
+                .filter(entry -> selected == null || entry.value().parents().contains(selected)).toList();
         buttons.clear();
-        panelHeight = PADDING + UiStyle.LINE + 6 + Math.max(1, fusions.size()) * ROW + 22 + PADDING;
+        panelHeight = PADDING + UiStyle.LINE + 6 + 22 + Math.max(1, fusions.size()) * ROW + 22 + PADDING;
         panelHeight = Math.min(panelHeight, height - 10);
         left = (width - WIDTH) / 2;
         top = (height - panelHeight) / 2;
-        int y = top + PADDING + UiStyle.LINE + 6;
+        int filterY = top + PADDING + UiStyle.LINE + 4;
+        if (!placed.isEmpty()) {
+            int filterWidth = (WIDTH - 2 * PADDING - (placed.size() - 1) * 4) / placed.size();
+            for (int i = 0; i < placed.size(); i++) {
+                var id = placed.get(i);
+                Component label = FusionText.className(level, id);
+                if (id.equals(selected)) {
+                    label = Component.literal("✔ ").append(label);
+                }
+                addRenderableWidget(Button.builder(label, b -> {
+                    selected = id.equals(selected) ? null : id;
+                    rebuildWidgets();
+                }).bounds(left + PADDING + i * (filterWidth + 4), filterY, filterWidth, 16).build(MitofusButton::new));
+            }
+        }
+        int y = filterY + 22;
         for (Definitions.Entry<FusionDefinition> entry : fusions) {
             FusionDefinition fusion = entry.value();
             Component name = Component.translatable("screen.mitofus.hybrid_name", FusionText.className(level, fusion.resultClass()),
@@ -92,7 +115,7 @@ public class FusionScreen extends Screen implements MitofusStyledScreen {
             graphics.drawCenteredString(font, Component.translatable("screen.mitofus.fusions_none"), left + WIDTH / 2, top + PADDING + UiStyle.LINE + 12, UiStyle.MUTED);
             return;
         }
-        int y = top + PADDING + UiStyle.LINE + 6 + 20;
+        int y = top + PADDING + UiStyle.LINE + 4 + 22 + 20;
         for (Definitions.Entry<FusionDefinition> entry : fusions) {
             Set<FusionRules.Missing> missing = FusionService.missing(minecraft.player, entry.value());
             Component status = missing.isEmpty()
