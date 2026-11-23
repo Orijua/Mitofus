@@ -24,6 +24,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -195,5 +196,21 @@ final class TestSupport {
     /** Puts {@code iron} in the player's purse (the only money). */
     static void setIron(net.minecraft.server.level.ServerPlayer player, long iron) {
         player.setData(com.orijua.mitofus.core.registry.ModAttachments.PURSE.get(), new com.orijua.mitofus.feature.economy.Purse(iron));
+    }
+
+    /** A sleeping body of {@code tier} lying at {@code relative}, owned by nobody online. */
+    static void lieBody(GameTestHelper helper, BlockPos relative, com.orijua.mitofus.feature.vrhelmet.VrHelmetTier tier) {
+        removeBody(helper, relative);
+        com.orijua.mitofus.feature.vrhelmet.SleepingBody.spawn(helper.getLevel(), helper.absolutePos(relative), tier, UUID.randomUUID(), 0.0f);
+    }
+
+    /** The sleeping bodies lying at {@code relative} are removed. */
+    static void removeBody(GameTestHelper helper, BlockPos relative) {
+        com.orijua.mitofus.feature.vrhelmet.SleepingBody.at(helper.getLevel(), helper.absolutePos(relative)).forEach(Entity::discard);
+    }
+
+    /** Whether a sleeping body lies at the absolute position. */
+    static boolean hasBody(GameTestHelper helper, BlockPos absolute) {
+        return !com.orijua.mitofus.feature.vrhelmet.SleepingBody.at(helper.getLevel(), absolute).isEmpty();
     }
 }

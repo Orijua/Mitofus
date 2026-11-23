@@ -1,7 +1,4 @@
 {
-  "block.mitofus.body": "Sleeping Body",
-  "block.mitofus.advanced_body": "Sleeping Body",
-  "block.mitofus.diamond_body": "Sleeping Body",
   "item.mitofus.helmet": "Connection Helmet",
   "item.mitofus.advanced_helmet": "Advanced Connection Helmet",
   "item.mitofus.diamond_helmet": "Diamond Connection Helmet",
@@ -78,6 +75,7 @@
   "item.mitofus.mithril_ingot": "Mithril Ingot",
   "block.mitofus.mithril_ore": "Mithril Ore",
   "block.mitofus.deepslate_mithril_ore": "Deepslate Mithril Ore",
+  "entity.mitofus.sleeping_body": "Sleeping Body",
   "entity.mitofus.blacksmith": "Blacksmith",
   "item.mitofus.blacksmith_spawn_egg": "Blacksmith Spawn Egg",
   "entity.mitofus.village_chief": "Village Chief",

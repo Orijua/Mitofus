@@ -1,7 +1,4 @@
 {
-  "block.mitofus.body": "Cuerpo dormido",
-  "block.mitofus.advanced_body": "Cuerpo dormido",
-  "block.mitofus.diamond_body": "Cuerpo dormido",
   "item.mitofus.helmet": "Casco de conexión",
   "item.mitofus.advanced_helmet": "Casco de conexión avanzado",
   "item.mitofus.diamond_helmet": "Casco de conexión de diamante",
@@ -78,6 +75,7 @@
   "item.mitofus.mithril_ingot": "Lingote de mitril",
   "block.mitofus.mithril_ore": "Mena de mitril",
   "block.mitofus.deepslate_mithril_ore": "Mena de mitril de pizarra profunda",
+  "entity.mitofus.sleeping_body": "Cuerpo dormido",
   "entity.mitofus.blacksmith": "Herrero",
   "item.mitofus.blacksmith_spawn_egg": "Huevo de generación de herrero",
   "entity.mitofus.village_chief": "Jefe del pueblo",

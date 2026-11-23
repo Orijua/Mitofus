@@ -44,15 +44,6 @@ final class ModBlockStateProvider extends BlockStateProvider {
         horizontalBlock(ModBlocks.SMELTER.get(), state -> state.getValue(SmelterBlock.LIT) ? smelterLit : smelter);
         simpleBlockItem(ModBlocks.SMELTER.get(), smelter);
 
-        // The sleeping bodies (they have no item): a box with a front of another material per tier, until they have their own art: iron with lapis,
-        // gold with lapis, diamond with netherite.
-        ModelFile vrhelmet = models().orientable("body", mcLoc("block/iron_block"), mcLoc("block/lapis_block"), mcLoc("block/iron_block"));
-        horizontalBlock(ModBlocks.BODY.get(), vrhelmet);
-        ModelFile advancedVrHelmet = models().orientable("advanced_body", mcLoc("block/gold_block"), mcLoc("block/lapis_block"), mcLoc("block/gold_block"));
-        horizontalBlock(ModBlocks.ADVANCED_BODY.get(), advancedVrHelmet);
-        ModelFile diamondVrHelmet = models().orientable("diamond_body", mcLoc("block/diamond_block"), mcLoc("block/netherite_block"), mcLoc("block/diamond_block"));
-        horizontalBlock(ModBlocks.DIAMOND_BODY.get(), diamondVrHelmet);
-
         // The account terminal: an iron box with a glass front, until it has its own art.
         ModelFile terminal = models().orientable("account_terminal", mcLoc("block/iron_block"), mcLoc("block/light_blue_stained_glass"), mcLoc("block/iron_block"));
         horizontalBlock(ModBlocks.ACCOUNT_TERMINAL.get(), terminal);
