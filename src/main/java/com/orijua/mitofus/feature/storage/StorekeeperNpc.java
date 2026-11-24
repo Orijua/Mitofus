@@ -1,8 +1,8 @@
 package com.orijua.mitofus.feature.storage;
 
-import com.orijua.mitofus.feature.storage.client.StorageScreen;
 import com.orijua.mitofus.feature.npc.NpcRules;
 import com.orijua.mitofus.feature.npc.PeacefulNpc;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -42,9 +42,9 @@ public class StorekeeperNpc extends PathfinderMob implements PeacefulNpc {
         if (!isAlive()) {
             return super.mobInteract(player, hand);
         }
-        if (level().isClientSide) {
-            // Only runs on the client, so the client-only class is never loaded on a server.
-            StorageScreen.open(this);
+        if (player instanceof ServerPlayer serverPlayer) {
+            // The window opens when the state arrives (the client does not know the rows or the prices).
+            StorageService.sendInfo(serverPlayer, this);
         }
         return InteractionResult.sidedSuccess(level().isClientSide);
     }
