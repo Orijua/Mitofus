@@ -1,0 +1,16 @@
+{
+  "name": {
+    "translate": "title.mitofus.grade_adept"
+  },
+  "description": {
+    "translate": "title.mitofus.grade_adept.desc"
+  },
+  "goal": {
+    "type": "milestone",
+    "milestone": "mitofus:grade_2",
+    "count": 1
+  },
+  "bonus_stats": {
+    "stamina": 1
+  }
+}

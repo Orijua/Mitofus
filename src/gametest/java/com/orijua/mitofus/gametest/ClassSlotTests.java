@@ -205,7 +205,7 @@ public final class ClassSlotTests {
     }
 
     @GameTest(template = TestSupport.EMPTY)
-    public static void gradeUpFailsWithoutTheJobLevelAndWorksWithIt(GameTestHelper helper) {
+    public static void gradeUpNeedsTheClassLevelAndGoesOneGradeAtATime(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
         ClassService.chooseClass(player, 0, SWORD);
         helper.assertTrue(ClassService.advanceGrade(player, 0) == ClassSlotRules.Advance.LEVEL_TOO_LOW, "level 1 is not enough");
@@ -214,13 +214,10 @@ public final class ClassSlotTests {
         helper.assertTrue(ClassService.advanceGrade(player, 0) == ClassSlotRules.Advance.OK, "Adept");
         helper.assertTrue(ClassService.advanceGrade(player, 0) == ClassSlotRules.Advance.OK, "Expert, one grade at a time");
         helper.assertTrue(classes(player).slot(0).orElseThrow().grade() == ClassGrade.EXPERT, "Expert");
-        // The swordsman asks for a blacksmith level of 10 to reach Master.
-        helper.assertTrue(ClassService.advanceGrade(player, 0) == ClassSlotRules.Advance.JOB_TOO_LOW, "no job");
-        ClassService.chooseJob(player, BLACKSMITH);
-        helper.assertTrue(ClassService.advanceGrade(player, 0) == ClassSlotRules.Advance.JOB_TOO_LOW, "smithing level 0");
-        ProgressionService.set(player, ProgressionService.get(player).withSmithingXp(ProgressionRules.smithingXpFor(10)));
-        helper.assertTrue(ClassService.advanceGrade(player, 0) == ClassSlotRules.Advance.OK, "smithing level 10");
+        // The swordsman no longer asks for a job level: a job never blocks a grade.
+        helper.assertTrue(ClassService.advanceGrade(player, 0) == ClassSlotRules.Advance.OK, "Master with no job");
         helper.assertTrue(classes(player).slot(0).orElseThrow().grade() == ClassGrade.MASTER, "Master");
+        helper.assertTrue(ClassService.advanceGrade(player, 0) == ClassSlotRules.Advance.LEVEL_TOO_LOW, "Grand Master needs level 400");
         helper.succeed();
     }
 

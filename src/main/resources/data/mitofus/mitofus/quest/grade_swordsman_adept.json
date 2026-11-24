@@ -1,0 +1,28 @@
+{
+  "name": {
+    "translate": "quest.mitofus.grade_swordsman_adept"
+  },
+  "description": {
+    "translate": "quest.mitofus.grade_swordsman_adept.desc"
+  },
+  "giver": "mitofus:village_chief",
+  "required_class": "mitofus:swordsman",
+  "grade_quest": {
+    "from": "apprentice"
+  },
+  "goal": {
+    "type": "kill",
+    "count": 30
+  },
+  "xp_reward": 500,
+  "item_rewards": [
+    {
+      "id": "mitofus:gold_coin",
+      "count": 1
+    },
+    {
+      "id": "mitofus:enhancement_stone",
+      "count": 2
+    }
+  ]
+}

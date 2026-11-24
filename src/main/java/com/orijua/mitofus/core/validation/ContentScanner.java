@@ -108,6 +108,7 @@ public final class ContentScanner {
             String from = "quest " + entry.getKey();
             QuestDefinition quest = entry.getValue();
             quest.requiredClass().ifPresent(id -> references.add(new Reference(from, Kind.CLASS, id)));
+            quest.gradeQuest().flatMap(grade -> grade.job()).ifPresent(id -> references.add(new Reference(from, Kind.JOB, id)));
             quest.requiresQuest().ifPresent(id -> {
                 references.add(new Reference(from, Kind.QUEST, id));
                 questRequirements.put(entry.getKey(), id);

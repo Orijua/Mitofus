@@ -7,6 +7,12 @@ import com.orijua.mitofus.core.registry.ModDatapackRegistries;
 import com.orijua.mitofus.feature.notification.NotificationEvents;
 import com.orijua.mitofus.feature.notification.SystemNotification;
 import com.orijua.mitofus.feature.progression.ClassService;
+import com.orijua.mitofus.feature.progression.ClassSlot;
+import com.orijua.mitofus.feature.progression.ClassSlotRules;
+import com.orijua.mitofus.feature.progression.PlayerClasses;
+import com.orijua.mitofus.feature.quest.goal.GoalTracker;
+import com.orijua.mitofus.feature.talent.TalentRules;
+import com.orijua.mitofus.feature.talent.TalentService;
 import com.orijua.mitofus.feature.progression.PlayerStats;
 import com.orijua.mitofus.feature.progression.ProgressionService;
 import com.orijua.mitofus.feature.quest.goal.DeliverGoal;
@@ -77,7 +83,37 @@ public final class QuestService {
                 && !quests.isFailed(id)
                 && (quest.repeatable() || !quests.isCompleted(id))
                 && quest.allowsClass(Set.copyOf(player.getData(ModAttachments.PLAYER_CLASSES).classIds()))
-                && quest.isUnlockedBy(quests);
+                && quest.isUnlockedBy(quests)
+                && gradeCheck(player, quest).map(check -> check == GradeQuestRules.Check.OK).orElse(true);
+    }
+
+    /**
+     * For a class grade quest, whether the player can take it now and, if not, why; empty for any other quest. Reads the player's
+     * slot, talent tree and job, and the other grade quests of the same class and grade to know if their job has its own variant.
+     */
+    public static Optional<GradeQuestRules.Check> gradeCheck(Player player, QuestDefinition quest) {
+        if (quest.gradeQuest().isEmpty() || quest.requiredClass().isEmpty()) {
+            return Optional.empty();
+        }
+        GradeQuest grade = quest.gradeQuest().get();
+        ResourceLocation classId = quest.requiredClass().get();
+        PlayerClasses classes = player.getData(ModAttachments.PLAYER_CLASSES);
+        Optional<ClassSlot> slot = classes.slots().stream().filter(placed -> placed.classId().equals(classId)).findFirst();
+        boolean treeComplete = slot.isPresent() && TalentRules.treeComplete(TalentService.all(player.level()), slot.get());
+        boolean variant = classes.job().isPresent() && Definitions.all(player.level(), ModDatapackRegistries.QUEST).stream()
+                .map(entry -> entry.value())
+                .anyMatch(other -> other.gradeQuest().filter(g -> g.from() == grade.from() && g.job().equals(classes.job())).isPresent()
+                        && other.requiredClass().equals(quest.requiredClass()));
+        return Optional.of(GradeQuestRules.check(grade, slot, treeComplete, classes.job(), variant));
+    }
+
+    /** Whether the Quests tab lists the quest: any quest that is not a grade quest, or one that is the player's own variant (even if not open yet). */
+    public static boolean listedFor(Player player, ResourceLocation id, QuestDefinition quest) {
+        PlayerQuests quests = get(player);
+        if (quests.isActive(id) || quests.isCompleted(id)) {
+            return true;
+        }
+        return gradeCheck(player, quest).map(GradeQuestRules::isForPlayer).orElse(true);
     }
 
     /** The player opened the Quests tab: their discoveries stop being marked "New!". */
@@ -326,6 +362,16 @@ public final class QuestService {
         }
     }
 
+    /** A class grade quest was claimed: the class goes up a grade, and that counts as a story milestone (the grade titles use it). */
+    private static void raiseGrade(ServerPlayer player, ResourceLocation classId) {
+        ClassService.slotOf(player, classId).ifPresent(slot -> {
+            if (ClassService.advanceGrade(player, slot) == ClassSlotRules.Advance.OK) {
+                int number = ClassService.classes(player).slot(slot).map(placed -> placed.grade().number()).orElse(1);
+                GoalTracker.milestone(player, ResourceLocation.fromNamespaceAndPath("mitofus", "grade_" + number));
+            }
+        });
+    }
+
     /** {@code at}: the NPC whose quest window the player used, or null (see {@link #atGiver}). */
     public static Result claim(ServerPlayer player, ResourceLocation id, @Nullable Entity at) {
         Optional<QuestDefinition> found = Definitions.get(player.level(), ModDatapackRegistries.QUEST, id);
@@ -351,6 +397,7 @@ public final class QuestService {
         giveRewards(player, quest);
         quest.classReward().ifPresent(classId -> ClassService.grantClass(player, classId));
         quest.jobReward().ifPresent(jobId -> ClassService.grantJob(player, jobId));
+        quest.gradeQuest().ifPresent(grade -> quest.requiredClass().ifPresent(classId -> raiseGrade(player, classId)));
         player.displayClientMessage(Component.translatable("message.mitofus.quest_completed", quest.name()), false);
         player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8f, 1.5f);
         NeoForge.EVENT_BUS.post(new QuestCompletedEvent(player, id));

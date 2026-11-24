@@ -25,6 +25,7 @@ public final class GoalTracker {
         gameBus.addListener(GoalTracker::onKill);
         gameBus.addListener(GoalTracker::onForged);
         gameBus.addListener(GoalTracker::onLevelUp);
+        JobActivity.register(gameBus);
     }
 
     public static PlayerCounters counters(ServerPlayer player) {

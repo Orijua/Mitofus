@@ -1,0 +1,30 @@
+{
+  "name": {
+    "translate": "quest.mitofus.grade_swordsman_master_woodcutter"
+  },
+  "description": {
+    "translate": "quest.mitofus.grade_swordsman_master_woodcutter.desc"
+  },
+  "giver": "mitofus:village_chief",
+  "required_class": "mitofus:swordsman",
+  "grade_quest": {
+    "from": "expert",
+    "job": "mitofus:woodcutter"
+  },
+  "goal": {
+    "type": "milestone",
+    "milestone": "mitofus:logs_chopped",
+    "count": 150
+  },
+  "xp_reward": 4000,
+  "item_rewards": [
+    {
+      "id": "mitofus:gold_coin",
+      "count": 8
+    },
+    {
+      "id": "mitofus:blessed_enhancement_scroll",
+      "count": 1
+    }
+  ]
+}
