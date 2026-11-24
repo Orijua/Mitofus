@@ -2,7 +2,6 @@ package com.orijua.mitofus.feature.progression.client;
 
 import com.orijua.mitofus.core.client.MitofusButton;
 import com.orijua.mitofus.core.client.MitofusTab;
-import com.orijua.mitofus.core.client.PanelFit;
 import com.orijua.mitofus.core.client.UiStyle;
 import com.orijua.mitofus.core.config.Balance;
 import com.orijua.mitofus.core.config.VrHelmetBalance;
@@ -13,7 +12,6 @@ import com.orijua.mitofus.feature.vrhelmet.VrHelmetTier;
 import com.orijua.mitofus.feature.fatigue.FatigueRules;
 import com.orijua.mitofus.feature.fatigue.client.FatigueHudLayer;
 import com.orijua.mitofus.core.registry.ModAttachments;
-import com.orijua.mitofus.feature.view.Observation;
 import com.orijua.mitofus.feature.progression.AllocateStatPayload;
 import com.orijua.mitofus.core.config.WeightBalance;
 import com.orijua.mitofus.core.registry.ModItems;
@@ -56,17 +54,13 @@ import java.util.function.Consumer;
 
 /** Level, XP, resources and the five stats with "+" buttons. */
 public class StatusTab extends MitofusTab {
-    private static final int STATS_TOP = 66;
-    private static final int MAX_STAT_ROW = 18;
-    private static final int MIN_STAT_ROW = 12;
-    /** Space kept under the stats for the logout row. */
-    private static final int BOTTOM = 16;
+    private static final int STATS_TOP = StatusLayout.STATS_TOP;
     private static final int LOGOUT_WIDTH = 110;
     private static final int COIN_ICON = 9;
 
     private final List<Button> plusButtons = new ArrayList<>();
     /** Height of each stat row: 18 when the window has room, tighter when the screen is small. */
-    private int statRow = MAX_STAT_ROW;
+    private int statRow = StatusLayout.MAX_STAT_ROW;
 
     public StatusTab() {
         super(Component.translatable("tab.mitofus.status"));
@@ -79,7 +73,7 @@ public class StatusTab extends MitofusTab {
     @Override
     protected void addWidgets(Consumer<AbstractWidget> addWidget) {
         plusButtons.clear();
-        statRow = PanelFit.spread(height - STATS_TOP - BOTTOM, StatType.values().length, MIN_STAT_ROW, MAX_STAT_ROW);
+        statRow = StatusLayout.statRow(height, StatType.values().length);
         StatType[] types = StatType.values();
         for (int i = 0; i < types.length; i++) {
             StatType stat = types[i];
@@ -120,7 +114,6 @@ public class StatusTab extends MitofusTab {
     public void render(GuiGraphics graphics, int mouseX, int mouseY) {
         PlayerStats stats = stats();
         PlayerStats effective = ProgressionService.effectiveStats(player());
-        float mana = player().getData(ModAttachments.MANA);
         int half = left + width / 2;
 
         UiStyle.heading(graphics, font(), Component.translatable("screen.mitofus.level", stats.level()), left, top);
@@ -129,20 +122,12 @@ public class StatusTab extends MitofusTab {
         int xpTextX = left + width - font().width(xpText);
         UiStyle.bar(graphics, half, top + 2, xpTextX - 6 - half, 4, progress.xp() / (float) progress.needed(), UiStyle.XP);
         UiStyle.text(graphics, font(), xpText, xpTextX, top, UiStyle.TEXT);
+        boolean overXp = mouseX >= left && mouseX < left + width && mouseY >= top - 2 && mouseY < top + 10;
 
-        boolean overRate = renderXpRate(graphics, mouseX, mouseY, progress);
-
-        UiStyle.text(graphics, font(), Component.translatable("screen.mitofus.mana", (int) mana, (int) ProgressionService.maxMana(player())), left, top + 28, UiStyle.TEXT);
-        UiStyle.text(graphics, font(), Component.translatable("screen.mitofus.smithing", ProgressionService.effectiveSmithingLevel(player())), half, top + 28, UiStyle.MUTED);
-        UiStyle.text(graphics, font(), Component.translatable("screen.mitofus.free_points", stats.freePoints()), left, top + 42,
-                stats.freePoints() > 0 ? UiStyle.GOOD : UiStyle.MUTED);
-        int swordBonus = Observation.effectiveView(player()) - Observation.view(player());
-        Component view = Component.translatable("screen.mitofus.view", Observation.view(player()))
-                .append(swordBonus > 0 ? Component.literal(" +" + swordBonus).withColor(UiStyle.GOOD) : Component.empty());
-        UiStyle.text(graphics, font(), view, half, top + 42, UiStyle.MUTED);
-        boolean overView = mouseX >= half && mouseX < half + font().width(view) && mouseY >= top + 40 && mouseY < top + 52;
-
-        boolean overEnergy = renderEnergy(graphics, mouseX, mouseY, half);
+        renderMana(graphics, half);
+        boolean overEnergy = renderFatigue(graphics, mouseX, mouseY, half);
+        UiStyle.text(graphics, font(), Component.translatable("screen.mitofus.free_points", stats.freePoints()), left,
+                top + StatusLayout.POINTS_Y, stats.freePoints() > 0 ? UiStyle.GOOD : UiStyle.MUTED);
 
         StatType[] types = StatType.values();
         StatType hovered = null;
@@ -162,21 +147,12 @@ public class StatusTab extends MitofusTab {
         Component weightTip = renderMoneyAndWeight(graphics, mouseX, mouseY, effective);
         if (weightTip != null) {
             graphics.renderTooltip(font(), font().split(weightTip, 200), mouseX, mouseY);
-        } else if (overRate) {
-            PassiveXpBalance passive = PassiveXpBalance.current();
-            Component peaceful = passive.firstReducedLevel() >= passive.oneXpFromLevel()
-                    ? Component.translatable("screen.mitofus.xp_rate.tooltip.step", passive.oneXpFromLevel())
-                    : Component.translatable("screen.mitofus.xp_rate.tooltip.passive", passive.firstReducedLevel(), passive.oneXpFromLevel());
-            Component tooltip = Component.translatable("screen.mitofus.xp_rate.tooltip", XpRateRules.WINDOW_MINUTES)
-                    .append("\n").append(peaceful);
-            graphics.renderTooltip(font(), font().split(tooltip, 220), mouseX, mouseY);
+        } else if (overXp) {
+            graphics.renderTooltip(font(), font().split(xpTooltip(progress), 220), mouseX, mouseY);
         } else if (overEnergy) {
             graphics.renderTooltip(font(), font().split(energyTooltip(), 220), mouseX, mouseY);
         } else if (hovered != null) {
             graphics.renderTooltip(font(), tooltip(hovered), mouseX, mouseY);
-        } else if (overView) {
-            graphics.renderTooltip(font(), font().split(Component.translatable("screen.mitofus.view.tooltip",
-                    String.format("%.1f", Observation.observeTicks(player()) / 20.0)), 200), mouseX, mouseY);
         }
     }
 
@@ -256,8 +232,8 @@ public class StatusTab extends MitofusTab {
         return tooltip;
     }
 
-    /** The XP still missing with the time it would take, and the XP per hour on the right. Returns whether the mouse is over the row. */
-    private boolean renderXpRate(GuiGraphics graphics, int mouseX, int mouseY, ProgressionRules.XpProgress progress) {
+    /** The XP still missing with the time it would take, the XP per hour and how peaceful play is rewarded. */
+    private Component xpTooltip(ProgressionRules.XpProgress progress) {
         XpRate rate = XpRateService.get(player());
         OptionalLong perHour = XpRateRules.xpPerHour(rate);
         OptionalLong eta = XpRateText.etaMinutes(rate, progress.remaining());
@@ -267,28 +243,37 @@ public class StatusTab extends MitofusTab {
         Component rateText = perHour.isPresent()
                 ? Component.translatable("screen.mitofus.xp_rate", perHour.getAsLong())
                 : Component.translatable("screen.mitofus.xp_rate.measuring");
-        int y = top + 14;
-        UiStyle.text(graphics, font(), remaining, left, y, UiStyle.TEXT);
-        UiStyle.text(graphics, font(), rateText, left + width - font().width(rateText), y, perHour.isPresent() ? UiStyle.TEXT : UiStyle.MUTED);
-        return mouseX >= left && mouseX < left + width && mouseY >= y - 2 && mouseY < y + 10;
+        PassiveXpBalance passive = PassiveXpBalance.current();
+        Component peaceful = passive.firstReducedLevel() >= passive.oneXpFromLevel()
+                ? Component.translatable("screen.mitofus.xp_rate.tooltip.step", passive.oneXpFromLevel())
+                : Component.translatable("screen.mitofus.xp_rate.tooltip.passive", passive.firstReducedLevel(), passive.oneXpFromLevel());
+        return remaining.copy().append("\n").append(rateText).append("\n")
+                .append(Component.translatable("screen.mitofus.xp_rate.tooltip", XpRateRules.WINDOW_MINUTES)).append("\n").append(peaceful);
     }
 
-    /** The energy line: percentage, minutes left at normal play and a small bar. Returns whether the mouse is over it. */
-    private boolean renderEnergy(GuiGraphics graphics, int mouseX, int mouseY, int half) {
+    /** The mana: its numbers above a thin bar, in the left half. */
+    private void renderMana(GuiGraphics graphics, int half) {
+        float mana = player().getData(ModAttachments.MANA);
+        float max = ProgressionService.maxMana(player());
+        UiStyle.text(graphics, font(), Component.translatable("screen.mitofus.mana", (int) mana, (int) max), left,
+                top + StatusLayout.RESOURCE_TEXT_Y, UiStyle.TEXT);
+        UiStyle.bar(graphics, left, top + StatusLayout.RESOURCE_BAR_Y, half - left - 8, StatusLayout.RESOURCE_BAR_HEIGHT,
+                max <= 0 ? 0f : mana / max, UiStyle.MANA);
+    }
+
+    /** Fatigue (energy): its percentage above a thin bar in the right half; the details are in the hover. Returns whether the mouse is over it. */
+    private boolean renderFatigue(GuiGraphics graphics, int mouseX, int mouseY, int half) {
         FatigueBalance balance = FatigueBalance.current();
         if (!balance.enabled()) {
             return false;
         }
         float energy = player().getData(ModAttachments.FATIGUE);
-        int percent = FatigueRules.percent(energy);
-        var minutes = FatigueRules.minutesLeft(balance, energy, FatigueRules.Activity.NORMAL, modifiers(balance));
-        Component text = minutes.isPresent()
-                ? Component.translatable("screen.mitofus.fatigue", percent, VrHelmetText.minutes(minutes.getAsDouble()))
-                : Component.translatable("screen.mitofus.fatigue.plain", percent);
-        int y = top + 54;
-        UiStyle.text(graphics, font(), text, left, y, UiStyle.TEXT);
-        UiStyle.bar(graphics, half, y + 2, Math.min(70, width / 2 - 8), 4, energy, FatigueHudLayer.colorFor(energy, balance));
-        return mouseX >= left && mouseX < half + 70 && mouseY >= y - 2 && mouseY < y + 10;
+        UiStyle.text(graphics, font(), Component.translatable("screen.mitofus.fatigue.plain", FatigueRules.percent(energy)), half,
+                top + StatusLayout.RESOURCE_TEXT_Y, UiStyle.TEXT);
+        UiStyle.bar(graphics, half, top + StatusLayout.RESOURCE_BAR_Y, left + width - half, StatusLayout.RESOURCE_BAR_HEIGHT,
+                energy, FatigueHudLayer.colorFor(energy, balance));
+        return mouseX >= half && mouseX < left + width && mouseY >= top + StatusLayout.RESOURCE_TEXT_Y - 2
+                && mouseY < top + StatusLayout.RESOURCE_BAR_Y + StatusLayout.RESOURCE_BAR_HEIGHT + 2;
     }
 
     /** How long the energy lasts at each activity, and how it comes back. */

@@ -24,6 +24,7 @@ import com.orijua.mitofus.feature.progression.ProgressionService;
 import com.orijua.mitofus.feature.progression.StatType;
 import com.orijua.mitofus.feature.progression.TitleDefinition;
 import net.minecraft.client.Minecraft;
+import com.orijua.mitofus.feature.view.Observation;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -256,6 +257,15 @@ public class ProfileTab extends MitofusTab {
     public void render(GuiGraphics graphics, int mouseX, int mouseY) {
         Layout layout = layout();
         UiStyle.heading(graphics, font(), Component.translatable("screen.mitofus.class"), left, top);
+        int swordBonus = Observation.effectiveView(player()) - Observation.view(player());
+        Component view = Component.translatable("screen.mitofus.view", Observation.view(player()))
+                .append(swordBonus > 0 ? Component.literal(" +" + swordBonus).withColor(UiStyle.GOOD) : Component.empty());
+        int viewX = left + width - font().width(view);
+        UiStyle.text(graphics, font(), view, viewX, top, UiStyle.MUTED);
+        if (mouseX >= viewX && mouseX < left + width && mouseY >= top - 2 && mouseY < top + 10) {
+            graphics.renderTooltip(font(), font().split(Component.translatable("screen.mitofus.view.tooltip",
+                    String.format("%.1f", Observation.observeTicks(player()) / 20.0)), 200), mouseX, mouseY);
+        }
         int classY = top + layout.classLines();
         for (ClassSlot placed : classes().slots()) {
             Component name = FusionText.slotName(player().level(), placed);
