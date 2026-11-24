@@ -50,12 +50,6 @@ import java.util.function.Consumer;
 final class TestSupport {
     /** data/mitofus/structure/empty.nbt: a 3x3x3 air box. */
     static final String EMPTY = "empty";
-    /**
-     * How far, in chunks, the searches for Covadonga and Eibar look on the vanilla overworld, whose terrain doesn't follow
-     * map (seas and rivers anywhere): the radius they had before the Mitofus terrain followed the map.
-     */
-    static final int VANILLA_TERRAIN_SEARCH_RADIUS = 32;
-
     private TestSupport() {
     }
 
