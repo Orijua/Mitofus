@@ -3,6 +3,7 @@ package com.orijua.mitofus.feature.npc.client;
 import com.orijua.mitofus.core.config.ApprenticeBalance;
 import com.orijua.mitofus.core.client.MitofusButton;
 import com.orijua.mitofus.core.client.MitofusStyledScreen;
+import com.orijua.mitofus.core.client.PanelFit;
 import com.orijua.mitofus.core.client.MitofusCard;
 import com.orijua.mitofus.core.client.MitofusConfirmScreen;
 import com.orijua.mitofus.core.client.UiStyle;
@@ -96,6 +97,10 @@ public final class ApprenticeScreen extends Screen implements MitofusStyledScree
     private Button hammer;
     private int left;
     private int top;
+    /** Top of the visible window, and of the content (which is higher by {@code scrollY} when scrolled). */
+    private int panelTop;
+    private int contentHeight;
+    private int scrollY;
     private int panelHeight;
 
     private ApprenticeScreen(ApprenticeSmith apprentice) {
@@ -161,9 +166,14 @@ public final class ApprenticeScreen extends Screen implements MitofusStyledScree
     protected void init() {
         hint = font.split(Component.translatable("screen.mitofus.apprentice.hint", Money.format(ApprenticeBalance.current().dailyWage())), WIDTH - 2 * PADDING);
         top = 0;
-        panelHeight = buttonsY() + 18 + 8 + COIN_LINE + hint.size() * 10 + PADDING;
+        contentHeight = buttonsY() + 18 + 8 + COIN_LINE + hint.size() * 10 + PADDING;
+        // On a small screen the window is as tall as the screen allows and its content scrolls.
+        panelHeight = PanelFit.fit(WIDTH, contentHeight, width, height).height();
+        panelHeight = Math.min(panelHeight, contentHeight);
+        scrollY = Math.clamp(scrollY, 0, contentHeight - panelHeight);
         left = (width - WIDTH) / 2;
-        top = (height - panelHeight) / 2;
+        panelTop = (height - panelHeight) / 2;
+        top = panelTop - scrollY;
         cancel = rowButton(Row.ORDER, "screen.mitofus.apprentice.cancel", ApprenticeActionPayload.Action.CANCEL_ORDER);
         pay = addRenderableWidget(Button.builder(Component.translatable("screen.mitofus.apprentice.pay"), b -> send(
                         hasControlDown() ? ApprenticeActionPayload.Action.PAY_10_DAYS
@@ -232,7 +242,9 @@ public final class ApprenticeScreen extends Screen implements MitofusStyledScree
     @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(graphics, mouseX, mouseY, partialTick);
-        UiStyle.panel(graphics, left, top, WIDTH, panelHeight);
+        UiStyle.panel(graphics, left, panelTop, WIDTH, panelHeight);
+        // Everything after the panel is clipped to it; render() ends the clip once the widgets and the text are drawn.
+        graphics.enableScissor(left, panelTop, left + WIDTH, panelTop + panelHeight);
         int centerX = left + WIDTH / 2;
         // "Craftsman" goes once, in gold, as the small label; the title is his plain name (his display name carries the
         // Craftsman suffix too).
@@ -312,14 +324,47 @@ public final class ApprenticeScreen extends Screen implements MitofusStyledScree
         UiStyle.text(graphics, font, purseLabel, left + PADDING, coinsY, UiStyle.MUTED);
         int coinsX = left + PADDING + font.width(purseLabel) + 6;
         int coinsWidth = CoinBalanceView.render(graphics, font, Wallet.totalCopper(minecraft.player), coinsX, coinsY, UiStyle.GOLD);
-        if (mouseX >= coinsX && mouseX < coinsX + coinsWidth && mouseY >= coinsY - 5 && mouseY < coinsY + 12) {
-            graphics.renderComponentTooltip(font, CoinBalanceView.tooltip(), mouseX, mouseY);
-        }
+        boolean coinsTooltip = mouseX >= coinsX && mouseX < coinsX + coinsWidth && mouseY >= coinsY - 5 && mouseY < coinsY + 12
+                && mouseY >= panelTop && mouseY < panelTop + panelHeight;
         int hintY = buttonsY() + 18 + 8 + COIN_LINE;
         for (FormattedCharSequence line : hint) {
             graphics.drawString(font, line, left + PADDING, hintY, UiStyle.MUTED);
             hintY += 10;
         }
+        graphics.disableScissor();
+        if (contentHeight > panelHeight) {
+            int trackTop = panelTop + 4;
+            int trackHeight = panelHeight - 8;
+            int thumb = Math.max(8, trackHeight * panelHeight / contentHeight);
+            int thumbY = trackTop + (trackHeight - thumb) * scrollY / (contentHeight - panelHeight);
+            graphics.fill(left + WIDTH - 5, trackTop, left + WIDTH - 2, trackTop + trackHeight, 0x60FFFFFF);
+            graphics.fill(left + WIDTH - 5, thumbY, left + WIDTH - 2, thumbY + thumb, 0xFFA0A0D0);
+        }
+        if (coinsTooltip) {
+            graphics.renderComponentTooltip(font, CoinBalanceView.tooltip(), mouseX, mouseY);
+        }
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (contentHeight > panelHeight) {
+            int before = this.scrollY;
+            this.scrollY = Math.clamp(before - (int) Math.signum(scrollY) * 12, 0, contentHeight - panelHeight);
+            if (this.scrollY != before) {
+                rebuildWidgets();
+            }
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+    }
+
+    /** Buttons scrolled out of the window are still there, so clicks outside the window are ignored. */
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (mouseY < panelTop || mouseY >= panelTop + panelHeight) {
+            return false;
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     /** Room for the value of a row that has a button. */
