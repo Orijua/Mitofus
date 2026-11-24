@@ -3,6 +3,8 @@ package com.orijua.mitofus.feature.fusion.client;
 import com.orijua.mitofus.core.client.MitofusButton;
 import com.orijua.mitofus.core.client.MitofusConfirmScreen;
 import com.orijua.mitofus.core.client.MitofusStyledScreen;
+import com.orijua.mitofus.core.client.PanelFit;
+import com.orijua.mitofus.core.client.ScrollList;
 import com.orijua.mitofus.core.client.UiStyle;
 import com.orijua.mitofus.core.registry.Definitions;
 import com.orijua.mitofus.core.registry.ModDatapackRegistries;
@@ -38,6 +40,9 @@ public class FusionScreen extends Screen implements MitofusStyledScreen {
     private int left;
     private int top;
     private int panelHeight;
+    private final ScrollList scroll = new ScrollList(1);
+    /** Everything in the window that is not a fusion row: padding, title, filters, the back button. */
+    private static final int CHROME = PADDING + UiStyle.LINE + 6 + 22 + 22 + PADDING;
     private final java.util.List<Button> buttons = new java.util.ArrayList<>();
 
     public FusionScreen(Screen parent) {
@@ -56,8 +61,11 @@ public class FusionScreen extends Screen implements MitofusStyledScreen {
         fusions = Definitions.all(level, ModDatapackRegistries.FUSION).stream()
                 .filter(entry -> selected == null || entry.value().parents().contains(selected)).toList();
         buttons.clear();
-        panelHeight = PADDING + UiStyle.LINE + 6 + 22 + Math.max(1, fusions.size()) * ROW + 22 + PADDING;
-        panelHeight = Math.min(panelHeight, height - 10);
+        int fitting = PanelFit.rows(height - 2 * PanelFit.MARGIN - CHROME, ROW);
+        int shown = Math.max(1, Math.min(fusions.size(), fitting));
+        scroll.setVisibleRows(shown);
+        scroll.clamp(fusions.size());
+        panelHeight = CHROME + shown * ROW;
         left = (width - WIDTH) / 2;
         top = (height - panelHeight) / 2;
         int filterY = top + PADDING + UiStyle.LINE + 4;
@@ -76,7 +84,8 @@ public class FusionScreen extends Screen implements MitofusStyledScreen {
             }
         }
         int y = filterY + 22;
-        for (Definitions.Entry<FusionDefinition> entry : fusions) {
+        for (int i = scroll.first(); i < scroll.end(fusions.size()); i++) {
+            Definitions.Entry<FusionDefinition> entry = fusions.get(i);
             FusionDefinition fusion = entry.value();
             Component name = Component.translatable("screen.mitofus.hybrid_name", FusionText.className(level, fusion.resultClass()),
                     FusionText.className(level, fusion.parents().get(0)), FusionText.className(level, fusion.parents().get(1)));
@@ -116,7 +125,8 @@ public class FusionScreen extends Screen implements MitofusStyledScreen {
             return;
         }
         int y = top + PADDING + UiStyle.LINE + 4 + 22 + 20;
-        for (Definitions.Entry<FusionDefinition> entry : fusions) {
+        for (int i = scroll.first(); i < scroll.end(fusions.size()); i++) {
+            Definitions.Entry<FusionDefinition> entry = fusions.get(i);
             Set<FusionRules.Missing> missing = FusionService.missing(minecraft.player, entry.value());
             Component status = missing.isEmpty()
                     ? Component.translatable("screen.mitofus.fusion_ready").append(" · ").append(Component.translatable("screen.mitofus.fusion_cost", MoneyText.iron(FusionService.costInIron(entry.value()))))
@@ -124,12 +134,22 @@ public class FusionScreen extends Screen implements MitofusStyledScreen {
             graphics.drawString(font, font.plainSubstrByWidth(status.getString(), WIDTH - 2 * PADDING), left + PADDING, y, missing.isEmpty() ? UiStyle.GOOD : UiStyle.MUTED);
             y += ROW;
         }
+        scroll.renderBar(graphics, left + WIDTH - PADDING + 3, top + PADDING + UiStyle.LINE + 4 + 22, scroll.visibleRows() * ROW - 2, fusions.size());
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (scroll.scroll(scrollY, fusions.size())) {
+            rebuildWidgets();
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override
     public void tick() {
         for (int i = 0; i < buttons.size(); i++) {
-            buttons.get(i).active = FusionService.missing(minecraft.player, fusions.get(i).value()).isEmpty();
+            buttons.get(i).active = FusionService.missing(minecraft.player, fusions.get(scroll.first() + i).value()).isEmpty();
         }
     }
 

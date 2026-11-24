@@ -50,6 +50,14 @@ class PanelFitTest {
     }
 
     @Test
+    void spreadStaysBetweenItsLimits() {
+        assertEquals(18, PanelFit.spread(90, 5, 12, 18));
+        assertEquals(18, PanelFit.spread(500, 5, 12, 18));
+        assertEquals(12, PanelFit.spread(20, 5, 12, 18));
+        assertEquals(14, PanelFit.spread(70, 5, 12, 18));
+    }
+
+    @Test
     void shopAndTerminalSizesFitEveryCommonResolutionAndScale() {
         int[][] resolutions = {{854, 480}, {1280, 720}, {1920, 1080}};
         for (int[] resolution : resolutions) {
