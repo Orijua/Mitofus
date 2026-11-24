@@ -12,7 +12,8 @@ import java.util.function.Supplier;
 public class MitofusScreen extends Screen implements MitofusStyledScreen {
     /** Width of the window unless the open tab asks for more ({@link MitofusTab#panelWidth}). */
     public static final int PANEL_WIDTH = 320;
-    private static final int PANEL_HEIGHT = 210;
+    /** Height of the window unless the screen is smaller ({@link PanelFit}). */
+    private static final int WANTED_HEIGHT = 210;
     private static final int TAB_BAR_HEIGHT = 26;
     private static int lastTab;
 
@@ -20,6 +21,7 @@ public class MitofusScreen extends Screen implements MitofusStyledScreen {
     private int left;
     private int top;
     private int panelWidth;
+    private int panelHeight;
 
     public MitofusScreen(List<Supplier<MitofusTab>> tabFactories) {
         super(Component.translatable("screen.mitofus.status"));
@@ -43,9 +45,11 @@ public class MitofusScreen extends Screen implements MitofusStyledScreen {
 
     @Override
     protected void init() {
-        panelWidth = current().panelWidth();
+        PanelFit.Size size = PanelFit.fit(current().panelWidth(), WANTED_HEIGHT, width, height);
+        panelWidth = size.width();
+        panelHeight = size.height();
         left = (width - panelWidth) / 2;
-        top = (height - PANEL_HEIGHT) / 2;
+        top = (height - panelHeight) / 2;
 
         int tabWidth = (panelWidth - 8) / tabs.size();
         for (int i = 0; i < tabs.size(); i++) {
@@ -56,7 +60,7 @@ public class MitofusScreen extends Screen implements MitofusStyledScreen {
             button.active = i != lastTab;
             addRenderableWidget(button);
         }
-        current().init(left + 8, top + TAB_BAR_HEIGHT + 4, panelWidth - 16, PANEL_HEIGHT - TAB_BAR_HEIGHT - 12,
+        current().init(left + 8, top + TAB_BAR_HEIGHT + 4, panelWidth - 16, panelHeight - TAB_BAR_HEIGHT - 12,
                 this::addRenderableWidget);
     }
 
@@ -114,7 +118,7 @@ public class MitofusScreen extends Screen implements MitofusStyledScreen {
     @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(graphics, mouseX, mouseY, partialTick);
-        UiStyle.panel(graphics, left, top, panelWidth, PANEL_HEIGHT);
+        UiStyle.panel(graphics, left, top, panelWidth, panelHeight);
     }
 
     @Override

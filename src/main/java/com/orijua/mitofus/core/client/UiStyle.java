@@ -238,7 +238,7 @@ public final class UiStyle {
         if (font.width(text) <= maxWidth) {
             return text;
         }
-        return Component.literal(font.substrByWidth(text, maxWidth - font.width("…")).getString() + "…");
+        return Component.literal(TextFit.fit(text.getString(), maxWidth, font::width));
     }
 
     /**
