@@ -3,6 +3,7 @@ package com.orijua.mitofus.feature.skill.client;
 import com.orijua.mitofus.MitofusClient;
 import com.orijua.mitofus.core.client.MitofusButton;
 import com.orijua.mitofus.core.client.MitofusCard;
+import com.orijua.mitofus.core.client.MitofusEmptyState;
 import com.orijua.mitofus.core.client.MitofusTab;
 import com.orijua.mitofus.core.client.PanelFit;
 import com.orijua.mitofus.core.client.ScrollList;
@@ -170,7 +171,8 @@ public class SkillsTab extends MitofusTab {
     public void render(GuiGraphics graphics, int mouseX, int mouseY) {
         UiStyle.heading(graphics, font(), Component.translatable("screen.mitofus.skills_header"), left, top);
         if (rows.isEmpty()) {
-            UiStyle.text(graphics, font(), Component.translatable("screen.mitofus.no_skills"), left, top + LIST_TOP, UiStyle.MUTED);
+            MitofusEmptyState.draw(graphics, font(), left, top + LIST_TOP, width, height - LIST_TOP,
+                    Component.translatable("screen.mitofus.no_skills"), MitofusEmptyState.Kind.EMPTY);
             return;
         }
         Row hovered = null;
