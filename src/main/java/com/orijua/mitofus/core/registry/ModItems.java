@@ -149,11 +149,6 @@ public final class ModItems {
     public static final DeferredItem<Item> COPPER_COIN = ITEMS.registerSimpleItem("copper_coin",
             new Item.Properties());
 
-    static {
-        // Worlds saved before 0.2 store the money under this id: the registry maps it to the gold coin when loading.
-        ITEMS.addAlias(Mitofus.id("mitofus_emerald"), Mitofus.id("gold_coin"));
-    }
-
     public static final DeferredItem<SkillBookItem> SKILL_BOOK = ITEMS.registerItem("skill_book",
             SkillBookItem::new, new Item.Properties().stacksTo(1));
 

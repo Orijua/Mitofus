@@ -95,38 +95,6 @@ public final class EconomyTests {
         return answers;
     }
 
-    private static boolean sameOffer(MerchantOffer a, MerchantOffer b) {
-        return ItemStack.isSameItemSameComponents(a.getResult(), b.getResult()) && a.getResult().getCount() == b.getResult().getCount()
-                && ItemStack.isSameItemSameComponents(a.getBaseCostA(), b.getBaseCostA()) && a.getBaseCostA().getCount() == b.getBaseCostA().getCount()
-                && ItemStack.isSameItemSameComponents(a.getCostB(), b.getCostB()) && a.getCostB().getCount() == b.getCostB().getCount();
-    }
-
-    /** The shop after a restock is exactly the catalog of a new Smith: every offer once, none missing, none extra. */
-    private static void assertFullCatalog(GameTestHelper helper, BlacksmithNpc restocked) {
-        BlacksmithNpc fresh = helper.spawn(ModEntities.BLACKSMITH.get(), 3, 1, 1);
-        MerchantOffers expected = fresh.getOffers();
-        MerchantOffers actual = restocked.getOffers();
-        helper.assertTrue(actual.size() == expected.size(), "the catalog has " + expected.size() + " offers, not " + actual.size());
-        for (MerchantOffer offer : expected) {
-            long matches = actual.stream().filter(other -> sameOffer(offer, other)).count();
-            helper.assertTrue(matches == 1, "offer for " + offer.getResult() + " appears " + matches + " times");
-        }
-        helper.assertTrue(count(actual, ModItems.ENHANCEMENT_STONE.get()) == 1, "one enhancement stone");
-        helper.assertTrue(count(actual, ModItems.RESPEC_SCROLL.get()) == 1, "one respec scroll");
-        helper.assertTrue(actual.stream().filter(offer -> offer.getBaseCostA().is(ModItems.MITHRIL_INGOT.get())).count() == 1, "one mithril offer");
-        helper.assertTrue(count(actual, ModItems.GOLD_COIN.get()) == 1, "one offer gives gold");
-        helper.assertTrue(count(actual, ModItems.APPRAISER_EYE.get()) == 1, "one Eye");
-        helper.assertTrue(count(actual, ModItems.APPRENTICE_CONTRACT.get()) == 1, "one contract");
-        helper.assertTrue(count(actual, ModItems.SKILL_BOOK.get()) == count(expected, ModItems.SKILL_BOOK.get()), "all the books");
-        MerchantOffer mithril = actual.stream().filter(offer -> offer.getBaseCostA().is(ModItems.MITHRIL_INGOT.get())).findFirst().orElseThrow();
-        helper.assertTrue(mithril.getBaseCostA().getCount() == 4 && mithril.getResult().is(ModItems.GOLD_COIN.get())
-                && mithril.getResult().getCount() == 1, "the mithril gives one gold");
-        MerchantOffer contract = offerFor(restocked, ModItems.APPRENTICE_CONTRACT.get());
-        helper.assertTrue(contract.getBaseCostA().is(ModItems.GOLD_COIN.get())
-                && contract.getBaseCostA().getCount() == ApprenticeBalance.DEFAULT.contractPrice(), "the contract costs its price in gold");
-        fresh.discard();
-    }
-
     @GameTest(template = TestSupport.EMPTY)
     public static void thePurseSurvivesRespawn(GameTestHelper helper) {
         ServerPlayer old = TestSupport.fakePlayer(helper);
@@ -219,28 +187,6 @@ public final class EconomyTests {
     }
 
     @GameTest(template = TestSupport.EMPTY)
-    public static void anOldSmithIsRestockedInTheNewCurrency(GameTestHelper helper) {
-        ServerPlayer player = TestSupport.fakePlayer(helper);
-        BlacksmithNpc smith = helper.spawn(ModEntities.BLACKSMITH.get(), 1, 1, 1);
-        smith.getOffers().clear();
-        smith.getOffers().add(new MerchantOffer(new ItemCost(Items.EMERALD, 6), new ItemStack(ModItems.ENHANCEMENT_STONE.get()), 16, 0, 0.05f));
-        smith.getOffers().add(new MerchantOffer(new ItemCost(ModItems.MITHRIL_INGOT.get(), 4), new ItemStack(Items.EMERALD, 3), 16, 0, 0.05f));
-
-        smith.startTrading(player);
-        MerchantOffers offers = smith.getOffers();
-        helper.assertTrue(offers.stream().noneMatch(offer -> offer.getBaseCostA().is(Items.EMERALD) || offer.getCostB().is(Items.EMERALD)
-                || offer.getResult().is(Items.EMERALD)), "no vanilla emerald is left in the shop");
-        helper.assertTrue(count(offers, ModItems.APPRAISER_EYE.get()) == 1, "the Eye appears once");
-        helper.assertTrue(count(offers, ModItems.APPRENTICE_CONTRACT.get()) == 1, "and the contract too");
-        int size = offers.size();
-        smith.setTradingPlayer(null);
-        smith.startTrading(player);
-        helper.assertTrue(smith.getOffers().size() == size, "a second opening changes nothing");
-        helper.assertTrue(count(smith.getOffers(), ModItems.APPRAISER_EYE.get()) == 1, "still one Eye");
-        helper.succeed();
-    }
-
-    @GameTest(template = TestSupport.EMPTY)
     public static void theGoldCoinIsNotAVanillaEmerald(GameTestHelper helper) {
         ItemStack stack = new ItemStack(ModItems.GOLD_COIN.get());
         helper.assertFalse(stack.is(Items.EMERALD), "it is not the vanilla emerald");
@@ -283,47 +229,4 @@ public final class EconomyTests {
         helper.succeed();
     }
 
-    @GameTest(template = TestSupport.EMPTY)
-    public static void anOldOfferWithTheVanillaEmeraldAsCostBIsRestocked(GameTestHelper helper) {
-        ServerPlayer player = TestSupport.fakePlayer(helper);
-        BlacksmithNpc smith = helper.spawn(ModEntities.BLACKSMITH.get(), 1, 1, 1);
-        smith.getOffers().add(new MerchantOffer(new ItemCost(ModItems.GOLD_COIN.get(), 6), Optional.of(new ItemCost(Items.EMERALD, 2)),
-                new ItemStack(ModItems.RESPEC_SCROLL.get()), 4, 0, 0.05f));
-        smith.startTrading(player);
-        helper.assertTrue(smith.getOffers().stream().noneMatch(offer -> offer.getBaseCostA().is(Items.EMERALD) || offer.getCostB().is(Items.EMERALD)
-                || offer.getResult().is(Items.EMERALD)), "no vanilla emerald is left");
-        assertFullCatalog(helper, smith);
-        helper.succeed();
-    }
-
-    @GameTest(template = TestSupport.EMPTY)
-    public static void theVanillaAppraiserEyeBecomesTheMitofusOne(GameTestHelper helper) {
-        ServerPlayer player = TestSupport.fakePlayer(helper);
-        BlacksmithNpc smith = helper.spawn(ModEntities.BLACKSMITH.get(), 1, 1, 1);
-        smith.getOffers().clear();
-        smith.getOffers().add(new MerchantOffer(new ItemCost(Items.EMERALD, 32), Optional.of(new ItemCost(Items.DIAMOND, 2)),
-                new ItemStack(ModItems.APPRAISER_EYE.get()), 2, 0, 0.05f));
-        smith.startTrading(player);
-        MerchantOffer eye = offerFor(smith, ModItems.APPRAISER_EYE.get());
-        helper.assertTrue(eye.getBaseCostA().is(ModItems.GOLD_COIN.get()) && eye.getBaseCostA().getCount() == 10, "10 gold");
-        helper.assertTrue(eye.getCostB().is(Items.DIAMOND) && eye.getCostB().getCount() == 2, "and the two diamonds stay");
-        assertFullCatalog(helper, smith);
-        helper.succeed();
-    }
-
-    @GameTest(template = TestSupport.EMPTY)
-    public static void aSpentOldOfferComesBackWithoutUses(GameTestHelper helper) {
-        ServerPlayer player = TestSupport.fakePlayer(helper);
-        BlacksmithNpc smith = helper.spawn(ModEntities.BLACKSMITH.get(), 1, 1, 1);
-        smith.getOffers().clear();
-        MerchantOffer spent = new MerchantOffer(new ItemCost(Items.EMERALD, 6), new ItemStack(ModItems.ENHANCEMENT_STONE.get()), 16, 0, 0.05f);
-        spent.setToOutOfStock();
-        helper.assertTrue(spent.isOutOfStock() && spent.getUses() == spent.getMaxUses(), "the old offer is spent");
-        smith.getOffers().add(spent);
-        smith.startTrading(player);
-        helper.assertTrue(smith.getOffers().stream().allMatch(offer -> offer.getUses() == 0 && !offer.isOutOfStock()), "every offer is fresh");
-        helper.assertTrue(offerFor(smith, ModItems.ENHANCEMENT_STONE.get()).getBaseCostA().is(ModItems.GOLD_COIN.get()), "and the stone costs gold");
-        assertFullCatalog(helper, smith);
-        helper.succeed();
-    }
 }

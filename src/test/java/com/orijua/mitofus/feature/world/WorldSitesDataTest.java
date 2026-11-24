@@ -56,12 +56,4 @@ class WorldSitesDataTest {
         assertTrue(loaded.sites().isEmpty());
     }
 
-    @Test
-    void oldSaveWithSitesCountsAsChosen() {
-        WorldSitesData data = new WorldSitesData();
-        data.setSite(WorldSites.COVADONGA, new ChunkPos(4, 4));
-        CompoundTag old = data.save(new CompoundTag(), null);
-        old.remove("chosen");
-        assertTrue(WorldSitesData.load(old, null).chosen());
-    }
 }

@@ -57,7 +57,7 @@ public final class EquipLevelTests {
     }
 
     @GameTest(template = TestSupport.EMPTY)
-    public static void anOldRatedPieceNeedsItsDerivedLevelToBeUsed(GameTestHelper helper) {
+    public static void aPieceWithNoStoredRequirementsNeedsItsDerivedLevel(GameTestHelper helper) {
         defaults(() -> {
             ServerPlayer player = TestSupport.fakePlayer(helper);
             ItemStack sword = rated(Items.IRON_SWORD, ItemRating.UNIQUE); // iron 5 + unique 10 = 15, no REQUIREMENTS stored
@@ -124,7 +124,7 @@ public final class EquipLevelTests {
     }
 
     @GameTest(template = TestSupport.EMPTY)
-    public static void theTooltipOfAnOldPieceShowsTheDerivedLevel(GameTestHelper helper) {
+    public static void theTooltipOfAPieceWithNoStoredRequirementsShowsTheDerivedLevel(GameTestHelper helper) {
         defaults(() -> {
             ServerPlayer player = TestSupport.fakePlayer(helper);
             ItemStack sword = rated(Items.IRON_SWORD, ItemRating.UNIQUE);
@@ -138,7 +138,7 @@ public final class EquipLevelTests {
     }
 
     @GameTest(template = TestSupport.EMPTY)
-    public static void sellingAnOldPiecePaysTheNewReference(GameTestHelper helper) {
+    public static void sellingAPieceWithNoStoredRequirementsPaysTheReference(GameTestHelper helper) {
         defaults(() -> {
             ServerPlayer player = TestSupport.fakePlayer(helper);
             // Iron unique (level 15), no options: 30 x 1 x 1,28 = 38,4 -> 38; sold at 40 % = 15.

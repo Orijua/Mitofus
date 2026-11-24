@@ -82,14 +82,6 @@ class ApprenticeRulesTest {
     }
 
     @Test
-    void theWageAndTheContractAreAThirdOfTheOldPricesInEmeralds() {
-        assertEquals(Money.goldFromEmeralds(3), ApprenticeBalance.DEFAULT.dailyWage());
-        assertEquals(Money.goldFromEmeralds(64), ApprenticeBalance.DEFAULT.contractPrice());
-        assertEquals(1, ApprenticeBalance.DEFAULT.dailyWage());
-        assertEquals(21, ApprenticeBalance.DEFAULT.contractPrice());
-    }
-
-    @Test
     void theWageIsPaidInWholeDaysUpToTwoWeeksAhead() {
         assertEquals(9, ApprenticeRules.daysBought(9, 0), "one gold a day");
         assertEquals(10, ApprenticeRules.daysBought(10, 0));
@@ -135,7 +127,7 @@ class ApprenticeRulesTest {
     }
 
     @Test
-    void theDefaultsAreTheOldNumbers() {
+    void theDefaultsAreTheDesignedNumbers() {
         assertEquals(new ApprenticeBalance(50, 10, 5, 1, 14, 21, 60, 20), ApprenticeBalance.DEFAULT);
         assertEquals(1200, ApprenticeRules.ticksPerPiece(0, ApprenticeBalance.DEFAULT));
         assertEquals(400, ApprenticeRules.ticksPerPiece(100, ApprenticeBalance.DEFAULT));

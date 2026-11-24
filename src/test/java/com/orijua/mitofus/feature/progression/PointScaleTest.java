@@ -11,11 +11,6 @@ class PointScaleTest {
     }
 
     @Test
-    void anOldConfigWithFivePointsMakesEachPointWorthDouble() {
-        assertEquals(2.0, ProgressionRules.pointScale(5), 1e-9);
-    }
-
-    @Test
     void aLevelGivesTheSamePowerWhateverThePointsPerLevel() {
         for (int points : new int[]{1, 4, 5, 10, 20}) {
             assertEquals(ProgressionRules.REFERENCE_POINTS_PER_LEVEL, ProgressionRules.pointScale(points) * points, 1e-9);

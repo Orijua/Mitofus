@@ -65,9 +65,6 @@ public class BlacksmithNpc extends AbstractVillager implements PeacefulNpc {
         goalSelector.addGoal(3, new RandomLookAroundGoal(this));
     }
 
-    // Only for spotting shops stocked before the economy; the currency now is the gold coin.
-    private static final Item LEGACY_CURRENCY = Items.EMERALD;
-
     /** Version of the shop's catalogue: 1 = priced in Mitofus emeralds (and no stamp saved), 2 = priced in gold, 3 = enhancement that can fail, 4 = the Appraiser Eye restocks to 4 every day. */
     public static final int SHOP_VERSION = 4;
     private static final String SHOP_VERSION_TAG = "mitofus_shop_version";
@@ -136,13 +133,12 @@ public class BlacksmithNpc extends AbstractVillager implements PeacefulNpc {
     }
 
     /**
-     * Smiths whose shop was stocked before these offers existed get them added. One stocked before the economy (it
-     * trades in vanilla emeralds) or before the gold coin (older catalogue version) is restocked from scratch, which
-     * also refills its spent uses.
+     * Smiths whose shop was stocked before these offers existed get them added. One saved with an older catalogue
+     * version is restocked from scratch, which also refills its spent uses.
      */
     private void stockNewOffers() {
         MerchantOffers offers = getOffers();
-        if (shopVersion < SHOP_VERSION || offers.stream().anyMatch(BlacksmithNpc::usesLegacyCurrency)) {
+        if (shopVersion < SHOP_VERSION) {
             offers.clear();
             updateTrades();
             return;
@@ -187,11 +183,6 @@ public class BlacksmithNpc extends AbstractVillager implements PeacefulNpc {
                 && a.getItemCostB().equals(b.getItemCostB())
                 && a.getResult().getCount() == b.getResult().getCount()
                 && a.getMaxUses() == b.getMaxUses();
-    }
-
-    private static boolean usesLegacyCurrency(MerchantOffer offer) {
-        return offer.getBaseCostA().is(LEGACY_CURRENCY) || offer.getCostB().is(LEGACY_CURRENCY)
-                || offer.getResult().is(LEGACY_CURRENCY);
     }
 
     /** Right-click: his quest window, whose Trade button opens the shop ({@link #startTrading}). */

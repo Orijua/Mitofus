@@ -40,18 +40,6 @@ class TradeBalanceTest {
         assertEquals(0.25, b.minDurabilityFactor());
     }
 
-    @Test
-    void everyBasePriceTimesThreeIsTheOldPriceInEmeralds() {
-        TradeBalance b = TradeBalance.DEFAULT;
-        assertEquals(3, b.basePrice().get(ItemRating.NORMAL) * Money.EMERALDS_PER_GOLD);
-        assertEquals(9, b.basePrice().get(ItemRating.RARE) * Money.EMERALDS_PER_GOLD);
-        assertEquals(21, b.basePrice().get(ItemRating.EPIC) * Money.EMERALDS_PER_GOLD);
-        assertEquals(90, b.basePrice().get(ItemRating.UNIQUE) * Money.EMERALDS_PER_GOLD);
-        assertEquals(450, b.basePrice().get(ItemRating.LEGENDARY) * Money.EMERALDS_PER_GOLD);
-        assertEquals(1800, b.basePrice().get(ItemRating.ANCESTRAL) * Money.EMERALDS_PER_GOLD);
-        assertEquals(10_000L, TradeBalance.DEFAULT.maxSellGold() * Money.EMERALDS_PER_GOLD + 1, "3.333 gold is the old 10.000 cap, rounded down");
-    }
-
     private static TradeBalance withMinDurability(double value) {
         return TradeBalancesForTests.withMinDurabilityFactor(value);
     }

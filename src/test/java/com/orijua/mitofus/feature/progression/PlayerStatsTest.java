@@ -40,12 +40,4 @@ class PlayerStatsTest {
         assertEquals(stats, roundTrip(stats));
     }
 
-    @Test
-    void smithingXpIsOptionalInOlderSaves() {
-        Tag saved = PlayerStats.CODEC.encodeStart(NbtOps.INSTANCE, PlayerStats.DEFAULT).getOrThrow();
-        ((net.minecraft.nbt.CompoundTag) saved).remove("smithing_xp");
-        PlayerStats loaded = PlayerStats.CODEC.parse(NbtOps.INSTANCE, saved).getOrThrow();
-        assertEquals(0, loaded.smithingXp());
-        assertTrue(loaded.level() == 1);
-    }
 }

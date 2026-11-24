@@ -59,21 +59,6 @@ class OfferRulesTest {
         assertEquals(Long.MAX_VALUE, OfferRules.price(Double.POSITIVE_INFINITY, 4.0, 300));
     }
 
-    /** The new price is never below the old one (rounded-down gold of the reference x 3, x 400) and less than 400 iron above it. */
-    @Test
-    void theNewPriceStaysCloseToTheOldOneOnTheWholeGrid() {
-        for (int i = 100; i <= 200_000; i++) {
-            double v = i / 100.0;
-            long legacy = Math.max(1L, Money.floor(3 * v)) * 400L;
-            long price = OfferRules.price(v, 4.0, 300);
-            assertTrue(price >= legacy, "v=" + v + " price=" + price + " legacy=" + legacy);
-            assertTrue(price - legacy < 400L, "v=" + v + " price=" + price + " legacy=" + legacy);
-        }
-        for (int i = 0; i < 100; i++) {
-            assertEquals(1200L, OfferRules.price(i / 100.0, 4.0, 300), "v=" + i / 100.0);
-        }
-    }
-
     @Test
     void ratingAtOutsideTheDomainThrows() {
         assertThrows(IllegalArgumentException.class, () -> OfferRules.ratingAt(0, 0));

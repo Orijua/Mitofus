@@ -133,14 +133,6 @@ class MitofusDeathRulesTest {
     }
 
     @Test
-    void anOldJsonWithoutTheLockReadsAsNoLock() {
-        JsonObject old = new JsonObject();
-        old.addProperty("last_death_at", 55L);
-        old.addProperty("pending_disconnect", true);
-        assertEquals(new MitofusDeaths(55L, true, 0L), MitofusDeaths.CODEC.parse(JsonOps.INSTANCE, old).getOrThrow());
-    }
-
-    @Test
     void theCounterSurvivesAJsonRoundTrip() {
         MitofusDeaths original = new MitofusDeaths(123_456_789_012L, true, 987_654L);
         var json = MitofusDeaths.CODEC.encodeStart(JsonOps.INSTANCE, original).getOrThrow();

@@ -34,9 +34,6 @@ public final class Money {
         return out.toString();
     }
 
-    /** How many emeralds the old economy priced in one gold: only to convert the fixed prices of before the gold coin. */
-    public static final int EMERALDS_PER_GOLD = 3;
-
     /**
      * Every gold price: rounded down (like all money here), never below 1. Zero, negative and NaN amounts give 1; a huge
      * amount saturates at {@link Long#MAX_VALUE}.
@@ -105,11 +102,6 @@ public final class Money {
     /** Iron paid for copper, rounded down (the copper left over is lost). */
     public static long ironFromCopper(long copper) {
         return Math.max(0L, copper) / COPPER_PER_IRON;
-    }
-
-    /** A fixed price of the old emerald economy in gold: a third, rounded down, at least 1. */
-    public static long goldFromEmeralds(long emeralds) {
-        return gold(emeralds / (double) EMERALDS_PER_GOLD);
     }
 
     /** A price computed with doubles (shares, saturation), rounded down to whole units. */

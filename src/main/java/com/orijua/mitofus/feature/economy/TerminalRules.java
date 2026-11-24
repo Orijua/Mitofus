@@ -12,15 +12,13 @@ import net.minecraft.nbt.Tag;
 public final class TerminalRules {
     /** The id of the gold coin as it appears in a saved inventory. */
     public static final String GOLD_ID = "mitofus:gold_coin";
-    /** The id the money had before the gold coin: old saves still hold it, and the registry maps it to the coin on loading. */
-    public static final String LEGACY_GOLD_ID = "mitofus:mitofus_emerald";
 
     private TerminalRules() {
     }
 
-    /** Whether an item id is the gold coin, under its current id or the one of saves before it. */
+    /** Whether an item id is the gold coin. */
     public static boolean isGoldId(String id) {
-        return GOLD_ID.equals(id) || LEGACY_GOLD_ID.equals(id);
+        return GOLD_ID.equals(id);
     }
 
     private static int countOf(CompoundTag entry) {

@@ -39,16 +39,6 @@ class TerminalRulesTest {
     }
 
     @Test
-    void countsTheLegacyIdOfSavesBeforeTheGoldCoin() {
-        ListTag inventory = list(entry(TerminalRules.LEGACY_GOLD_ID, 10), entry(TerminalRules.GOLD_ID, 5), entry("minecraft:emerald", 7));
-        assertEquals(15, TerminalRules.countGold(inventory));
-        assertTrue(TerminalRules.isGoldId(TerminalRules.GOLD_ID));
-        assertTrue(TerminalRules.isGoldId(TerminalRules.LEGACY_GOLD_ID));
-        assertFalse(TerminalRules.isGoldId("minecraft:emerald"));
-        assertFalse(TerminalRules.isGoldId(""));
-    }
-
-    @Test
     void anEntryWithComponentsStillCounts() {
         CompoundTag withComponents = entry(TerminalRules.GOLD_ID, 3);
         CompoundTag components = new CompoundTag();
