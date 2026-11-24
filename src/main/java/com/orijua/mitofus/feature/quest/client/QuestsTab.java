@@ -548,9 +548,8 @@ public class QuestsTab extends MitofusTab {
             y += 12;
             OptionalLong deadline = shownState.deadline(id);
             if (deadline.isPresent()) {
-                graphics.drawString(font(), Component.translatable("screen.mitofus.quest_time_left",
-                        QuestDeadlines.timeLeft(deadline.getAsLong(), QuestDeadlines.now(player()))), x, y, UiStyle.BAD);
-                y += 10;
+                y = drawWrapped(graphics, Component.translatable("screen.mitofus.quest_time_left",
+                        QuestDeadlines.timeLeft(deadline.getAsLong(), QuestDeadlines.now(player()))), x, y, detailWidth, UiStyle.BAD);
             }
         } else if (shownState.isFailed(id)) {
             graphics.drawString(font(), Component.literal("✖ ").append(Component.translatable("screen.mitofus.quest_failed")), x, y, UiStyle.BAD);
@@ -564,15 +563,13 @@ public class QuestsTab extends MitofusTab {
         }
         Optional<Component> requiredClass = classAllows(quest) ? Optional.empty() : quest.requiredClass().flatMap(QuestsTab::className);
         if (requiredClass.isPresent()) {
-            graphics.drawString(font(), Component.translatable("screen.mitofus.quest_requires_class", requiredClass.get()), x, y, UiStyle.BAD);
-            y += 10;
+            y = drawWrapped(graphics, Component.translatable("screen.mitofus.quest_requires_class", requiredClass.get()), x, y, detailWidth, UiStyle.BAD);
         }
         if (!shownState.isActive(id) && !shownState.isCompleted(id)) {
             Optional<GradeQuestRules.Check> blocked = QuestService.gradeCheck(player(), quest)
                     .filter(check -> check == GradeQuestRules.Check.LEVEL_TOO_LOW || check == GradeQuestRules.Check.TREE_INCOMPLETE);
             if (blocked.isPresent()) {
-                graphics.drawString(font(), Component.translatable("screen.mitofus.quest_grade_" + blocked.get().name().toLowerCase()), x, y, UiStyle.BAD);
-                y += 10;
+                y = drawWrapped(graphics, Component.translatable("screen.mitofus.quest_grade_" + blocked.get().name().toLowerCase()), x, y, detailWidth, UiStyle.BAD);
             }
         }
 
@@ -597,13 +594,22 @@ public class QuestsTab extends MitofusTab {
         y += ITEM;
         Optional<Component> newClass = quest.classReward().flatMap(QuestsTab::className);
         if (newClass.isPresent()) {
-            graphics.drawString(font(), Component.translatable("screen.mitofus.quest_class_reward", newClass.get()), x, y, UiStyle.GOLD);
+            drawWrapped(graphics, Component.translatable("screen.mitofus.quest_class_reward", newClass.get()), x, y, detailWidth, UiStyle.GOLD);
         }
         if (!hoveredItem.isEmpty()) {
             graphics.renderTooltip(font(), hoveredItem, mouseX, mouseY);
         } else if (!hoverText.isEmpty()) {
             graphics.renderTooltip(font(), hoverText.stream().flatMap(text -> font().split(text, 220).stream()).toList(), mouseX, mouseY);
         }
+    }
+
+    /** Draws {@code text} wrapped to {@code maxWidth}; returns the y under it. */
+    private int drawWrapped(GuiGraphics graphics, Component text, int x, int y, int maxWidth, int color) {
+        for (FormattedCharSequence line : font().split(text, maxWidth)) {
+            graphics.drawString(font(), line, x, y, color);
+            y += 10;
+        }
+        return y;
     }
 
     @Nullable
