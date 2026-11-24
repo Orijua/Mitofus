@@ -34,4 +34,37 @@ class PanelFitTest {
         assertTrue(PanelFit.needsScroll(101, 100));
         assertFalse(PanelFit.needsScroll(0, 0));
     }
+
+    @Test
+    void ownMinimumSizeIsRespected() {
+        assertEquals(new PanelFit.Size(300, 150), PanelFit.fit(400, 226, 200, 100, 300, 150));
+        assertEquals(new PanelFit.Size(312, 172), PanelFit.fit(400, 226, 320, 180, 300, 150));
+    }
+
+    @Test
+    void rowsFillTheSpaceButNeverDropToZero() {
+        assertEquals(7, PanelFit.rows(158, 22));
+        assertEquals(6, PanelFit.rows(146, 24));
+        assertEquals(1, PanelFit.rows(5, 22));
+        assertEquals(1, PanelFit.rows(-10, 22));
+    }
+
+    @Test
+    void shopAndTerminalSizesFitEveryCommonResolutionAndScale() {
+        int[][] resolutions = {{854, 480}, {1280, 720}, {1920, 1080}};
+        for (int[] resolution : resolutions) {
+            for (int scale = 1; scale <= 4; scale++) {
+                int screenWidth = resolution[0] / scale;
+                int screenHeight = resolution[1] / scale;
+                PanelFit.Size terminal = PanelFit.fit(400, 226, screenWidth, screenHeight, 300, 150);
+                PanelFit.Size shop = PanelFit.fit(260, 214, screenWidth, screenHeight, 240, 120);
+                // The windows only exceed the screen where the screen is smaller than their readable minimum.
+                assertTrue(terminal.width() <= Math.max(300, screenWidth - 2 * PanelFit.MARGIN));
+                assertTrue(terminal.height() <= Math.max(150, screenHeight - 2 * PanelFit.MARGIN));
+                assertTrue(shop.width() <= Math.max(240, screenWidth - 2 * PanelFit.MARGIN));
+                assertTrue(shop.height() <= Math.max(120, screenHeight - 2 * PanelFit.MARGIN));
+                assertTrue(PanelFit.rows(terminal.height() - 48 - 20, 22) >= 1);
+            }
+        }
+    }
 }
