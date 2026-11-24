@@ -52,19 +52,19 @@ final class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.GOLD_COIN.get());
         basicItem(ModItems.IRON_COIN.get());
         basicItem(ModItems.COPPER_COIN.get());
-        vanillaTexture(ModItems.SKILL_BOOK.get(), "writable_book");
-        vanillaTexture(ModItems.GUADALETE_BLUEPRINT.get(), "map");
-        vanillaTexture(ModItems.UNAPPRAISED_BOOK.get(), "book");
-        vanillaTexture(ModItems.APPRAISER_EYE.get(), "ender_eye");
-        vanillaTexture(ModItems.APPRENTICE_CONTRACT.get(), "paper");
-        vanillaTexture(ModItems.TRANSFER_CONTRACT.get(), "paper");
-        vanillaTexture(ModItems.WORKSHOP_LEDGER.get(), "writable_book");
-        vanillaTexture(ModItems.RESPEC_SCROLL.get(), "paper");
-        vanillaTexture(ModItems.TALENT_SCROLL.get(), "paper");
-        vanillaTexture(ModItems.ORBE_AURIFERO.get(), "enchanted_book");
 
-        // The phone borrows a dark glass block as its texture until it has its own art.
-        withExistingParent("phone", mcLoc("item/generated")).texture("layer0", mcLoc("block/black_stained_glass"));
+        // Batch 2: own 32x32 textures. Held objects have a 3D model in hands and on the ground.
+        held3d(ModItems.SKILL_BOOK.get());
+        held3d(ModItems.PHONE.get());
+        held3d(ModItems.ORBE_AURIFERO.get());
+        basicItem(ModItems.GUADALETE_BLUEPRINT.get());
+        basicItem(ModItems.UNAPPRAISED_BOOK.get());
+        basicItem(ModItems.APPRAISER_EYE.get());
+        basicItem(ModItems.APPRENTICE_CONTRACT.get());
+        basicItem(ModItems.TRANSFER_CONTRACT.get());
+        basicItem(ModItems.WORKSHOP_LEDGER.get());
+        basicItem(ModItems.RESPEC_SCROLL.get());
+        basicItem(ModItems.TALENT_SCROLL.get());
 
         withExistingParent(ModItems.BLACKSMITH_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         withExistingParent(ModItems.VILLAGE_CHIEF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
@@ -74,23 +74,27 @@ final class ModItemModelProvider extends ItemModelProvider {
         withExistingParent(ModItems.VELASCO_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
     }
 
-    private void vanillaTexture(Item item, String vanillaTexture) {
-        withExistingParent(BuiltInRegistries.ITEM.getKey(item).getPath(), mcLoc("item/generated"))
-                .texture("layer0", mcLoc("item/" + vanillaTexture));
-    }
-
     /**
      * Flat 32x32 icon in the inventory and in frames, hand-made 3D model (models/item/<id>_3d.json) in hands and on
      * the ground.
      */
     private void hammer3d(Item item) {
+        solid3d(item, "minecraft:item/handheld");
+    }
+
+    /** Same as {@link #hammer3d} for objects that are held, not swung: books, the phone, the orb. */
+    private void held3d(Item item) {
+        solid3d(item, "minecraft:item/generated");
+    }
+
+    private void solid3d(Item item, String flatParent) {
         String id = BuiltInRegistries.ITEM.getKey(item).getPath();
         ModelFile solid = new ModelFile.UncheckedModelFile(modLoc("item/" + id + "_3d"));
         ItemModelBuilder builder = getBuilder(id).parent(new ModelFile.UncheckedModelFile("minecraft:item/generated"));
         SeparateTransformsModelBuilder<ItemModelBuilder> loader = builder.customLoader(SeparateTransformsModelBuilder::begin);
         loader.base(nested().parent(solid));
         for (ItemDisplayContext context : new ItemDisplayContext[] {ItemDisplayContext.GUI, ItemDisplayContext.FIXED}) {
-            loader.perspective(context, nested().parent(new ModelFile.UncheckedModelFile("minecraft:item/handheld"))
+            loader.perspective(context, nested().parent(new ModelFile.UncheckedModelFile(flatParent))
                     .texture("layer0", modLoc("item/" + id)));
         }
     }

@@ -25,12 +25,10 @@ final class ModBlockStateProvider extends BlockStateProvider {
         // Ores: a full cube with textures/block/<id>.png on all sides, and the same model for the item.
         cubeAllWithItem(ModBlocks.MITHRIL_ORE.get());
         cubeAllWithItem(ModBlocks.DEEPSLATE_MITHRIL_ORE.get());
-        // Wolfram borrows vanilla copper's textures until it has its own.
-        vanillaCubeWithItem(ModBlocks.WOLFRAM_ORE.get(), "copper_ore");
-        vanillaCubeWithItem(ModBlocks.DEEPSLATE_WOLFRAM_ORE.get(), "deepslate_copper_ore");
-        // Blue azurite borrows vanilla lapis' ores until it has its own.
-        vanillaCubeWithItem(ModBlocks.AZURITE_ORE.get(), "lapis_ore");
-        vanillaCubeWithItem(ModBlocks.DEEPSLATE_AZURITE_ORE.get(), "deepslate_lapis_ore");
+        cubeAllWithItem(ModBlocks.WOLFRAM_ORE.get());
+        cubeAllWithItem(ModBlocks.DEEPSLATE_WOLFRAM_ORE.get());
+        cubeAllWithItem(ModBlocks.AZURITE_ORE.get());
+        cubeAllWithItem(ModBlocks.DEEPSLATE_AZURITE_ORE.get());
 
         // The smithing anvil reuses vanilla's anvil model.
         ModelFile anvil = models().getExistingFile(mcLoc("block/anvil"));
@@ -69,10 +67,6 @@ final class ModBlockStateProvider extends BlockStateProvider {
             model.element().from(2, 14, 2).to(14, 14.25f, 14).face(Direction.UP).texture("#book").end().end();
         }
         return model;
-    }
-
-    private void vanillaCubeWithItem(Block block, String vanillaTexture) {
-        simpleBlockWithItem(block, models().cubeAll(BuiltInRegistries.BLOCK.getKey(block).getPath(), mcLoc("block/" + vanillaTexture)));
     }
 
     private void cubeAllWithItem(Block block) {
