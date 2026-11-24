@@ -20,7 +20,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Conde Nuno's manor near Covadonga, where he gives his secret request (own design: in the original design Nuno is a noble of
@@ -91,30 +90,7 @@ public final class TorreDelOro {
         return piece;
     }
 
-    /**
-     * The site for this world's manor: the nearest chunk {@code minDistance}-{@code maxDistance} chunks from Covadonga
-     * where it stands on dry, fairly flat land (and on the lore map's land, in Mitofus). Empty if the generator doesn't have it or nothing fits.
-     */
-    public static Optional<ChunkPos> findSite(RegistryAccess registries, ChunkGenerator generator, RandomState random,
-                                              StructureTemplateManager templates, long seed, LevelHeightAccessor height, ChunkPos covadonga,
-                                              int minDistance, int maxDistance) {
-        Structure manor = registries.registryOrThrow(Registries.STRUCTURE).get(KEY);
-        if (manor == null) {
-            return Optional.empty();
-        }
-        for (ChunkPos chunk : ChunkSpiral.around(covadonga, maxDistance)) {
-            if (covadonga.getChessboardDistance(chunk) < minDistance
-                    || !MitofusBiomeSource.onMapLand(generator.getBiomeSource(), chunk.getMiddleBlockX(), chunk.getMiddleBlockZ())) {
-                continue;
-            }
-            if (fitsAt(registries, generator, random, templates, seed, height, chunk)) {
-                return Optional.of(chunk);
-            }
-        }
-        return Optional.empty();
-    }
-
-    /** Whether the manor stands at this chunk on dry, fairly flat land: what the search asks of its site. */
+    /** Whether the manor stands at this chunk on dry, fairly flat land: what a fixed site asks of its place. */
     public static boolean fitsAt(RegistryAccess registries, ChunkGenerator generator, RandomState random, StructureTemplateManager templates,
                                  long seed, LevelHeightAccessor height, ChunkPos chunk) {
         Structure manor = registries.registryOrThrow(Registries.STRUCTURE).get(KEY);

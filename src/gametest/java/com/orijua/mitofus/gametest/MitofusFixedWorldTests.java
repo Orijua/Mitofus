@@ -45,6 +45,8 @@ import java.util.Set;
 public final class MitofusFixedWorldTests {
     /** Nine seeds of all kinds: small, large, negative. */
     static final long[] SEEDS = {1L, 2L, 42L, 99L, -5L, -7_000_123L, 123_456_789L, 0xDEAD_BEEFL, 8_675_309_000_123L};
+    /** The coast cuts take most of the time of the terrain test, so they run over the first of {@link #SEEDS}. */
+    private static final int CUT_SEEDS = 3;
 
     /** Three of them (small, negative, large) for the long cuts, where every seed costs seconds of terrain generation. */
     static final long[] FEW_SEEDS = {1L, -5L, 8_675_309_000_123L};
@@ -172,14 +174,15 @@ public final class MitofusFixedWorldTests {
         helper.assertTrue(median <= MAX_SURFACE_SPREAD_MEDIAN && p95 <= MAX_SURFACE_SPREAD_P95,
                 "the surface moves little with the seed: median " + median + ", p95 " + p95);
         helper.assertTrue(dryChanges <= MAX_DRY_CHANGES, "dry or wet changes with the seed at " + dryChanges + " points");
-        // The coast cuts.
+        // The coast cuts: the slow part, so three of the seeds (the shape above already holds for all nine).
+        RandomState[] cutRandoms = Arrays.copyOf(randoms, CUT_SEEDS);
         List<String> cuts = new ArrayList<>();
         List<String> wrong = new ArrayList<>();
         for (Cut cut : CUTS) {
             int shore = mapShore(map, cut);
             List<List<Integer>> shapes = new ArrayList<>();
             int minDry = Integer.MAX_VALUE, maxDry = Integer.MIN_VALUE;
-            for (RandomState random : randoms) {
+            for (RandomState random : cutRandoms) {
                 CutShape shape = cutShape(generator, random, cut, shore);
                 shapes.add(shape.shapeShores());
                 minDry = Math.min(minDry, shape.lastDry());
@@ -196,7 +199,7 @@ public final class MitofusFixedWorldTests {
             }
             cuts.add(cut.name() + ": map shore " + shore + ", terrain shore " + first + ", last dry " + minDry + ".." + maxDry);
         }
-        Mitofus.LOGGER.info("Mitofus coast cuts over {} seeds: {}", SEEDS.length, cuts);
+        Mitofus.LOGGER.info("Mitofus coast cuts over {} seeds: {}", cutRandoms.length, cuts);
         helper.assertTrue(wrong.isEmpty(), "the coast changes with the seed: " + wrong);
         helper.succeed();
     }

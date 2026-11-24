@@ -21,11 +21,8 @@ import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * Covadonga, the starting village of the Mitofus dimension. The dimension's (0, 0) is Covadonga's pixel on map
@@ -37,17 +34,12 @@ import java.util.stream.Stream;
  * player entering Mitofus starts, as Cid starts in Covadonga. They then generate there with the terrain, like any village
  * ({@link WorldSitePlacement}).
  * <p>
- * The fixed sites were chosen once with {@link #search}, the search over the map that every world ran before
- * 2026-11-07 (Covadonga nearest (0, 0) on dry plains, the rest from it); the search stays for that and for the tests on
- * terrain that doesn't follow the map. They are chosen only once per world (it is remembered); worlds created before
- * keep the sites their search gave them, and worlds created before the dimension have none.
+ * The fixed sites were chosen once, by a search over the map that every world ran before 2026-11-07 (Covadonga nearest
+ * (0, 0) on dry plains, the rest from it); that search is gone and {@code sites.json} keeps its result. They are chosen
+ * only once per world (it is remembered); worlds created before keep the sites that search gave them, and worlds created
+ * before the dimension have none.
  */
 public final class StartingVillage {
-    /**
-     * How far around Covadonga's place on the map, (0, 0), to look, in chunks: the terrain follows the map, so Covadonga's
-     * plains are there and the village lands at (0, 0) or a chunk or two away.
-     */
-    public static final int SEARCH_RADIUS = 4;
     private static final ResourceKey<Structure> VILLAGE = ResourceKey.create(Registries.STRUCTURE, Covadonga.STRUCTURE);
 
     private StartingVillage() {
@@ -120,68 +112,8 @@ public final class StartingVillage {
         return new Chosen(new LinkedHashMap<>(fixed.all()), Optional.of(landing));
     }
 
-    /**
-     * The search every world ran before its sites were fixed, and how {@code sites.json} was chosen: Covadonga first,
-     * nearest (0, 0) ({@link #findSite}), and the rest from it and the map: the cave on the snowy north coast, the manor
-     * near Covadonga and Eibar at its place on the map, away from the other two. Its result follows the seed a little (the
-     * 3D noise and the layout of the structures). Empty if Covadonga has no room. Only reads the terrain noise and the map.
-     */
-    public static Chosen search(RegistryAccess registries, ChunkGenerator generator, RandomState random, StructureTemplateManager templates,
-                                long seed, LevelHeightAccessor height) {
-        Optional<Site> covadonga = findSite(registries, generator, random, templates, seed, height, new ChunkPos(0, 0));
-        if (covadonga.isEmpty()) {
-            Mitofus.LOGGER.warn("No room for Covadonga within {} chunks of its place on the map", SEARCH_RADIUS);
-            return new Chosen(Map.of(), Optional.empty());
-        }
-        ChunkPos village = covadonga.get().chunk();
-        Map<String, ChunkPos> sites = new LinkedHashMap<>();
-        sites.put(WorldSites.COVADONGA, village);
-        Altamira.findSite(registries, generator, random, templates, seed, height, village)
-                .ifPresent(cave -> sites.put(WorldSites.ALTAMIRA, cave));
-        TorreDelOro.findSite(registries, generator, random, templates, seed, height, village, TorreDelOro.MIN_DISTANCE, TorreDelOro.MAX_DISTANCE)
-                .ifPresent(manor -> sites.put(WorldSites.TORRE_DEL_ORO, manor));
-        // Eibar keeps away from the cave and the manor.
-        List<ChunkPos> taken = Stream.of(WorldSites.ALTAMIRA, WorldSites.TORRE_DEL_ORO).map(sites::get).filter(Objects::nonNull).toList();
-        Eibar.findSite(registries, generator, random, templates, seed, height, village, taken)
-                .ifPresent(eibar -> sites.put(WorldSites.EIBAR, eibar));
-        return new Chosen(sites, Optional.of(covadonga.get().spawn()));
-    }
-
     private static void onServerStopped(ServerStoppedEvent event) {
         WorldSites.clear();
-    }
-
-    /**
-     * The chunk nearest {@code near}, up to {@link #SEARCH_RADIUS} chunks away, where the village assembles (its biome
-     * check included) in the map's plains (in Mitofus, as on map) with every piece on dry land, and the spawn
-     * on its square. Only reads the terrain noise: nothing is generated or placed.
-     */
-    public static Optional<Site> findSite(RegistryAccess registries, ChunkGenerator generator, RandomState random,
-                                          StructureTemplateManager templates, long seed, LevelHeightAccessor height, ChunkPos near) {
-        return findSite(registries, generator, random, templates, seed, height, near, SEARCH_RADIUS);
-    }
-
-    /**
-     * The same search up to {@code radius} chunks away: wider on terrain that doesn't follow the map, such as the
-     * vanilla overworld of the tests.
-     */
-    public static Optional<Site> findSite(RegistryAccess registries, ChunkGenerator generator, RandomState random,
-                                          StructureTemplateManager templates, long seed, LevelHeightAccessor height, ChunkPos near,
-                                          int radius) {
-        Structure village = registries.registryOrThrow(Registries.STRUCTURE).get(VILLAGE);
-        if (village == null) {
-            return Optional.empty();
-        }
-        for (ChunkPos chunk : ChunkSpiral.around(near, radius)) {
-            if (!MitofusBiomeSource.inMapRegion(generator.getBiomeSource(), chunk.getMiddleBlockX(), chunk.getMiddleBlockZ(), MitofusMapData.PLAINS)) {
-                continue;
-            }
-            Optional<Site> site = villageAt(village, registries, generator, random, templates, seed, height, chunk);
-            if (site.isPresent()) {
-                return site;
-            }
-        }
-        return Optional.empty();
     }
 
     /**

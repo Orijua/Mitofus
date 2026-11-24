@@ -22,7 +22,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -52,11 +51,6 @@ public final class Eibar {
     public static final BlockPos RIVAL_SPOT = new BlockPos(10, 2, 12);
     public static final BlockPos PLAYER_ANVIL = new BlockPos(6, 2, 13);
 
-    /**
-     * How far from its place on the map to look, in chunks (the nearest that fits wins). The terrain follows the map, so
-     * its place is dry land; the room is for keeping away from Covadonga, the cave and the manor.
-     */
-    public static final int SEARCH_RADIUS = 8;
     /** Never this close, in chunks, to Covadonga or another one-per-world place. */
     public static final int KEEP_AWAY = 8;
 
@@ -325,46 +319,8 @@ public final class Eibar {
     }
 
     /**
-     * The site for this world's Eibar: the chunk nearest its place on the West Continent's map (taken from Covadonga)
-     * where the district assembles (its biome check included) on the map's land with every piece on dry land, within
-     * {@link #SEARCH_RADIUS} chunks of that place and at least {@link #KEEP_AWAY} chunks from Covadonga and the places in
-     * {@code avoid}. Empty if the generator doesn't have it or nothing fits.
-     */
-    public static Optional<ChunkPos> findSite(RegistryAccess registries, ChunkGenerator generator, RandomState random,
-                                              StructureTemplateManager templates, long seed, LevelHeightAccessor height, ChunkPos covadonga,
-                                              List<ChunkPos> avoid) {
-        return findSite(registries, generator, random, templates, seed, height, covadonga, avoid, SEARCH_RADIUS);
-    }
-
-    /**
-     * The same search up to {@code radius} chunks from Eibar's place: wider on terrain that doesn't follow the map,
-     * such as the vanilla overworld of the tests.
-     */
-    public static Optional<ChunkPos> findSite(RegistryAccess registries, ChunkGenerator generator, RandomState random,
-                                              StructureTemplateManager templates, long seed, LevelHeightAccessor height, ChunkPos covadonga,
-                                              List<ChunkPos> avoid, int radius) {
-        Structure eibar = registries.registryOrThrow(Registries.STRUCTURE).get(KEY);
-        if (eibar == null) {
-            return Optional.empty();
-        }
-        ChunkPos offset = mapOffset(MitofusMapData.west());
-        ChunkPos target = new ChunkPos(covadonga.x + offset.x, covadonga.z + offset.z);
-        for (ChunkPos chunk : ChunkSpiral.around(target, radius)) {
-            if (covadonga.getChessboardDistance(chunk) < KEEP_AWAY
-                    || avoid.stream().anyMatch(other -> other.getChessboardDistance(chunk) < KEEP_AWAY)
-                    || !MitofusBiomeSource.onMapLand(generator.getBiomeSource(), chunk.getMiddleBlockX(), chunk.getMiddleBlockZ())) {
-                continue;
-            }
-            if (fitsAt(eibar, registries, generator, random, templates, seed, height, chunk)) {
-                return Optional.of(chunk);
-            }
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * Whether the district assembles at this chunk (its biome check included) with every piece on dry land: what the
-     * search asks of its site. False if the generator doesn't have it.
+     * Whether the district assembles at this chunk (its biome check included) with every piece on dry land: what a
+     * fixed site asks of its place. False if the generator doesn't have it.
      */
     public static boolean fitsAt(RegistryAccess registries, ChunkGenerator generator, RandomState random, StructureTemplateManager templates,
                                  long seed, LevelHeightAccessor height, ChunkPos chunk) {
