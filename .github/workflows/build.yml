@@ -56,6 +56,15 @@ jobs:
         if: github.event_name != 'pull_request' || !github.event.pull_request.draft
         run: tools/ci/dedicated-server-smoke.sh
 
+      # Informative: what the unit tests cover. Never fails the build.
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: build/reports/jacoco/test
+          if-no-files-found: ignore
+
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@v4
