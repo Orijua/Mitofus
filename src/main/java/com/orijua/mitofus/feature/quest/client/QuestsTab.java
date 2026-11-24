@@ -69,10 +69,10 @@ public class QuestsTab extends MitofusTab {
     /** Lines of story shown in the detail; the rest is in the hover. */
     private static final int STORY_LINES = 2;
 
-    private static final int GUIDE = 0x709DC4EA;
+    private static final int GUIDE = 0x70C9B070;
     private static final int SELECTED = 0x50FFFFFF;
     private static final int HOVERED = 0x25FFFFFF;
-    private static final int DIVIDER = 0x609DC4EA;
+    private static final int DIVIDER = 0x60C9B070;
 
     private enum Section { STORY, REPEATABLE, COMPLETED, RUMORS }
 

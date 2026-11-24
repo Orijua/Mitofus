@@ -9,7 +9,7 @@ import net.minecraft.client.gui.GuiGraphics;
 public final class ScrollList {
     private static final int BAR_WIDTH = 3;
     private static final int TRACK = 0x60FFFFFF;
-    private static final int THUMB = 0xFFA0A0D0;
+    private static final int THUMB = 0xFFC9B070;
 
     private int visibleRows;
     private int offset;
