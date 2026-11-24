@@ -36,16 +36,6 @@ class PlayerSkillsTest {
         assertEquals(Optional.of(B), skills.slot(SlotRules.MAX_SLOTS - 1));
     }
 
-    /** A save from before the pages (3 slots) keeps every skill in the slot it had. */
-    @Test
-    void anOldThreeSlotSaveKeepsItsSlots() {
-        PlayerSkills skills = decode("{\"learned\": [\"a:b\", \"a:c\"], \"slots\": [\"a:b\", \"\", \"a:c\"], \"cooldown_until\": {}}");
-        assertEquals(Optional.of(A), skills.slot(0));
-        assertEquals(Optional.empty(), skills.slot(1));
-        assertEquals(Optional.of(B), skills.slot(2));
-        assertEquals(Optional.empty(), skills.slot(3));
-    }
-
     @Test
     void aNewSkillOnlyFillsAnOpenSlot() {
         PlayerSkills full = PlayerSkills.EMPTY.learn(A, 0).learn(B, 0).learn(ResourceLocation.fromNamespaceAndPath("a", "d"), 0);

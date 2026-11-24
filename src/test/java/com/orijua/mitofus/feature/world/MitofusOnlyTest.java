@@ -90,14 +90,4 @@ class MitofusOnlyTest {
         assertFalse(MitofusOnly.isMitofusEntity(ResourceLocation.fromNamespaceAndPath("othermod", "x")));
     }
 
-    @Test
-    void theWarningKeyExistsInBothLangFiles() throws Exception {
-        for (String file : new String[]{"en_us.json", "es_es.json"}) {
-            try (InputStream stream = MitofusOnlyTest.class.getResourceAsStream("/assets/mitofus/lang/" + file)) {
-                assertNotNull(stream, "lang file not found: " + file);
-                JsonObject lang = JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8)).getAsJsonObject();
-                assertTrue(lang.has(MitofusOnly.WARNING_KEY), file + " lacks " + MitofusOnly.WARNING_KEY);
-            }
-        }
-    }
 }

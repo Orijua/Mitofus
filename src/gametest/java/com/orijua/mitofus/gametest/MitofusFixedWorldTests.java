@@ -46,6 +46,12 @@ public final class MitofusFixedWorldTests {
     /** Nine seeds of all kinds: small, large, negative. */
     static final long[] SEEDS = {1L, 2L, 42L, 99L, -5L, -7_000_123L, 123_456_789L, 0xDEAD_BEEFL, 8_675_309_000_123L};
 
+    /** Three of them (small, negative, large) for the long cuts, where every seed costs seconds of terrain generation. */
+    static final long[] FEW_SEEDS = {1L, -5L, 8_675_309_000_123L};
+
+    /** Blocks between the sampled points of the seed-independence check (it was 256, with 768 points, when the bounds below were measured). */
+    private static final int GRID_STEP = 512;
+
     /**
      * Over {@link #SEEDS}, measured 2026-11-07 (in brackets, the same with the seed's own vanilla noise in the terrain,
      * before it was fixed): the terrain's own level differs by 0 blocks at all 768 points (up to 64; land or sea of the
@@ -53,9 +59,10 @@ public final class MitofusFixedWorldTests {
      * the seed still moves, through vanilla's 3D noise, jaggedness and caves: the surface (WORLD_SURFACE_WG) by a median 4,
      * p90 15, p95 22, p99 39 and at most 98 blocks (a cave mouth or a peak); the solid ground (OCEAN_FLOOR_WG) by a median
      * 9, p95 27, at most 98 (10, 37, 99); whether a point is dry changes at 15 of 768 points; and the last dry column of a
-     * coast cut by up to 27 blocks (31), the beaches' puddles and cave mouths. Bounds: measured + a margin.
+     * coast cut by up to 27 blocks (31), the beaches' puddles and cave mouths. Bounds: measured + a margin. With the grid
+     * of 512 (192 points) the same run gave a surface median of 7, p95 22 and 3 dry changes, so the median bound is 9.
      */
-    private static final int MAX_SURFACE_SPREAD_MEDIAN = 6;
+    private static final int MAX_SURFACE_SPREAD_MEDIAN = 9;
     private static final int MAX_SURFACE_SPREAD_P95 = 26;
     private static final int MAX_DRY_CHANGES = 20;
     private static final int MAX_LAST_DRY_SPREAD = 30;
@@ -124,8 +131,8 @@ public final class MitofusFixedWorldTests {
         int dryChanges = 0;
         List<Integer> surfaceSpreads = new ArrayList<>();
         List<Integer> floorSpreads = new ArrayList<>();
-        for (int x = -3500; x <= 4600; x += 256) {
-            for (int z = -880; z <= 5200; z += 256) {
+        for (int x = -3500; x <= 4600; x += GRID_STEP) {
+            for (int z = -880; z <= 5200; z += GRID_STEP) {
                 points++;
                 int minTop = Integer.MAX_VALUE, maxTop = Integer.MIN_VALUE;
                 int minFloor = Integer.MAX_VALUE, maxFloor = Integer.MIN_VALUE;

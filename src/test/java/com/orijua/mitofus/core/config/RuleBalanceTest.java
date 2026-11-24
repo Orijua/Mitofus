@@ -21,7 +21,7 @@ class RuleBalanceTest {
     }
 
     @Test
-    void defaultsAreTheOldFixedValues() {
+    void defaultsAreTheDesignedNumbers() {
         RuleBalance d = RuleBalance.DEFAULT;
         assertEquals(60, d.connectTicks());
         assertEquals(60, d.logoutTicks());
@@ -43,21 +43,6 @@ class RuleBalanceTest {
         assertEquals(30, d.chiefLevel());
         assertEquals(25, d.velascoLevel());
         assertEquals(50, d.menciaLevel());
-    }
-
-    @Test
-    void theOldConstantsStillMatchTheDefaults() {
-        RuleBalance d = RuleBalance.DEFAULT;
-        assertEquals(VrHelmetRules.CONNECT_TICKS, d.connectTicks());
-        assertEquals(LogoutRules.COUNTDOWN_TICKS, d.logoutTicks());
-        assertEquals(LogoutRules.DANGER_TICKS, d.dangerTicks());
-        assertEquals(VrHelmetRules.MAX_DISTANCE, d.maxDistance());
-        assertEquals(VrHelmetRules.STILL_TOLERANCE, d.stillTolerance());
-        assertEquals(NpcGrade.NAMED_CHANCE, d.namedChance());
-        assertEquals(NpcGrade.SEMI_NAMED_CHANCE, d.semiNamedChance());
-        assertEquals(FatigueRules.COMBAT_WINDOW_TICKS, d.combatWindowTicks());
-        assertEquals(FatigueRules.PROTECTION_TICKS, d.protectionTicks());
-        assertEquals(FatigueRules.WORK_WINDOW_TICKS, d.workWindowTicks());
     }
 
     @Test

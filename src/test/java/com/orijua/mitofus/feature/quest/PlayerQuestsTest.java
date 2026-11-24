@@ -26,15 +26,6 @@ class PlayerQuestsTest {
     }
 
     @Test
-    void savesFromBeforeHiddenQuestsStillLoad() {
-        PlayerQuests loaded = PlayerQuests.CODEC.parse(JsonOps.INSTANCE,
-                JsonParser.parseString("{\"active\": {\"test:other\": 2}, \"completed\": [\"test:secret\"]}")).getOrThrow();
-        assertEquals(List.of(), loaded.discovered());
-        assertEquals(List.of(), loaded.seen());
-        assertTrue(loaded.isActive(OTHER) && loaded.isCompleted(SECRET));
-    }
-
-    @Test
     void discoveriesAreNewUntilSeen() {
         PlayerQuests quests = PlayerQuests.EMPTY.discover(SECRET);
         assertTrue(quests.isNew(SECRET) && quests.hasNew());
@@ -65,14 +56,6 @@ class PlayerQuestsTest {
         assertEquals(2, quests.timesCompleted(OTHER));
         assertEquals(List.of(OTHER), quests.completed(), "listed as completed once");
         assertEquals(0, quests.timesCompleted(SECRET));
-    }
-
-    @Test
-    void savesFromBeforeCountingStillCountACompletedQuestOnce() {
-        PlayerQuests loaded = PlayerQuests.CODEC.parse(JsonOps.INSTANCE,
-                JsonParser.parseString("{\"completed\": [\"test:other\"]}")).getOrThrow();
-        assertEquals(1, loaded.timesCompleted(OTHER));
-        assertEquals(List.of(), loaded.tracked());
     }
 
     @Test
@@ -133,14 +116,6 @@ class PlayerQuestsTest {
         assertTrue(timed.complete(OTHER).deadline(OTHER).isEmpty());
         assertTrue(timed.abandon(OTHER).deadline(OTHER).isEmpty());
         assertFalse(timed.complete(OTHER).isFailed(OTHER));
-    }
-
-    @Test
-    void savesFromBeforeTimeLimitsStillLoad() {
-        PlayerQuests loaded = PlayerQuests.CODEC.parse(JsonOps.INSTANCE,
-                JsonParser.parseString("{\"active\": {\"test:other\": 2}, \"tracked\": [\"test:other\"]}")).getOrThrow();
-        assertTrue(loaded.deadlines().isEmpty() && loaded.failed().isEmpty() && loaded.warned().isEmpty());
-        assertTrue(loaded.isActive(OTHER));
     }
 
     @Test

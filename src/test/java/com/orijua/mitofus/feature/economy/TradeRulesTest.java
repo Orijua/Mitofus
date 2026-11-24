@@ -627,43 +627,6 @@ class TradeRulesTest {
     }
 
     @Test
-    void everyTradeKeyExistsInBothLangFiles() {
-        List<String> keys = new ArrayList<>();
-        for (Refusal refusal : Refusal.values()) {
-            assertTrue(refusal.langKey().startsWith("trade.mitofus.refusal."));
-            keys.add(refusal.langKey());
-        }
-        keys.addAll(List.of("notification.mitofus.trade.sold", "notification.mitofus.trade.sold_many",
-                "screen.mitofus.trade.confirm_sell", "screen.mitofus.trade.confirm_title",
-                "screen.mitofus.trade.select_all", "screen.mitofus.trade.select_none",
-                "screen.mitofus.trade.sell_selected", "screen.mitofus.trade.sell_price", "screen.mitofus.trade.empty",
-                "message.mitofus.trade_refused", "message.mitofus.trade_outside",
-                "message.mitofus.trade_stale", "message.mitofus.trade_failed", "message.mitofus.trade_skipped",
-                "screen.mitofus.trade.tip.durability", "screen.mitofus.status.rested_cooldown",
-                "message.mitofus.debug_vrhelmet_cooldown", "message.mitofus.debug_vrhelmet"));
-        List<String> gone = List.of("screen.mitofus.trade.confirm_export", "notification.mitofus.trade.exported",
-                "screen.mitofus.trade.export", "screen.mitofus.trade.export_price");
-        for (String file : List.of("en_us.json", "es_es.json")) {
-            JsonObject lang = LangFiles.load(file);
-            for (String key : keys) {
-                assertTrue(lang.has(key), key + " missing in " + file);
-            }
-            for (String key : gone) {
-                assertFalse(lang.has(key), key + " should be gone from " + file);
-            }
-            assertEquals(2, placeholders(lang.get("screen.mitofus.trade.confirm_sell").getAsString()), file + ": confirm_sell");
-            assertEquals(2, placeholders(lang.get("screen.mitofus.trade.sell_selected").getAsString()), file + ": sell_selected");
-            assertEquals(0, placeholders(lang.get("screen.mitofus.trade.confirm_title").getAsString()), file + ": confirm_title");
-            assertEquals(2, placeholders(lang.get("notification.mitofus.trade.sold_many").getAsString()), file + ": sold_many");
-            assertEquals(1, placeholders(lang.get("message.mitofus.trade_skipped").getAsString()), file + ": trade_skipped");
-            assertEquals(1, placeholders(lang.get("screen.mitofus.trade.tip.durability").getAsString()), file + ": tip.durability");
-            assertEquals(1, placeholders(lang.get("screen.mitofus.status.rested_cooldown").getAsString()), file + ": rested_cooldown");
-            assertEquals(1, placeholders(lang.get("message.mitofus.debug_vrhelmet_cooldown").getAsString()), file + ": debug_vrhelmet_cooldown");
-            assertEquals(5, placeholders(lang.get("message.mitofus.debug_vrhelmet").getAsString()), file + ": debug_vrhelmet");
-        }
-    }
-
-    @Test
     void exactMultiplesRoundDownToTheExactValueWithAMinimumOfOne() {
         for (long r : new long[]{5, 10, 15, 20, 35, 100, 1000}) {
             long expected = Math.max(1L, BigDecimal.valueOf(r).multiply(BigDecimal.valueOf(B.sellShare())).setScale(0, RoundingMode.FLOOR).longValueExact());

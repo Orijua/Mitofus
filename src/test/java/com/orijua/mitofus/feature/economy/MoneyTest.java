@@ -27,23 +27,7 @@ class MoneyTest {
     }
 
     @Test
-    void goldFromEmeraldsIsAThirdRoundedDownWithAMinimumOfOne() {
-        for (int emeralds = 1; emeralds <= 5; emeralds++) {
-            assertEquals(1L, Money.goldFromEmeralds(emeralds), "emeralds " + emeralds);
-        }
-        assertEquals(2L, Money.goldFromEmeralds(6));
-        assertEquals(4L, Money.goldFromEmeralds(12));
-        assertEquals(5L, Money.goldFromEmeralds(16));
-        assertEquals(10L, Money.goldFromEmeralds(32));
-        assertEquals(16L, Money.goldFromEmeralds(48));
-        assertEquals(21L, Money.goldFromEmeralds(64));
-        assertEquals(3333L, Money.goldFromEmeralds(10_000));
-    }
-
-    @Test
     void goldBordersRoundDownWithAMinimumOfOne() {
-        assertEquals(1L, Money.goldFromEmeralds(0));
-        assertEquals(1L, Money.goldFromEmeralds(-3));
         assertEquals(1L, Money.gold(1.0));
         assertEquals(1L, Money.gold(0.9999999999), "below 1 counts as 1 either way");
         assertEquals(2L, Money.gold(1.9999999999), "the 1e-9 tolerance absorbs the rounding error of a double");

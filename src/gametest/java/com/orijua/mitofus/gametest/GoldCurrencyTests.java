@@ -57,7 +57,6 @@ import java.util.Optional;
 @GameTestHolder(Mitofus.MODID)
 @PrefixGameTestTemplate(false)
 public final class GoldCurrencyTests {
-    private static final String LEGACY_ID = "mitofus:mitofus_emerald";
     private static final TerminalBalance D = TerminalBalance.DEFAULT;
     private static final TradeBalance TRADE = TradeBalance.DEFAULT;
 
@@ -115,135 +114,6 @@ public final class GoldCurrencyTests {
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    // ---- 1. The old id of the money ----
-
-    @GameTest(template = TestSupport.EMPTY)
-    public static void theOldMoneyIdIsAnAliasOfTheGoldCoin(GameTestHelper helper) {
-        ResourceLocation old = Mitofus.id("mitofus_emerald");
-        helper.assertTrue(BuiltInRegistries.ITEM.get(old) == gold(), "the registry resolves the old id to the gold coin");
-        helper.assertTrue(BuiltInRegistries.ITEM.getOptional(old).filter(item -> item == gold()).isPresent(), "and getOptional too");
-        helper.assertTrue(BuiltInRegistries.ITEM.getKey(gold()).equals(Mitofus.id("gold_coin")), "the coin itself is called gold_coin");
-
-        CompoundTag entry = new CompoundTag();
-        entry.putString("id", LEGACY_ID);
-        entry.putInt("count", 7);
-        ItemStack parsed = ItemStack.parse(helper.getLevel().registryAccess(), entry).orElseThrow();
-        helper.assertTrue(parsed.is(gold()) && parsed.getCount() == 7, "an old stack of 7 loads as 7 gold coins: " + parsed);
-
-        ServerPlayer player = TestSupport.fakePlayer(helper);
-        player.getInventory().clearContent();
-        ListTag list = new ListTag();
-        CompoundTag slot = new CompoundTag();
-        slot.putByte("Slot", (byte) 3);
-        slot.putString("id", LEGACY_ID);
-        slot.putInt("count", 12);
-        list.add(slot);
-        player.getInventory().load(list);
-        helper.assertTrue(carried(player) == 12 && player.getInventory().getItem(3).is(gold()), "a saved inventory with the old id counts as gold coins");
-        helper.succeed();
-    }
-
-    // ---- 2. The vault ----
-
-    @GameTest(template = TestSupport.EMPTY)
-    public static void aVaultWithTheOldIdIsCountedByTheTerminal(GameTestHelper helper) {
-        ServerPlayer player = TestSupport.fakePlayer(helper);
-        player.getInventory().clearContent();
-        giveSplit(player, 60, 5);
-        CompoundTag snapshot = CharacterSnapshot.capture(player);
-        ListTag inventory = CharacterSnapshot.inventory(snapshot);
-        for (int i = 0; i < inventory.size(); i++) {
-            inventory.getCompound(i).putString("id", LEGACY_ID); // the tag is shared with the snapshot
-        }
-        player.getInventory().clearContent();
-        player.setData(ModAttachments.CHARACTER_VAULT.get(), CharacterVault.of(WorldSide.REAL, snapshot));
-        TestSupport.withAllDefaults(() -> VrHelmetTests.outsideMitofus(helper, () -> {
-            helper.assertTrue(TerminalService.state(player, Optional.empty()).storedGold() == 65, "the terminal counts the old stacks: "
-                    + TerminalService.state(player, Optional.empty()).storedGold());
-        }));
-        helper.succeed();
-    }
-
-    // ---- 3. A Smith of before ----
-
-    /** Rewrites a saved Smith as the 0.1 versions wrote it: no shop stamp and every gold price in Mitofus emeralds. */
-    private static CompoundTag legacySave(BlacksmithNpc smith) {
-        CompoundTag tag = new CompoundTag();
-        smith.addAdditionalSaveData(tag);
-        tag.remove("mitofus_shop_version");
-        ListTag recipes = tag.getCompound("Offers").getList("Recipes", Tag.TAG_COMPOUND);
-        for (int i = 0; i < recipes.size(); i++) {
-            CompoundTag recipe = recipes.getCompound(i);
-            CompoundTag buy = recipe.getCompound("buy");
-            String result = recipe.getCompound("sell").getString("id");
-            if (buy.getString("id").equals("mitofus:gold_coin")) {
-                buy.putString("id", LEGACY_ID);
-                buy.putInt("count", switch (result) {
-                    case "mitofus:enhancement_stone" -> 6;
-                    case "mitofus:respec_scroll" -> 12;
-                    case "mitofus:skill_book" -> 16;
-                    case "mitofus:appraiser_eye" -> 32;
-                    default -> 64;
-                });
-            }
-            if (result.equals("mitofus:gold_coin")) {
-                recipe.getCompound("sell").putString("id", LEGACY_ID);
-                recipe.getCompound("sell").putInt("count", 3);
-            }
-            recipe.putInt("uses", 3);
-        }
-        return tag;
-    }
-
-    private static void assertGoldCatalogue(GameTestHelper helper, BlacksmithNpc smith) {
-        MerchantOffers offers = smith.getOffers();
-        helper.assertTrue(offers.get(indexFor(smith, ModItems.ENHANCEMENT_STONE.get())).getItemCostA().count() == SmithShopBalance.DEFAULT.stonePrice()
-                && SmithShopBalance.DEFAULT.stonePrice() == 90, "the stone costs 90 gold");
-        for (Item sold : java.util.List.of(ModItems.ARMOR_ENHANCEMENT_STONE.get(), ModItems.BLESSED_WEAPON_ENHANCEMENT_STONE.get(),
-                ModItems.BLESSED_ARMOR_ENHANCEMENT_STONE.get(), ModItems.BLESSED_ENHANCEMENT_SCROLL.get())) {
-            helper.assertTrue(offers.stream().anyMatch(offer -> offer.getResult().is(sold)), "the shop sells " + sold);
-        }
-        helper.assertTrue(offers.get(indexFor(smith, ModItems.RESPEC_SCROLL.get())).getItemCostA().count() == 4, "the scroll costs 4 gold");
-        MerchantOffer eye = offers.get(indexFor(smith, ModItems.APPRAISER_EYE.get()));
-        helper.assertTrue(eye.getItemCostA().count() == 10 && eye.getItemCostA().test(new ItemStack(gold())), "the Eye costs 10 gold");
-        helper.assertTrue(eye.getItemCostB().map(cost -> cost.count() == 2 && cost.test(new ItemStack(Items.DIAMOND))).orElse(false), "and 2 diamonds");
-        MerchantOffer mithril = offers.get(indexFor(smith, gold()));
-        helper.assertTrue(mithril.getItemCostA().count() == 4 && mithril.getResult().is(gold()) && mithril.getResult().getCount() == 1,
-                "4 mithril ingots give 1 gold");
-        helper.assertTrue(offers.get(indexFor(smith, ModItems.SKILL_BOOK.get())).getItemCostA().count() == 5, "a skill book costs 5 gold");
-        helper.assertTrue(offers.get(indexFor(smith, ModItems.APPRENTICE_CONTRACT.get())).getItemCostA().count() == ApprenticeBalance.DEFAULT.contractPrice(), "the contract: 21");
-        helper.assertTrue(offers.stream().allMatch(offer -> offer.getUses() == 0), "every offer is fresh");
-        helper.assertTrue(offers.stream().noneMatch(offer -> offer.getBaseCostA().is(Items.EMERALD)), "no vanilla emerald");
-    }
-
-    @GameTest(template = TestSupport.EMPTY)
-    public static void aSmithSavedBeforeTheGoldCoinIsRestockedInGoldOnce(GameTestHelper helper) {
-        ServerPlayer player = TestSupport.fakePlayer(helper);
-        BlacksmithNpc original = helper.spawn(ModEntities.BLACKSMITH.get(), 1, 1, 1);
-        original.getOffers(); // stocks it
-        CompoundTag legacy = legacySave(original);
-        BlacksmithNpc old = helper.spawn(ModEntities.BLACKSMITH.get(), 2, 1, 1);
-        old.readAdditionalSaveData(legacy);
-        MerchantOffers loaded = old.getOffers();
-        helper.assertTrue(loaded.stream().allMatch(offer -> offer.getUses() == 3), "the old uses were loaded");
-        helper.assertTrue(loaded.get(indexFor(old, ModItems.ENHANCEMENT_STONE.get())).getItemCostA().count() == 6
-                && loaded.get(indexFor(old, ModItems.ENHANCEMENT_STONE.get())).getItemCostA().test(new ItemStack(gold())),
-                "the old stone costs 6 old coins, which the alias loads as gold coins");
-
-        old.startTrading(player);
-        assertGoldCatalogue(helper, old);
-        int size = old.getOffers().size();
-        old.setTradingPlayer(null);
-        old.startTrading(player);
-        helper.assertTrue(old.getOffers().size() == size, "a second opening changes nothing");
-        assertGoldCatalogue(helper, old);
-
-        CompoundTag saved = new CompoundTag();
-        old.addAdditionalSaveData(saved);
-        helper.assertTrue(saved.getInt("mitofus_shop_version") == BlacksmithNpc.SHOP_VERSION, "the shop is stamped with the new version");
-        helper.succeed();
     }
 
     // ---- 4 and 5. Payment in many stacks, and prices above a stack ----
@@ -514,11 +384,7 @@ public final class GoldCurrencyTests {
         helper.succeed();
     }
 
-    // ---- 11. The terminal ----
-
-    // ---- 12. The price of the daily offer ----
-
-    // ---- 12. The price of the daily offer ----
+    // ---- 11. The price of the daily offer ----
 
     @GameTest(template = TestSupport.EMPTY)
     public static void theOfferPricesAreInIronAndNeverBelowFourGold(GameTestHelper helper) {

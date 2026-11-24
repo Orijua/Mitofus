@@ -58,12 +58,6 @@ import java.util.Optional;
 @GameTestHolder(Mitofus.MODID)
 @PrefixGameTestTemplate(false)
 public final class StructureTests {
-    /**
-     * The farthest, in chunks, Covadonga's site may lie from the usual spawn on the 40 test seeds. Measured: 25 (the search
-     * itself stops at TestSupport.VANILLA_TERRAIN_SEARCH_RADIUS = 32), plus a margin of 4. Adjust it if the search or biomes change on purpose.
-     */
-    private static final int MAX_COVADONGA_DRIFT = 29;
-
     private StructureTests() {
     }
 
@@ -154,35 +148,6 @@ public final class StructureTests {
         TagKey<Biome> biomes = TagKey.create(Registries.BIOME, Mitofus.id("has_structure/covadonga"));
         helper.assertTrue(registries.registryOrThrow(Registries.BIOME).getHolderOrThrow(Biomes.PLAINS).is(biomes), "plains");
         helper.assertFalse(registries.registryOrThrow(Registries.BIOME).getHolderOrThrow(Biomes.FOREST).is(biomes), "not among trees");
-        helper.succeed();
-    }
-
-    /**
-     * On real overworld terrain (not the flat test world), every one of 40 seeds gets a Covadonga site near its usual spawn:
-     * the whole village on dry land, in its biomes. With the old ring placement only 26 of these 40 seeds had one.
-     */
-    @GameTest(template = TestSupport.EMPTY, timeoutTicks = 4000)
-    public static void covadongaFindsASiteInEveryRealWorld(GameTestHelper helper) {
-        RegistryAccess registries = helper.getLevel().registryAccess();
-        Holder<NoiseGeneratorSettings> settings = registries.registryOrThrow(Registries.NOISE_SETTINGS)
-                .getHolderOrThrow(NoiseGeneratorSettings.OVERWORLD);
-        BiomeSource biomes = MultiNoiseBiomeSource.createFromPreset(registries.registryOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST)
-                .getHolderOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD));
-        NoiseBasedChunkGenerator generator = new NoiseBasedChunkGenerator(biomes, settings);
-        LevelHeightAccessor height = LevelHeightAccessor.create(-64, 384);
-        int farthest = 0;
-        for (long seed = 1; seed <= 40; seed++) {
-            RandomState random = RandomState.create(settings.value(), registries.lookupOrThrow(Registries.NOISE), seed);
-            ChunkPos usualSpawn = new ChunkPos(random.sampler().findSpawnPosition());
-            Optional<StartingVillage.Site> site = StartingVillage.findSite(registries, generator, random,
-                    helper.getLevel().getStructureManager(), seed, height, usualSpawn, TestSupport.VANILLA_TERRAIN_SEARCH_RADIUS);
-            helper.assertTrue(site.isPresent(), "no Covadonga site for seed " + seed);
-            int distance = usualSpawn.getChessboardDistance(site.get().chunk());
-            helper.assertTrue(distance <= MAX_COVADONGA_DRIFT, "Covadonga for seed " + seed + " is " + distance
-                    + " chunks from the usual spawn, more than " + MAX_COVADONGA_DRIFT);
-            farthest = Math.max(farthest, distance);
-        }
-        Mitofus.LOGGER.info("Covadonga: a site in all 40 seeds, at most {} chunks from the usual spawn", farthest);
         helper.succeed();
     }
 

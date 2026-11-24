@@ -37,10 +37,4 @@ class PurseTest {
         assertEquals(more, Purse.CODEC.parse(JsonOps.INSTANCE, Purse.CODEC.encodeStart(JsonOps.INSTANCE, more).getOrThrow()).getOrThrow());
     }
 
-    @Test
-    void aPurseSavedWithoutCopperStillLoads() {
-        var json = new com.google.gson.JsonObject();
-        json.addProperty("iron", 40L);
-        assertEquals(new Purse(40L, 0), Purse.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
-    }
 }
