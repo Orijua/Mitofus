@@ -115,6 +115,8 @@ public class WorkshopTab extends MitofusTab {
                 ? Component.translatable("screen.mitofus.workshop.count", hired, allowed)
                 : Component.translatable("screen.mitofus.workshop.count_next", hired, allowed, next);
         UiStyle.sectionHeading(graphics, font(), header, left, top, cardWidth(), UiStyle.HEADING);
+        Component smithingLevel = Component.translatable("screen.mitofus.smithing", smithing);
+        UiStyle.text(graphics, font(), smithingLevel, left + cardWidth() - font().width(smithingLevel), top, UiStyle.MUTED);
 
         if (entries.isEmpty()) {
             graphics.drawWordWrap(font(), Component.translatable("screen.mitofus.workshop.empty", ApprenticeBalance.current().firstLevel()),

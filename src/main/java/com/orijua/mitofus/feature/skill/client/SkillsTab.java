@@ -2,6 +2,7 @@ package com.orijua.mitofus.feature.skill.client;
 
 import com.orijua.mitofus.MitofusClient;
 import com.orijua.mitofus.core.client.MitofusButton;
+import com.orijua.mitofus.core.client.MitofusCard;
 import com.orijua.mitofus.core.client.MitofusTab;
 import com.orijua.mitofus.core.client.PanelFit;
 import com.orijua.mitofus.core.client.ScrollList;
@@ -173,26 +174,37 @@ public class SkillsTab extends MitofusTab {
             return;
         }
         Row hovered = null;
+        int cardWidth = width - 6;
         for (int i = 0; i < rows.size(); i++) {
             Entry entry = rows.get(i).entry();
             int y = rowY(i);
-            graphics.renderItem(entry.icon(), left, y + 1);
-            Component tag = Component.translatable(entry.passive() ? "screen.mitofus.skill_tag_passive" : "screen.mitofus.skill_tag_active");
-            UiStyle.text(graphics, font(), entry.name(), left + 20, y, UiStyle.TEXT);
-            UiStyle.text(graphics, font(), tag, left + 24 + font().width(entry.name()), y, UiStyle.MUTED);
-            UiStyle.text(graphics, font(), entry.detail(), left + 20, y + 10, UiStyle.MUTED);
+            boolean over = mouseX >= left && mouseX < left + cardWidth && mouseY >= y - 2 && mouseY < y + ROW - 4;
+            // Active skills get a blue stripe and passives a green one: no text tag needed.
+            MitofusCard.draw(graphics, left, y - 2, cardWidth, ROW - 2, entry.passive() ? UiStyle.GOOD : UiStyle.MANA,
+                    MitofusCard.state(over, false, false));
+            graphics.renderItem(entry.icon(), left + 4, y + 1);
+            int textLeft = left + 24;
+            int slotWidth = 0;
             if (!entry.passive()) {
                 // Where it is placed, for reading only: the assigning is done in its own window.
                 Component slot = slotLabel(entry.id());
-                UiStyle.text(graphics, font(), slot, left + width - font().width(slot), y, slotOf(entry.id()) < 0 ? UiStyle.MUTED : UiStyle.GOOD);
+                slotWidth = font().width(slot) + 6;
+                UiStyle.text(graphics, font(), slot, left + cardWidth - slotWidth + 3, y, slotOf(entry.id()) < 0 ? UiStyle.MUTED : UiStyle.GOOD);
             }
-            if (mouseX >= left && mouseX < left + 180 && mouseY >= y - 2 && mouseY < y + ROW - 4) {
+            int textWidth = cardWidth - 24 - slotWidth - 4;
+            UiStyle.text(graphics, font(), UiStyle.ellipsize(font(), entry.name(), textWidth), textLeft, y, UiStyle.TEXT);
+            UiStyle.text(graphics, font(), UiStyle.ellipsize(font(), entry.description(), cardWidth - 28), textLeft, y + 10, UiStyle.MUTED);
+            if (over) {
                 hovered = rows.get(i);
             }
         }
         scroll.renderBar(graphics, left + width + 3, top + LIST_TOP - 2, visibleRows * ROW - 4, shownCount);
         if (hovered != null) {
-            graphics.renderTooltip(font(), font().split(hovered.entry().description(), 180), mouseX, mouseY);
+            // The full description, then the cost and mastery that used to crowd the row.
+            // The kind (active or passive) is also written there, so the stripe color is never the only cue.
+            Component kind = Component.translatable(hovered.entry().passive() ? "screen.mitofus.skill_tag_passive" : "screen.mitofus.skill_tag_active");
+            Component tooltip = kind.copy().append("\n").append(hovered.entry().description()).append("\n").append(hovered.entry().detail());
+            graphics.renderTooltip(font(), font().split(tooltip, 200), mouseX, mouseY);
         }
     }
 }

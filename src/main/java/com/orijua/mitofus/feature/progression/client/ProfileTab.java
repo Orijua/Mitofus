@@ -24,6 +24,7 @@ import com.orijua.mitofus.feature.progression.ProgressionService;
 import com.orijua.mitofus.feature.progression.StatType;
 import com.orijua.mitofus.feature.progression.TitleDefinition;
 import net.minecraft.client.Minecraft;
+import com.orijua.mitofus.feature.view.Observation;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -50,6 +51,7 @@ public class ProfileTab extends MitofusTab {
     /** Space between a title's name and its bonus column. */
     private static final int NAME_GAP = 6;
 
+    private static final int FUSIONS_BUTTON_WIDTH = 70;
     private final ScrollList titleScroll = new ScrollList(9);
 
     public ProfileTab() {
@@ -126,7 +128,7 @@ public class ProfileTab extends MitofusTab {
         if (!Definitions.all(player().level(), ModDatapackRegistries.FUSION).isEmpty()) {
             addWidget.accept(Button.builder(Component.translatable("screen.mitofus.fusions"),
                             b -> Minecraft.getInstance().setScreen(new FusionScreen(Minecraft.getInstance().screen)))
-                    .bounds(left + width - 70, top - 2, 70, 14).build(MitofusButton::new));
+                    .bounds(left + width - FUSIONS_BUTTON_WIDTH, top - 2, FUSIONS_BUTTON_WIDTH, 14).build(MitofusButton::new));
         }
         if (classes().job().isEmpty()) {
             List<Definitions.Entry<JobDefinition>> jobs = Definitions.all(player().level(), ModDatapackRegistries.JOB).stream()
@@ -256,6 +258,17 @@ public class ProfileTab extends MitofusTab {
     public void render(GuiGraphics graphics, int mouseX, int mouseY) {
         Layout layout = layout();
         UiStyle.heading(graphics, font(), Component.translatable("screen.mitofus.class"), left, top);
+        int swordBonus = Observation.effectiveView(player()) - Observation.view(player());
+        Component view = Component.translatable("screen.mitofus.view", Observation.view(player()))
+                .append(swordBonus > 0 ? Component.literal(" +" + swordBonus).withColor(UiStyle.GOOD) : Component.empty());
+        // Left of the Fusions button, which takes the top right corner.
+        int viewRight = left + width - FUSIONS_BUTTON_WIDTH - 6;
+        int viewX = viewRight - font().width(view);
+        UiStyle.text(graphics, font(), view, viewX, top, UiStyle.MUTED);
+        if (mouseX >= viewX && mouseX < viewRight && mouseY >= top - 2 && mouseY < top + 10) {
+            graphics.renderTooltip(font(), font().split(Component.translatable("screen.mitofus.view.tooltip",
+                    String.format("%.1f", Observation.observeTicks(player()) / 20.0)), 200), mouseX, mouseY);
+        }
         int classY = top + layout.classLines();
         for (ClassSlot placed : classes().slots()) {
             Component name = FusionText.slotName(player().level(), placed);
