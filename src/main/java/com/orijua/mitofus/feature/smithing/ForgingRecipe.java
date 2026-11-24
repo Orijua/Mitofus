@@ -21,6 +21,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -66,14 +67,27 @@ public record ForgingRecipe(Ingredient material, int materialCount, Ingredient h
                     ForgingExtras.STREAM_CODEC.decode(buf)));
 
     /**
-     * The recipe the anvil forges for these inputs. Several can match at once (armor pieces of one material share the
-     * ingot and have no handle: 8 ingots also mitofus the helmet, leggings and boots), so the one that asks for the most
-     * material wins; otherwise the chestplate would never come out. Server and client screen both use this.
+     * The recipes the anvil can forge from these inputs. Several can match at once (armor pieces of one material share the
+     * ingot and have no handle: 8 ingots also match the helmet, leggings and boots), so only the ones that ask for the most
+     * material count; otherwise the chestplate would never come out. Some tie (pickaxe and axe, sword and hoe take the same
+     * items), and then the smith chooses: the list is sorted by recipe id, descending, so the order is the same on server and client
+     * and the first one is the useful default (pickaxe before axe, sword before hoe).
      */
-    public static Optional<RecipeHolder<ForgingRecipe>> find(RecipeManager recipes, ForgingRecipeInput input, Level level) {
-        return recipes.getAllRecipesFor(ModRecipes.FORGING.get()).stream()
+    public static List<RecipeHolder<ForgingRecipe>> candidates(RecipeManager recipes, ForgingRecipeInput input, Level level) {
+        List<RecipeHolder<ForgingRecipe>> matching = recipes.getAllRecipesFor(ModRecipes.FORGING.get()).stream()
                 .filter(holder -> holder.value().matches(input, level))
-                .max(Comparator.comparingInt((RecipeHolder<ForgingRecipe> holder) -> holder.value().materialCount()));
+                .toList();
+        int most = matching.stream().mapToInt(holder -> holder.value().materialCount()).max().orElse(0);
+        return matching.stream()
+                .filter(holder -> holder.value().materialCount() == most)
+                .sorted(Comparator.comparing((RecipeHolder<ForgingRecipe> holder) -> holder.id().toString()).reversed())
+                .toList();
+    }
+
+    /** The candidate at {@code choice}, wrapping around, so a stale choice (inputs changed) still lands on a recipe. */
+    public static Optional<RecipeHolder<ForgingRecipe>> find(RecipeManager recipes, ForgingRecipeInput input, Level level, int choice) {
+        List<RecipeHolder<ForgingRecipe>> candidates = candidates(recipes, input, level);
+        return candidates.isEmpty() ? Optional.empty() : Optional.of(candidates.get(Math.floorMod(choice, candidates.size())));
     }
 
     @Override

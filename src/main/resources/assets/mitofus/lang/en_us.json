@@ -426,6 +426,8 @@
   "screen.mitofus.forge_manual": "Manual",
   "screen.mitofus.forge_manual.tooltip": "Manual forging: heat the metal and hammer it. Done well, a better rating and maybe an extra option; done badly, worse than automatic. Double smithing XP.",
   "screen.mitofus.forge_stop": "Stop",
+  "screen.mitofus.recipe": "Recipe %s/%s",
+  "screen.mitofus.recipe.tooltip": "These items make more than one thing. Click to change what the anvil forges.",
   "screen.mitofus.batch.all": "All",
   "screen.mitofus.batch.tooltip": "Batch forging: Auto forges this many in a row, each with its own rating. Click to change the amount.",
   "screen.mitofus.batch.locked": "Batch forging: unlocked at smithing level 10.",

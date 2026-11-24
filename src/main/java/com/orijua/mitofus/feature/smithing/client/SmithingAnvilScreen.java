@@ -84,6 +84,8 @@ public class SmithingAnvilScreen extends AbstractContainerScreen<SmithingAnvilMe
     private boolean autoBlockedByContest;
     private Button manualButton;
     private Button batchButton;
+    /** Picks between recipes that take the same items (pickaxe or axe); only shown when there is a choice. */
+    private Button recipeButton;
     /** Which tooltip the batch button shows now, so it is only rebuilt when that changes. */
     private String batchTooltipKey = "";
     private double[] autoOdds = new double[ItemRating.values().length];
@@ -124,6 +126,11 @@ public class SmithingAnvilScreen extends AbstractContainerScreen<SmithingAnvilMe
         batchButton = addRenderableWidget(Button.builder(Component.empty(), b -> pressButton(SmithingAnvilMenu.BATCH_BUTTON))
                 .bounds(leftPos + 138, topPos + 37, 30, 14)
                 .build(MitofusButton::new));
+        recipeButton = addRenderableWidget(Button.builder(Component.empty(), b -> pressButton(SmithingAnvilMenu.RECIPE_BUTTON))
+                .bounds(leftPos + 86, topPos + 17, 82, 14)
+                .tooltip(Tooltip.create(Component.translatable("screen.mitofus.recipe.tooltip")))
+                .build(MitofusButton::new));
+        recipeButton.visible = false;
         batchTooltipKey = "";
         containerTick();
     }
@@ -159,8 +166,12 @@ public class SmithingAnvilScreen extends AbstractContainerScreen<SmithingAnvilMe
         // Recipes are synced to the client, so the screen can find the one the server will use.
         ForgingRecipeInput input = new ForgingRecipeInput(menu.getSlot(SmithingAnvilMenu.TOP_SLOT).getItem(),
                 menu.getSlot(SmithingAnvilMenu.BOTTOM_SLOT).getItem());
-        recipe = ForgingRecipe.find(minecraft.level.getRecipeManager(), input, minecraft.level)
+        int choices = ForgingRecipe.candidates(minecraft.level.getRecipeManager(), input, minecraft.level).size();
+        recipe = ForgingRecipe.find(minecraft.level.getRecipeManager(), input, minecraft.level, menu.recipeChoice())
                 .map(RecipeHolder::value);
+        recipeButton.visible = !enhanceButton.visible && choices > 1;
+        recipeButton.active = idle;
+        recipeButton.setMessage(Component.translatable("screen.mitofus.recipe", Math.floorMod(menu.recipeChoice(), Math.max(1, choices)) + 1, choices));
         // A recipe with a rating range (Guadalete: Unique or Legendary) shows the odds within it.
         ForgingExtras extras = recipe.map(ForgingRecipe::extras).orElse(ForgingExtras.NONE);
         // The hammer in either hand (the better one) counts in both, as when the server forges. Read every frame, so
