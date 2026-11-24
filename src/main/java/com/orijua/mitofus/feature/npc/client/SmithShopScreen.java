@@ -3,6 +3,7 @@ package com.orijua.mitofus.feature.npc.client;
 import com.orijua.mitofus.core.client.MitofusButton;
 import com.orijua.mitofus.core.client.MitofusCard;
 import com.orijua.mitofus.core.client.MitofusStyledScreen;
+import com.orijua.mitofus.core.client.PanelFit;
 import com.orijua.mitofus.core.client.ScrollList;
 import com.orijua.mitofus.core.client.UiStyle;
 import com.orijua.mitofus.core.registry.ModItems;
@@ -33,23 +34,33 @@ import java.util.Optional;
  */
 public class SmithShopScreen extends AbstractContainerScreen<SmithShopMenu> implements MitofusStyledScreen {
     private static final int MARGIN = 10;
-    private static final int ROWS = 6;
+    private static final int WANTED_WIDTH = 260;
+    private static final int WANTED_HEIGHT = 214;
+    private static final int MIN_HEIGHT = 120;
+    /** Space under the list: the message line, the gold and the button. */
+    private static final int FOOTER = 44;
     private static final int ROW_HEIGHT = 24;
     private static final int LIST_TOP = 24;
     private static final int ICON = 18;
 
-    private final ScrollList scroll = new ScrollList(ROWS);
+    private final ScrollList scroll = new ScrollList(1);
+    private int rows = 1;
     private int selected = -1;
     private Button deal;
 
     public SmithShopScreen(SmithShopMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        this.imageWidth = 260;
-        this.imageHeight = 214;
+        this.imageWidth = WANTED_WIDTH;
+        this.imageHeight = WANTED_HEIGHT;
     }
 
     @Override
     protected void init() {
+        PanelFit.Size size = PanelFit.fit(WANTED_WIDTH, WANTED_HEIGHT, width, height, WANTED_WIDTH - 20, MIN_HEIGHT);
+        imageWidth = size.width();
+        imageHeight = size.height();
+        rows = PanelFit.rows(imageHeight - LIST_TOP - FOOTER, ROW_HEIGHT);
+        scroll.setVisibleRows(rows);
         super.init();
         deal = addRenderableWidget(Button.builder(Component.translatable("screen.mitofus.smith_shop.trade"), pressed -> sendDeal())
                 .bounds(leftPos + imageWidth - MARGIN - 110, topPos + imageHeight - 28, 110, 18)
@@ -142,7 +153,7 @@ public class SmithShopScreen extends AbstractContainerScreen<SmithShopMenu> impl
         for (int i = scroll.first(); i < scroll.end(offers().size()); i++) {
             hovered = drawRow(graphics, offers().get(i), i, rowY(i - scroll.first()), mouseX, mouseY, hovered);
         }
-        scroll.renderBar(graphics, leftPos + imageWidth - MARGIN - 3, topPos + LIST_TOP, ROWS * ROW_HEIGHT - 2, offers().size());
+        scroll.renderBar(graphics, leftPos + imageWidth - MARGIN - 3, topPos + LIST_TOP, rows * ROW_HEIGHT - 2, offers().size());
         int bottom = topPos + imageHeight - 28;
         UiStyle.text(graphics, font, Component.translatable("screen.mitofus.smith_shop.have", Money.format(goldCarried())),
                 leftPos + MARGIN, bottom + 5, UiStyle.TEXT);

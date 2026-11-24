@@ -18,9 +18,19 @@ public final class PanelFit {
 
     /** The wanted size, shrunk to the screen minus the margins, but never under the minimum. */
     public static Size fit(int wantedWidth, int wantedHeight, int screenWidth, int screenHeight) {
-        int width = Math.max(MIN_WIDTH, Math.min(wantedWidth, screenWidth - 2 * MARGIN));
-        int height = Math.max(MIN_HEIGHT, Math.min(wantedHeight, screenHeight - 2 * MARGIN));
+        return fit(wantedWidth, wantedHeight, screenWidth, screenHeight, MIN_WIDTH, MIN_HEIGHT);
+    }
+
+    /** Like {@link #fit(int, int, int, int)} for a window that needs more than the default minimum to stay readable. */
+    public static Size fit(int wantedWidth, int wantedHeight, int screenWidth, int screenHeight, int minWidth, int minHeight) {
+        int width = Math.max(minWidth, Math.min(wantedWidth, screenWidth - 2 * MARGIN));
+        int height = Math.max(minHeight, Math.min(wantedHeight, screenHeight - 2 * MARGIN));
         return new Size(width, height);
+    }
+
+    /** How many rows of {@code rowHeight} fit in {@code availableHeight}; at least one, the list scrolls for the rest. */
+    public static int rows(int availableHeight, int rowHeight) {
+        return Math.max(1, availableHeight / rowHeight);
     }
 
     public static boolean needsScroll(int contentHeight, int availableHeight) {

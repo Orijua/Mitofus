@@ -1,6 +1,7 @@
 package com.orijua.mitofus.feature.economy.client;
 
 import com.orijua.mitofus.core.client.MitofusButton;
+import com.orijua.mitofus.core.client.PanelFit;
 import com.orijua.mitofus.core.client.ScrollList;
 import com.orijua.mitofus.core.client.UiStyle;
 import com.orijua.mitofus.core.config.VrHelmetBalance;
@@ -45,34 +46,49 @@ public class TerminalScreen extends AbstractContainerScreen<TerminalMenu> {
     private static final int PAGE_SHOP = 1;
     private static final int PAGE_HELMET = 2;
     private static final int OFFER_X = 12;
-    private static final int OFFER_WIDTH = 376;
+    private static final int WANTED_WIDTH = 400;
+    private static final int WANTED_HEIGHT = 226;
+    private static final int MIN_WIDTH = 300;
+    private static final int MIN_HEIGHT = 150;
+    /** Space under the offer list: the message line. */
+    private static final int FOOTER = 20;
+    private static final int PAGE_BUTTON_WIDTH = 64;
+    private static final int PAGE_BUTTON_STEP = 68;
     private static final int OFFER_TOP = 48;
     private static final int OFFER_ROW = 22;
-    private static final int OFFER_ROWS = 7;
+    private static final int MAX_OFFER_ROWS = 12;
 
     private int page = PAGE_ACCOUNT;
-    private final ScrollList offerScroll = new ScrollList(OFFER_ROWS);
+    private final ScrollList offerScroll = new ScrollList(1);
+    private int offerRows = 1;
     private Button pageAccount;
     private Button pageShop;
     private Button pageHelmet;
-    private final Button[] rowButtons = new Button[OFFER_ROWS];
+    private Button[] rowButtons = new Button[0];
 
     public TerminalScreen(TerminalMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        this.imageWidth = 400;
-        this.imageHeight = 226;
+        this.imageWidth = WANTED_WIDTH;
+        this.imageHeight = WANTED_HEIGHT;
     }
 
     @Override
     protected void init() {
+        PanelFit.Size size = PanelFit.fit(WANTED_WIDTH, WANTED_HEIGHT, width, height, MIN_WIDTH, MIN_HEIGHT);
+        imageWidth = size.width();
+        imageHeight = size.height();
+        offerRows = Math.min(MAX_OFFER_ROWS, PanelFit.rows(imageHeight - OFFER_TOP - FOOTER, OFFER_ROW));
+        offerScroll.setVisibleRows(offerRows);
+        rowButtons = new Button[offerRows];
         super.init();
-        pageAccount = addRenderableWidget(button(Component.translatable("screen.mitofus.terminal.page.account"), 188, 6, 64, () -> page = PAGE_ACCOUNT));
-        pageShop = addRenderableWidget(button(Component.translatable("screen.mitofus.terminal.page.shop"), 256, 6, 64, () -> page = PAGE_SHOP));
-        pageHelmet = addRenderableWidget(button(Component.translatable("screen.mitofus.terminal.page.vrhelmets"), 324, 6, 64, () -> page = PAGE_HELMET));
-        for (int i = 0; i < OFFER_ROWS; i++) {
+        int pagesX = imageWidth - MARGIN - 2 * PAGE_BUTTON_STEP - PAGE_BUTTON_WIDTH;
+        pageAccount = addRenderableWidget(button(Component.translatable("screen.mitofus.terminal.page.account"), pagesX, 6, PAGE_BUTTON_WIDTH, () -> page = PAGE_ACCOUNT));
+        pageShop = addRenderableWidget(button(Component.translatable("screen.mitofus.terminal.page.shop"), pagesX + PAGE_BUTTON_STEP, 6, PAGE_BUTTON_WIDTH, () -> page = PAGE_SHOP));
+        pageHelmet = addRenderableWidget(button(Component.translatable("screen.mitofus.terminal.page.vrhelmets"), pagesX + 2 * PAGE_BUTTON_STEP, 6, PAGE_BUTTON_WIDTH, () -> page = PAGE_HELMET));
+        for (int i = 0; i < offerRows; i++) {
             int row = i;
             rowButtons[i] = addRenderableWidget(button(Component.translatable("screen.mitofus.terminal.shop.buy"),
-                    OFFER_X + OFFER_WIDTH - 58, OFFER_TOP, 54, () -> sendBuyOffer(offerScroll.first() + row)));
+                    OFFER_X + offerWidth() - 58, OFFER_TOP, 54, () -> sendBuyOffer(offerScroll.first() + row)));
             rowButtons[i].setHeight(16);
         }
     }
@@ -100,6 +116,10 @@ public class TerminalScreen extends AbstractContainerScreen<TerminalMenu> {
     private Button button(Component label, int x, int y, int width, Runnable action) {
         return Button.builder(label, pressed -> action.run()).bounds(leftPos + x, topPos + y, width, 18)
                 .build(builder -> new MitofusButton(builder, UiStyle.DEVICE));
+    }
+
+    private int offerWidth() {
+        return imageWidth - 2 * OFFER_X;
     }
 
     private Optional<TerminalState> state() {
@@ -153,7 +173,7 @@ public class TerminalScreen extends AbstractContainerScreen<TerminalMenu> {
         long coins = Wallet.balance(player);
         List<OfferEntry> offer = state.offer();
         offerScroll.clamp(offer.size());
-        for (int i = 0; i < OFFER_ROWS; i++) {
+        for (int i = 0; i < offerRows; i++) {
             int position = offerScroll.first() + i;
             Button rowButton = rowButtons[i];
             boolean shown = position < offer.size() && !state.boughtToday().contains(position);
@@ -196,7 +216,7 @@ public class TerminalScreen extends AbstractContainerScreen<TerminalMenu> {
         drawHeader(graphics);
         Component coins = Component.translatable("screen.mitofus.terminal.coins", MoneyText.iron(Wallet.balance(player)));
         UiStyle.heading(graphics, font, Component.translatable("screen.mitofus.terminal.shop.offer"), x + OFFER_X, y + 34);
-        UiStyle.text(graphics, font, coins, x + OFFER_X + OFFER_WIDTH - 4 - font.width(coins), y + 34, UiStyle.GOLD);
+        UiStyle.text(graphics, font, coins, x + OFFER_X + offerWidth() - 4 - font.width(coins), y + 34, UiStyle.GOLD);
         if (!state.characterAvailable()) {
             UiStyle.text(graphics, font, Component.translatable("screen.mitofus.terminal.no_character"), x + OFFER_X + 100, y + 34, NO_CHARACTER_COLOR);
         } else {
@@ -212,22 +232,22 @@ public class TerminalScreen extends AbstractContainerScreen<TerminalMenu> {
             OfferEntry entry = offer.get(i);
             int rowY = y + OFFER_TOP + (i - offerScroll.first()) * OFFER_ROW;
             int rowX = x + OFFER_X;
-            boolean hover = mouseX >= rowX && mouseX < rowX + OFFER_WIDTH - 62 && mouseY >= rowY && mouseY < rowY + OFFER_ROW - 2;
-            graphics.fill(rowX, rowY, rowX + OFFER_WIDTH - 4, rowY + OFFER_ROW - 2, hover ? 0x40FFFFFF : 0x20FFFFFF);
+            boolean hover = mouseX >= rowX && mouseX < rowX + offerWidth() - 62 && mouseY >= rowY && mouseY < rowY + OFFER_ROW - 2;
+            graphics.fill(rowX, rowY, rowX + offerWidth() - 4, rowY + OFFER_ROW - 2, hover ? 0x40FFFFFF : 0x20FFFFFF);
             graphics.renderItem(entry.stack(), rowX + 3, rowY + 2);
             int nameColor = UiStyle.ratingNameColor(entry.stack());
-            graphics.drawString(font, UiStyle.ellipsize(font, entry.stack().getHoverName().copy().withColor(nameColor), OFFER_WIDTH - 24 - 62),
+            graphics.drawString(font, UiStyle.ellipsize(font, entry.stack().getHoverName().copy().withColor(nameColor), offerWidth() - 24 - 62),
                     rowX + 24, rowY + 2, nameColor);
             UiStyle.text(graphics, font, MoneyText.iron(entry.price()), rowX + 24, rowY + 11, UiStyle.GOLD);
             if (state.boughtToday().contains(entry.position())) {
                 Component bought = Component.translatable("screen.mitofus.terminal.shop.bought");
-                UiStyle.text(graphics, font, bought, rowX + OFFER_WIDTH - 8 - font.width(bought), rowY + 7, UiStyle.GOOD);
+                UiStyle.text(graphics, font, bought, rowX + offerWidth() - 8 - font.width(bought), rowY + 7, UiStyle.GOOD);
             }
             if (hover) {
                 hovered = entry.stack();
             }
         }
-        offerScroll.renderBar(graphics, x + OFFER_X + OFFER_WIDTH - 1, y + OFFER_TOP, OFFER_ROWS * OFFER_ROW - 2, offer.size());
+        offerScroll.renderBar(graphics, x + OFFER_X + offerWidth() - 1, y + OFFER_TOP, offerRows * OFFER_ROW - 2, offer.size());
         drawMessage(graphics, state);
         if (!hovered.isEmpty()) {
             graphics.renderTooltip(font, hovered, mouseX, mouseY);
@@ -236,7 +256,7 @@ public class TerminalScreen extends AbstractContainerScreen<TerminalMenu> {
 
     private void drawMessage(GuiGraphics graphics, TerminalState state) {
         state.message().ifPresent(message -> UiStyle.text(graphics, font, UiStyle.ellipsize(font, message, imageWidth - 2 * MARGIN),
-                leftPos + MARGIN, topPos + 206, UiStyle.COOLDOWN));
+                leftPos + MARGIN, topPos + imageHeight - FOOTER, UiStyle.COOLDOWN));
     }
 
     private void drawAccount(GuiGraphics graphics, TerminalState state, LocalPlayer player) {
