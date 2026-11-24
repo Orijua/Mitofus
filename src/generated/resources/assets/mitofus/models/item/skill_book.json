@@ -1,6 +1,21 @@
 {
   "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "minecraft:item/writable_book"
+  "base": {
+    "parent": "mitofus:item/skill_book_3d"
+  },
+  "loader": "neoforge:separate_transforms",
+  "perspectives": {
+    "fixed": {
+      "parent": "minecraft:item/generated",
+      "textures": {
+        "layer0": "mitofus:item/skill_book"
+      }
+    },
+    "gui": {
+      "parent": "minecraft:item/generated",
+      "textures": {
+        "layer0": "mitofus:item/skill_book"
+      }
+    }
   }
 }

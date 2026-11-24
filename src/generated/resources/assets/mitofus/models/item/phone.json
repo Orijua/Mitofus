@@ -1,6 +1,21 @@
 {
   "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "minecraft:block/black_stained_glass"
+  "base": {
+    "parent": "mitofus:item/phone_3d"
+  },
+  "loader": "neoforge:separate_transforms",
+  "perspectives": {
+    "fixed": {
+      "parent": "minecraft:item/generated",
+      "textures": {
+        "layer0": "mitofus:item/phone"
+      }
+    },
+    "gui": {
+      "parent": "minecraft:item/generated",
+      "textures": {
+        "layer0": "mitofus:item/phone"
+      }
+    }
   }
 }
