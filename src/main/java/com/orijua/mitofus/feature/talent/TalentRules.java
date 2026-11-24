@@ -59,6 +59,22 @@ public final class TalentRules {
         return Math.max(0, pointsEarned(slot.classLevel()) + slot.paidPoints() - pointsSpent(all, slot));
     }
 
+    /**
+     * Whether the slot owns every node of its tree that its grade lets it buy (a node asking for a higher grade does not count).
+     * What is still missing is what the player can spend points on; points are not needed, so a full tree can be owned by any class level.
+     */
+    public static boolean treeComplete(Map<ResourceLocation, ? extends TalentNode> all, ClassSlot slot) {
+        Set<ResourceLocation> owned = owned(all, slot);
+        for (Map.Entry<ResourceLocation, ? extends TalentNode> entry : all.entrySet()) {
+            TalentNode node = entry.getValue();
+            if (slot.treeClasses().contains(node.playerClass()) && !owned.contains(entry.getKey())
+                    && slot.grade().ordinal() >= node.minGrade().ordinal()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /** Whether {@code slot} may buy {@code node} now, and if not, the first thing that stops it. */
     public static Buy check(Map<ResourceLocation, ? extends TalentNode> all, ClassSlot slot, ResourceLocation node) {
         TalentNode definition = all.get(node);

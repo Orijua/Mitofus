@@ -13,6 +13,7 @@ import com.orijua.mitofus.feature.quest.PlayerQuests;
 import com.orijua.mitofus.feature.quest.QuestActionPayload;
 import com.orijua.mitofus.feature.quest.QuestDeadlines;
 import com.orijua.mitofus.feature.quest.QuestDefinition;
+import com.orijua.mitofus.feature.quest.GradeQuestRules;
 import com.orijua.mitofus.feature.quest.QuestService;
 import com.orijua.mitofus.feature.quest.QuestTree;
 import com.orijua.mitofus.feature.quest.QuestsSeenPayload;
@@ -166,6 +167,9 @@ public class QuestsTab extends MitofusTab {
         for (Definitions.Entry<QuestDefinition> entry : all) {
             byId.put(entry.id(), entry.value());
             QuestDefinition quest = entry.value();
+            if (!QuestService.listedFor(player(), entry.id(), quest)) {
+                continue;
+            }
             quests.add(new QuestTree.Quest(entry.id(), quest.requiresQuest(), groupKey(quest), quest.repeatable(), quest.isHidden()));
         }
         QuestTree.View view = QuestTree.build(quests, shownState);
@@ -543,6 +547,14 @@ public class QuestsTab extends MitofusTab {
         if (requiredClass.isPresent()) {
             graphics.drawString(font(), Component.translatable("screen.mitofus.quest_requires_class", requiredClass.get()), x, y, UiStyle.BAD);
             y += 10;
+        }
+        if (!shownState.isActive(id) && !shownState.isCompleted(id)) {
+            Optional<GradeQuestRules.Check> blocked = QuestService.gradeCheck(player(), quest)
+                    .filter(check -> check == GradeQuestRules.Check.LEVEL_TOO_LOW || check == GradeQuestRules.Check.TREE_INCOMPLETE);
+            if (blocked.isPresent()) {
+                graphics.drawString(font(), Component.translatable("screen.mitofus.quest_grade_" + blocked.get().name().toLowerCase()), x, y, UiStyle.BAD);
+                y += 10;
+            }
         }
 
         y += 2;

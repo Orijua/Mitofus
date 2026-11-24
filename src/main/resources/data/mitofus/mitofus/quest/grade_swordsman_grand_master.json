@@ -1,0 +1,25 @@
+{
+  "name": {
+    "translate": "quest.mitofus.grade_swordsman_grand_master"
+  },
+  "description": {
+    "translate": "quest.mitofus.grade_swordsman_grand_master.desc"
+  },
+  "giver": "mitofus:village_chief",
+  "required_class": "mitofus:swordsman",
+  "grade_quest": {
+    "from": "master"
+  },
+  "goal": {
+    "type": "deliver",
+    "items": "mitofus:wolfram_ingot",
+    "count": 5
+  },
+  "xp_reward": 10000,
+  "item_rewards": [
+    {
+      "id": "mitofus:diamond_coin",
+      "count": 3
+    }
+  ]
+}

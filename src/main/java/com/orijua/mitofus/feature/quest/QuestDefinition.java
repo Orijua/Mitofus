@@ -1,6 +1,7 @@
 package com.orijua.mitofus.feature.quest;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.orijua.mitofus.feature.quest.goal.Goal;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -26,6 +27,7 @@ import java.util.Set;
  * {@code time_limit_days} gives it a deadline in game days (sleeping counts) from accepting it: such a quest can't be
  * abandoned, warns when one day is left, and when the time runs out it fails for good and can never be taken again.
  * {@code fail_level_penalty} is how many levels failing it costs; never below level 1.
+ * {@code grade_quest} makes it a class grade quest: it needs {@code required_class} and raises that class's grade when claimed.
  * {@code accept_skill} is a skill learned on accepting it.
  */
 public record QuestDefinition(
@@ -44,7 +46,8 @@ public record QuestDefinition(
         List<ItemStack> loanedItems,
         Optional<Integer> timeLimitDays,
         Optional<ResourceLocation> acceptSkill,
-        int failLevelPenalty) {
+        int failLevelPenalty,
+        Optional<GradeQuest> gradeQuest) {
 
     /** One Minecraft day, in ticks of day time. */
     public static final long DAY_TICKS = 24_000L;
@@ -64,9 +67,20 @@ public record QuestDefinition(
             BuiltInRegistries.ENTITY_TYPE.byNameCodec().optionalFieldOf("giver").forGetter(QuestDefinition::giver),
             ItemStack.CODEC.listOf().optionalFieldOf("loaned_items", List.of()).forGetter(QuestDefinition::loanedItems),
             Codec.intRange(1, 365).optionalFieldOf("time_limit_days").forGetter(QuestDefinition::timeLimitDays),
-            ResourceLocation.CODEC.optionalFieldOf("accept_skill").forGetter(QuestDefinition::acceptSkill),
-            Codec.intRange(0, 100).optionalFieldOf("fail_level_penalty", 0).forGetter(QuestDefinition::failLevelPenalty)
-    ).apply(instance, QuestDefinition::new));
+            Extras.CODEC.forGetter(quest -> new Extras(quest.acceptSkill(), quest.failLevelPenalty(), quest.gradeQuest()))
+    ).apply(instance, (name, description, goal, requiredClass, requiresQuest, discoverWhen, xpReward, itemRewards, classReward,
+                       jobReward, repeatable, giver, loanedItems, timeLimitDays, extras) -> new QuestDefinition(name, description, goal,
+            requiredClass, requiresQuest, discoverWhen, xpReward, itemRewards, classReward, jobReward, repeatable, giver, loanedItems,
+            timeLimitDays, extras.acceptSkill(), extras.failLevelPenalty(), extras.gradeQuest())));
+
+    /** The last fields of the JSON, grouped only because a codec takes at most 16 fields; they stay flat in the file. */
+    private record Extras(Optional<ResourceLocation> acceptSkill, int failLevelPenalty, Optional<GradeQuest> gradeQuest) {
+        static final MapCodec<Extras> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                ResourceLocation.CODEC.optionalFieldOf("accept_skill").forGetter(Extras::acceptSkill),
+                Codec.intRange(0, 100).optionalFieldOf("fail_level_penalty", 0).forGetter(Extras::failLevelPenalty),
+                GradeQuest.CODEC.optionalFieldOf("grade_quest").forGetter(Extras::gradeQuest)
+        ).apply(instance, Extras::new));
+    }
 
     /** No class required, or the player has it in any of their slots ({@code playerClasses}). */
     public boolean allowsClass(Set<ResourceLocation> playerClasses) {

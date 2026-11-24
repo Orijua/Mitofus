@@ -15,12 +15,5 @@
   "passives": [
     "mitofus:tough_skin"
   ],
-  "third_slot_passive": "mitofus:sword_mastery",
-  "grade_requirements": [
-    {
-      "grade": "master",
-      "job": "mitofus:blacksmith",
-      "job_level": 10
-    }
-  ]
+  "third_slot_passive": "mitofus:sword_mastery"
 }

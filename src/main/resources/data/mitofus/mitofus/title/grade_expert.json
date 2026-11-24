@@ -1,0 +1,16 @@
+{
+  "name": {
+    "translate": "title.mitofus.grade_expert"
+  },
+  "description": {
+    "translate": "title.mitofus.grade_expert.desc"
+  },
+  "goal": {
+    "type": "milestone",
+    "milestone": "mitofus:grade_3",
+    "count": 1
+  },
+  "bonus_stats": {
+    "strength": 1
+  }
+}

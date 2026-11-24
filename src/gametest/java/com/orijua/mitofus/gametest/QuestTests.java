@@ -8,7 +8,12 @@ import com.orijua.mitofus.core.registry.ModItems;
 import com.orijua.mitofus.feature.equipment.ItemRating;
 import com.orijua.mitofus.feature.npc.BlacksmithNpc;
 import com.orijua.mitofus.feature.npc.VillageChiefNpc;
+import com.orijua.mitofus.feature.progression.ClassGrade;
 import com.orijua.mitofus.feature.progression.ClassService;
+import com.orijua.mitofus.feature.progression.ClassSlot;
+import com.orijua.mitofus.feature.quest.goal.GoalTracker;
+import com.orijua.mitofus.feature.quest.goal.JobActivity;
+import com.orijua.mitofus.feature.talent.TalentService;
 import com.orijua.mitofus.feature.progression.PlayerStats;
 import com.orijua.mitofus.feature.progression.ProgressionRules;
 import com.orijua.mitofus.feature.progression.ProgressionService;
@@ -276,6 +281,71 @@ public final class QuestTests {
             MitofusWorld.restoreStandIn();
         }
         helper.assertTrue(player.getInventory().countItem(ModItems.RULERS_SWORD.get()) == 1, "untouched");
+        helper.succeed();
+    }
+
+    private static final ResourceLocation SWORDSMAN = Mitofus.id("swordsman");
+
+    /** A swordsman of class level {@code level} and the given grade that owns every talent node its grade lets it buy. */
+    private static void swordsmanWithFullTree(ServerPlayer player, int level, ClassGrade grade) {
+        ClassService.chooseClass(player, 0, SWORDSMAN);
+        ClassSlot placed = ClassService.classes(player).slot(0).orElseThrow().withProgress(level, 0).withGrade(grade);
+        List<ResourceLocation> nodes = TalentService.all(player.level()).entrySet().stream()
+                .filter(entry -> entry.getValue().playerClass().equals(SWORDSMAN) && entry.getValue().minGrade().ordinal() <= grade.ordinal())
+                .map(java.util.Map.Entry::getKey).toList();
+        player.setData(ModAttachments.PLAYER_CLASSES, ClassService.classes(player).withSlot(placed.withTalents(nodes)));
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void aGradeQuestNeedsTheLevelAndTheFullTreeAndRaisesTheGrade(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        VillageChiefNpc chief = TestSupport.chief(helper);
+        ResourceLocation adept = Mitofus.id("grade_swordsman_adept");
+        ClassService.chooseClass(player, 0, SWORDSMAN);
+        helper.assertTrue(QuestService.accept(player, adept, chief) == QuestService.Result.NOT_AVAILABLE, "level 1 is too low");
+        ClassService.setClassLevel(player, 0, 100);
+        helper.assertTrue(QuestService.accept(player, adept, chief) == QuestService.Result.NOT_AVAILABLE, "level 100 without the full tree is not enough");
+
+        swordsmanWithFullTree(player, 100, ClassGrade.APPRENTICE);
+        helper.assertTrue(QuestService.accept(player, adept, chief) == QuestService.Result.SUCCESS, "level 100 and the full tree open it");
+        for (int i = 0; i < 30; i++) {
+            TestSupport.killZombie(helper, player);
+        }
+        helper.assertTrue(QuestService.claim(player, adept, chief) == QuestService.Result.SUCCESS, "30 kills complete it");
+        helper.assertTrue(ClassService.classes(player).slot(0).orElseThrow().grade() == ClassGrade.ADEPT, "the grade went up");
+        helper.assertTrue(QuestService.accept(player, adept, chief) == QuestService.Result.NOT_AVAILABLE, "it cannot be taken twice");
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void aGradeQuestVariantFollowsTheJobAndNoJobBlocksAGrade(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        VillageChiefNpc chief = TestSupport.chief(helper);
+        ResourceLocation generic = Mitofus.id("grade_swordsman_expert");
+        ResourceLocation fisher = Mitofus.id("grade_swordsman_expert_fisher");
+        ResourceLocation farmer = Mitofus.id("grade_swordsman_expert_farmer");
+        swordsmanWithFullTree(player, 200, ClassGrade.ADEPT);
+        helper.assertTrue(QuestService.accept(player, fisher, chief) == QuestService.Result.NOT_AVAILABLE, "no job: no fisher variant");
+        helper.assertTrue(ClassService.grantJob(player, Mitofus.id("fisher")), "the job is granted");
+        helper.assertTrue(QuestService.accept(player, generic, chief) == QuestService.Result.NOT_AVAILABLE, "a fisher gets the fisher variant");
+        helper.assertTrue(QuestService.accept(player, farmer, chief) == QuestService.Result.NOT_AVAILABLE, "not the farmer one");
+        helper.assertTrue(QuestService.accept(player, fisher, chief) == QuestService.Result.SUCCESS, "the fisher variant opens");
+        for (int i = 0; i < 10; i++) {
+            GoalTracker.milestone(player, JobActivity.FISH_CAUGHT);
+        }
+        helper.assertTrue(QuestService.claim(player, fisher, chief) == QuestService.Result.SUCCESS, "10 fish complete it");
+        helper.assertTrue(ClassService.classes(player).slot(0).orElseThrow().grade() == ClassGrade.EXPERT, "the grade went up");
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void aJobWithoutAVariantUsesTheGenericGradeQuest(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        VillageChiefNpc chief = TestSupport.chief(helper);
+        swordsmanWithFullTree(player, 200, ClassGrade.ADEPT);
+        ClassService.grantJob(player, Mitofus.id("tailor"));
+        helper.assertTrue(QuestService.accept(player, Mitofus.id("grade_swordsman_expert"), chief) == QuestService.Result.SUCCESS,
+                "a tailor has no variant yet and takes the generic one");
         helper.succeed();
     }
 }

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TalentRulesTest {
@@ -93,5 +94,14 @@ class TalentRulesTest {
         ClassSlot bought = TalentRules.buy(slot(3, ClassGrade.APPRENTICE), A);
         assertEquals(List.of(A), bought.talents());
         assertTrue(TalentRules.owned(TREE, bought).contains(A));
+    }
+
+    @Test
+    void theTreeIsCompleteWhenEveryNodeOfTheGradeIsOwned() {
+        assertFalse(TalentRules.treeComplete(TREE, slot(100, ClassGrade.APPRENTICE)));
+        assertFalse(TalentRules.treeComplete(TREE, slot(100, ClassGrade.APPRENTICE, A)));
+        assertTrue(TalentRules.treeComplete(TREE, slot(100, ClassGrade.APPRENTICE, A, B)), "the adept node does not count at apprentice");
+        assertFalse(TalentRules.treeComplete(TREE, slot(100, ClassGrade.ADEPT, A, B)), "it counts once the class is adept");
+        assertTrue(TalentRules.treeComplete(TREE, slot(100, ClassGrade.ADEPT, A, B, TOP)));
     }
 }

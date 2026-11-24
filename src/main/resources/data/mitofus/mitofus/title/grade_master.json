@@ -1,0 +1,16 @@
+{
+  "name": {
+    "translate": "title.mitofus.grade_master"
+  },
+  "description": {
+    "translate": "title.mitofus.grade_master.desc"
+  },
+  "goal": {
+    "type": "milestone",
+    "milestone": "mitofus:grade_4",
+    "count": 1
+  },
+  "bonus_stats": {
+    "agility": 1
+  }
+}
