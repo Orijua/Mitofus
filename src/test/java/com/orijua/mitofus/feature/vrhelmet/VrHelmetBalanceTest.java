@@ -136,7 +136,7 @@ class VrHelmetBalanceTest {
 
     @Test
     void theBasicTierUsesTheRealFatigueBalanceWhenItIsNotTheDefault() {
-        FatigueBalance other = new FatigueBalance(true, 20.0, 0.8, 2.0, 20.0, 5.0, 0.25, 15, java.util.List.of(0.15), 0.30);
+        FatigueBalance other = new FatigueBalance(true, 20.0, 0.8, 2.0, 20.0, 5.0, 0.25, 15, java.util.List.of(0.15), 0.30, 1.0);
         assertAll(
                 () -> assertEquals(20.0, D.sessionMinutes(VrHelmetTier.BASIC, other)),
                 () -> assertEquals(5.0, D.recoveryMinutes(VrHelmetTier.BASIC, other)),

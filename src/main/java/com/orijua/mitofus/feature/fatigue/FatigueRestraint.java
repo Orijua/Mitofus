@@ -1,5 +1,6 @@
 package com.orijua.mitofus.feature.fatigue;
 
+import com.orijua.mitofus.core.config.FatigueBalance;
 import com.orijua.mitofus.core.registry.ModAttachments;
 import com.orijua.mitofus.core.registry.ModEffects;
 import com.orijua.mitofus.feature.world.MitofusWorld;
@@ -25,7 +26,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
  * stuck on. The protection after reconnecting does not restrain.
  *
  * <p>The movement is also held on the server ({@link #holdStill}): horizontal motion zeroed each tick and a player who drifts
- * past {@link FatigueRules#RESTRAINT_LEEWAY} blocks is put back where the hold began. Releasing a bow or a charged trident is
+ * past {@code FatigueBalance.restraintLeeway} blocks is put back where the hold began. Releasing a bow or a charged trident is
  * refused too, so the first tick of the hold has no window. Any right click with an item stays refused, food
  * included (final decision, BUG-087). Mining, placing and interacting with entities follow the same rules as
  * {@link #isRestrained}.
@@ -114,7 +115,8 @@ public final class FatigueRestraint {
     private static void holdStill(ServerPlayer player) {
         Vec3 anchor = ANCHORS.computeIfAbsent(player.getUUID(), id -> player.position());
         Vec3 now = player.position();
-        if (FatigueRules.driftedTooFar(now.x - anchor.x, now.y - anchor.y, now.z - anchor.z)) {
+        if (FatigueRules.driftedTooFar(now.x - anchor.x, now.y - anchor.y, now.z - anchor.z,
+                FatigueBalance.current().restraintLeeway())) {
             // The connection's own teleport also tells the client where it is, so it cannot keep walking from the old spot.
             player.moveTo(anchor.x, anchor.y, anchor.z, player.getYRot(), player.getXRot());
             player.connection.teleport(anchor.x, anchor.y, anchor.z, player.getYRot(), player.getXRot());

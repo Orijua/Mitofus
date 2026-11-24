@@ -1126,6 +1126,8 @@
   "mitofus.configuration.minEnergyToConnect.tooltip": "El casco no conecta con menos energía que esta (0 a 1).",
   "mitofus.configuration.graceSeconds": "Margen (segundos)",
   "mitofus.configuration.graceSeconds.tooltip": "Segundos entre quedarse sin energía y la desconexión forzosa.",
+  "mitofus.configuration.restraintLeeway": "Margen de inmovilidad (bloques)",
+  "mitofus.configuration.restraintLeeway.tooltip": "Bloques que puede desplazarse un jugador inmovilizado antes de que el servidor lo devuelva a su sitio.",
   "mitofus.configuration.warnFirst": "Primer aviso",
   "mitofus.configuration.warnFirst.tooltip": "Energías (0 a 1) en las que sale un aviso una vez al cruzarlas hacia abajo.",
   "mitofus.configuration.warnSecond": "Segundo aviso",

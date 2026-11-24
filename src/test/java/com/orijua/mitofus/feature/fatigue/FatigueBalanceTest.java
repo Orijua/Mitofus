@@ -26,7 +26,8 @@ class FatigueBalanceTest {
                 () -> assertEquals(0.25, D.minEnergyToConnect()),
                 () -> assertEquals(5, D.graceSeconds(), "the safety protocol gives five seconds"),
                 () -> assertEquals(List.of(0.15, 0.08, 0.02), D.warnAt()),
-                () -> assertEquals(0.30, D.sleepRecovery()));
+                () -> assertEquals(0.30, D.sleepRecovery()),
+                () -> assertEquals(1.0, D.restraintLeeway()));
     }
 
     @Test

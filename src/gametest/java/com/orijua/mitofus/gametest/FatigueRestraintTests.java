@@ -459,7 +459,7 @@ public final class FatigueRestraintTests {
         ServerPlayer player = TestSupport.fakePlayer(helper);
         BlockPos covadonga = helper.absolutePos(new BlockPos(1, 1, 1));
         GlobalPos vrhelmet = GlobalPos.of(helper.getLevel().dimension(), helper.absolutePos(new BlockPos(0, 1, 0)));
-        FatigueBalance noGrace = new FatigueBalance(true, 40, 0.5, 2, 20, 10, 0.1, 0, List.of(0.25), 0.3);
+        FatigueBalance noGrace = new FatigueBalance(true, 40, 0.5, 2, 20, 10, 0.1, 0, List.of(0.25), 0.3, 1.0);
         inMitofusWithDefaults(helper, covadonga, () -> {
             helper.assertTrue(VrHelmetService.connect(player, vrhelmet), "connected");
             FatigueService.setEnergy(player, 0.0);

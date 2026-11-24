@@ -318,6 +318,9 @@ public final class Config {
     private static final ModConfigSpec.DoubleValue FATIGUE_WARN_3 = BUILDER
             .comment("Third warning energy (see warnFirst).")
             .defineInRange("warnThird", F.warnAt().get(2), 0.0, 1.0);
+    private static final ModConfigSpec.DoubleValue FATIGUE_RESTRAINT_LEEWAY = BUILDER
+            .comment("Blocks a player held in the grace period may drift before the server puts them back.")
+            .defineInRange("restraintLeeway", F.restraintLeeway(), 0.1, 16.0);
     private static final ModConfigSpec.DoubleValue FATIGUE_SLEEP_RECOVERY = BUILDER
             .comment("Energy (0 to 1) that sleeping through the night in the real world gives back.")
             .defineInRange("sleepRecovery", F.sleepRecovery(), 0.0, 1.0);
@@ -932,7 +935,7 @@ public final class Config {
                 FATIGUE_GRACE_SECONDS.get(),
                 java.util.stream.Stream.of(FATIGUE_WARN_1.get(), FATIGUE_WARN_2.get(), FATIGUE_WARN_3.get())
                         .sorted(java.util.Comparator.reverseOrder()).toList(),
-                FATIGUE_SLEEP_RECOVERY.get());
+                FATIGUE_SLEEP_RECOVERY.get(), FATIGUE_RESTRAINT_LEEWAY.get());
     }
 
     private static TradeBalance buildTradeBalance() {

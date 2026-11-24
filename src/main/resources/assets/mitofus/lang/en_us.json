@@ -1126,6 +1126,8 @@
   "mitofus.configuration.minEnergyToConnect.tooltip": "The helmet refuses to connect below this energy (0 to 1).",
   "mitofus.configuration.graceSeconds": "Grace time (seconds)",
   "mitofus.configuration.graceSeconds.tooltip": "Seconds between running out of energy and the forced disconnection.",
+  "mitofus.configuration.restraintLeeway": "Hold leeway (blocks)",
+  "mitofus.configuration.restraintLeeway.tooltip": "Blocks a player held in the grace period may drift before the server puts them back.",
   "mitofus.configuration.warnFirst": "First warning",
   "mitofus.configuration.warnFirst.tooltip": "Energies (0 to 1) at which a warning shows once when crossed downwards.",
   "mitofus.configuration.warnSecond": "Second warning",

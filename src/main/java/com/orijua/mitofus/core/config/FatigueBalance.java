@@ -17,6 +17,7 @@ import java.util.List;
  * @param graceSeconds        time between running out and the forced disconnection (the safety protocol: the player cannot move, attack or build meanwhile)
  * @param warnAt              energies (1 to 0, descending) that each trigger a warning once when crossed downwards
  * @param sleepRecovery       energy (0 to 1) that sleeping through the night in the real world gives back
+ * @param restraintLeeway     blocks a player held in the grace period may drift before the server puts them back where the hold began
  */
 public record FatigueBalance(
         boolean enabled,
@@ -28,10 +29,11 @@ public record FatigueBalance(
         double minEnergyToConnect,
         int graceSeconds,
         List<Double> warnAt,
-        double sleepRecovery) {
+        double sleepRecovery,
+        double restraintLeeway) {
 
     public static final FatigueBalance DEFAULT = new FatigueBalance(
-            true, 40.0, 0.8, 2.0, 20.0, 10.0, 0.25, 5, List.of(0.15, 0.08, 0.02), 0.30);
+            true, 40.0, 0.8, 2.0, 20.0, 10.0, 0.25, 5, List.of(0.15, 0.08, 0.02), 0.30, 1.0);
 
     public FatigueBalance {
         warnAt = List.copyOf(warnAt);
@@ -40,13 +42,13 @@ public record FatigueBalance(
     /** A copy with the fatigue switched on or off and everything else the same (for tests). */
     public FatigueBalance withEnabled(boolean enabled) {
         return new FatigueBalance(enabled, sessionMinutes, restMultiplier, combatMultiplier, forgeCostSeconds, recoveryMinutes,
-                minEnergyToConnect, graceSeconds, warnAt, sleepRecovery);
+                minEnergyToConnect, graceSeconds, warnAt, sleepRecovery, restraintLeeway);
     }
 
     /** A copy with another grace period and everything else the same (for tests). */
     public FatigueBalance withGraceSeconds(int graceSeconds) {
         return new FatigueBalance(enabled, sessionMinutes, restMultiplier, combatMultiplier, forgeCostSeconds, recoveryMinutes,
-                minEnergyToConnect, graceSeconds, warnAt, sleepRecovery);
+                minEnergyToConnect, graceSeconds, warnAt, sleepRecovery, restraintLeeway);
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
