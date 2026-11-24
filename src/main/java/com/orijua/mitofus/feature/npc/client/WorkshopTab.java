@@ -13,6 +13,7 @@ import com.orijua.mitofus.feature.npc.ApprenticeSmith;
 import com.orijua.mitofus.feature.npc.Workshop;
 import com.orijua.mitofus.feature.npc.WorkshopEntry;
 import com.orijua.mitofus.feature.progression.ProgressionService;
+import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -103,6 +104,18 @@ public class WorkshopTab extends MitofusTab {
 
     private boolean hovered(double mouseX, double mouseY, int y) {
         return mouseX >= left && mouseX < left + cardWidth() && mouseY >= y && mouseY < y + CARD;
+    }
+
+    /** Page Up / Page Down scroll the list a page at a time. */
+    @Override
+    public boolean keyPressed(int keyCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
+            return scroll.page(1, entries().size());
+        }
+        if (keyCode == GLFW.GLFW_KEY_PAGE_UP) {
+            return scroll.page(-1, entries().size());
+        }
+        return false;
     }
 
     @Override

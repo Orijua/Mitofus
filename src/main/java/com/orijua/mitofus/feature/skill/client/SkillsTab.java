@@ -18,6 +18,7 @@ import com.orijua.mitofus.feature.skill.MasteryText;
 import com.orijua.mitofus.feature.skill.PlayerSkills;
 import com.orijua.mitofus.feature.skill.SlotRules;
 import com.orijua.mitofus.feature.skill.SkillDefinition;
+import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -165,6 +166,18 @@ public class SkillsTab extends MitofusTab {
     @Override
     public boolean mouseScrolled(double wheel) {
         return scroll.scroll(wheel, shownCount);
+    }
+
+    /** Page Up / Page Down scroll the list a page at a time. */
+    @Override
+    public boolean keyPressed(int keyCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
+            return scroll.page(1, shownCount);
+        }
+        if (keyCode == GLFW.GLFW_KEY_PAGE_UP) {
+            return scroll.page(-1, shownCount);
+        }
+        return false;
     }
 
     @Override

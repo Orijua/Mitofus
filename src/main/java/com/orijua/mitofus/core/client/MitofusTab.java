@@ -66,6 +66,11 @@ public abstract class MitofusTab {
         return false;
     }
 
+    /** A key pressed in the window that no widget took. Return true if the tab used it (its widgets are then rebuilt). */
+    public boolean keyPressed(int keyCode, int modifiers) {
+        return false;
+    }
+
     /** Return true when the data behind the widgets changed (e.g. a class was chosen) so the window rebuilds them. */
     public boolean needsRebuild() {
         return false;
