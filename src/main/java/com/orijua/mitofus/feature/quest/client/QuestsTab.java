@@ -250,8 +250,11 @@ public class QuestsTab extends MitofusTab {
         graphics.drawString(font(), Component.translatable("screen.mitofus.npc_rumor"), x, y, UiStyle.HEADING);
         y += 10;
         Component teller = Component.translatable("screen.mitofus.rumor_from", Component.translatable(groupKey(rumor)));
-        graphics.drawString(font(), teller, x, y, UiStyle.GOLD);
-        y += 13;
+        for (FormattedCharSequence line : font().split(teller, detailWidth)) {
+            graphics.drawString(font(), line, x, y, UiStyle.GOLD);
+            y += 10;
+        }
+        y += 3;
         for (FormattedCharSequence line : font().split(rumor.text().copy().withStyle(ChatFormatting.ITALIC), detailWidth)) {
             graphics.drawString(font(), line, x, y, UiStyle.TEXT);
             y += 10;

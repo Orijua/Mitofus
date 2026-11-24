@@ -2,6 +2,7 @@ package com.orijua.mitofus.core.client;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -15,6 +16,8 @@ public class MitofusScreen extends Screen implements MitofusStyledScreen {
     /** Height of the window unless the screen is smaller ({@link PanelFit}). */
     private static final int WANTED_HEIGHT = 210;
     private static final int TAB_BAR_HEIGHT = 26;
+    /** Room around a tab title inside its button. */
+    private static final int TAB_PADDING = 14;
     private static int lastTab;
 
     private final List<MitofusTab> tabs;
@@ -45,7 +48,12 @@ public class MitofusScreen extends Screen implements MitofusStyledScreen {
 
     @Override
     protected void init() {
-        PanelFit.Size size = PanelFit.fit(current().panelWidth(), WANTED_HEIGHT, width, height);
+        // Wide enough for every tab title, so labels are not cut ("Skills", "Habilidades").
+        int titlesWidth = 8;
+        for (MitofusTab tab : tabs) {
+            titlesWidth += font.width(tab.title()) + TAB_PADDING;
+        }
+        PanelFit.Size size = PanelFit.fit(Math.max(current().panelWidth(), titlesWidth), WANTED_HEIGHT, width, height);
         panelWidth = size.width();
         panelHeight = size.height();
         left = (width - panelWidth) / 2;
@@ -54,8 +62,12 @@ public class MitofusScreen extends Screen implements MitofusStyledScreen {
         int tabWidth = (panelWidth - 8) / tabs.size();
         for (int i = 0; i < tabs.size(); i++) {
             int index = i;
-            Button button = Button.builder(tabs.get(i).title(), b -> select(index))
+            // On a narrow screen a long title is cut with "…" and its full text is in the hover.
+            Component title = tabs.get(i).title();
+            Component shown = UiStyle.ellipsize(font, title, tabWidth - TAB_PADDING / 2 - 4);
+            Button button = Button.builder(shown, b -> select(index))
                     .bounds(left + 4 + i * tabWidth, top + 4, tabWidth - 2, 18)
+                    .tooltip(Tooltip.create(title))
                     .build(MitofusButton::new);
             button.active = i != lastTab;
             addRenderableWidget(button);
