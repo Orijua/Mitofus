@@ -1,12 +1,9 @@
-// 1.21.1	2026-11-21T16:37:45.243353196	Loot Tables
+// 1.21.1	2026-11-24T08:10:13.903214196	Loot Tables
 0be6f4e03d41440fa020272e8c6ba8ed3305d2be data/mitofus/loot_table/blocks/account_terminal.json
-de119daea3e896e8b2219571d7c59d3be839b33f data/mitofus/loot_table/blocks/advanced_body.json
 2f20f4ed62c0df3a1908cc0ebfaf3c0a6ec660a1 data/mitofus/loot_table/blocks/azurite_ore.json
-a80e7572eec5ab72f58e38408d9d74b5c353e505 data/mitofus/loot_table/blocks/body.json
 da71e6df40a3ac5511a515e595698ab62d7de12a data/mitofus/loot_table/blocks/deepslate_azurite_ore.json
 68093d8d77f428db54919a07551217f35fafdaab data/mitofus/loot_table/blocks/deepslate_mithril_ore.json
 dd96673b30c1ac48976e783aa5b9d6017a7a07cd data/mitofus/loot_table/blocks/deepslate_wolfram_ore.json
-73c9aa6f33dabf608420f036be8a9951f8ef005a data/mitofus/loot_table/blocks/diamond_body.json
 d15be50edb8aca61fd5ec42eed7ed6ba056d4cba data/mitofus/loot_table/blocks/mithril_ore.json
 0278850a1b0c5a301bab376c24fd3c03b65eb362 data/mitofus/loot_table/blocks/smelter.json
 209bea9d42a3ce1f5b3ba38a0db0a4a72ccfef13 data/mitofus/loot_table/blocks/smithing_anvil.json
