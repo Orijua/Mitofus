@@ -21,6 +21,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -239,13 +240,19 @@ public class TradeTab extends MitofusTab {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY) {
-        Component title = Component.translatable("screen.mitofus.trade.balance", MoneyText.iron(Wallet.balance(player())));
-        UiStyle.heading(graphics, font(), UiStyle.ellipsize(font(), title, width), left, top);
+        Component title = Component.translatable("screen.mitofus.trade.balance_label");
+        UiStyle.heading(graphics, font(), title, left, top);
+        int coinsX = left + font().width(title) + 8;
+        int coinsWidth = CoinBalanceView.render(graphics, font(), Wallet.totalCopper(player()), coinsX, top + 1, UiStyle.GOLD);
+        boolean overCoins = mouseX >= coinsX && mouseX < coinsX + coinsWidth && mouseY >= top - 4 && mouseY < top + 14;
 
         List<Integer> slots = slots();
         if (slots.isEmpty()) {
             graphics.drawWordWrap(font(), Component.translatable("screen.mitofus.trade.empty"),
                     left, top + LIST_TOP + 4, width, UiStyle.MUTED);
+            if (overCoins) {
+                graphics.renderComponentTooltip(font(), CoinBalanceView.tooltip(), mouseX, mouseY);
+            }
             return;
         }
         scroll.setVisibleRows(visibleRows());
@@ -254,19 +261,26 @@ public class TradeTab extends MitofusTab {
         TradeSaturation saturation = TradeService.saturation(player());
         long today = today();
         List<Component> tooltip = null;
+        ItemStack tooltipStack = ItemStack.EMPTY;
         for (int i = scroll.first(); i < scroll.end(slots.size()); i++) {
             int y = rowTop(i - scroll.first());
             int slot = slots.get(i);
             ItemStack stack = player().getInventory().getItem(slot);
             boolean hover = hovered(mouseX, mouseY, y);
             List<Component> tip = renderRow(graphics, stack, y, chosen.containsKey(slot), batchPrices.get(slot), hover, saturation, today, balance);
-            if (hover && tip != null) {
-                tooltip = tip;
+            if (hover) {
+                tooltip = tip == null ? List.of() : tip;
+                tooltipStack = stack;
             }
         }
         scroll.renderBar(graphics, left + width - 3, top + LIST_TOP, visibleRows() * ROW - 2, slots.size());
         if (tooltip != null) {
-            graphics.renderComponentTooltip(font(), tooltip, mouseX, mouseY);
+            // The same tooltip as in the inventory, with the trade notes (saturation, wear) added at the end.
+            List<Component> lines = new ArrayList<>(Screen.getTooltipFromItem(Minecraft.getInstance(), tooltipStack));
+            lines.addAll(tooltip);
+            graphics.renderTooltip(font(), lines, tooltipStack.getTooltipImage(), tooltipStack, mouseX, mouseY);
+        } else if (overCoins) {
+            graphics.renderComponentTooltip(font(), CoinBalanceView.tooltip(), mouseX, mouseY);
         }
     }
 

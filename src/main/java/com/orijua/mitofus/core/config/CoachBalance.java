@@ -7,11 +7,13 @@ package com.orijua.mitofus.core.config;
  * @param baseIron              the base fare (500 = 5 gold)
  * @param surchargePer100Blocks   iron added for every 100 blocks of road
  * @param maxSurchargeIron      the most the surcharge can add
+ * @param travelSeconds         seconds the player is blind and still on the road before arriving
  */
-public record CoachBalance(int baseIron, int surchargePer100Blocks, int maxSurchargeIron) {
+public record CoachBalance(int baseIron, int surchargePer100Blocks, int maxSurchargeIron, int travelSeconds) {
     public static final int MAX_IRON = 1_000_000;
+    public static final int MAX_SECONDS = 60;
 
-    public static final CoachBalance DEFAULT = new CoachBalance(500, 10, 500);
+    public static final CoachBalance DEFAULT = new CoachBalance(500, 10, 500, 3);
 
     public CoachBalance {
         if (baseIron < 1 || baseIron > MAX_IRON) {
@@ -22,6 +24,9 @@ public record CoachBalance(int baseIron, int surchargePer100Blocks, int maxSurch
         }
         if (maxSurchargeIron < 0 || maxSurchargeIron > MAX_IRON) {
             throw new IllegalArgumentException("maxSurchargeIron must be between 0 and " + MAX_IRON + ": " + maxSurchargeIron);
+        }
+        if (travelSeconds < 0 || travelSeconds > MAX_SECONDS) {
+            throw new IllegalArgumentException("travelSeconds must be between 0 and " + MAX_SECONDS + ": " + travelSeconds);
         }
     }
 

@@ -107,4 +107,14 @@ public final class ApprenticeRules {
     public static int daysBought(int gold, int wage, int maxPaidDays, int daysAlreadyPaid) {
         return Math.max(0, Math.min(gold / wage, maxPaidDays - daysAlreadyPaid));
     }
+
+    /**
+     * The days a click on "Pay" buys: up to {@code requested} (1, or 5 with Shift, or 10 with Ctrl), but no more than the balance
+     * pays at {@code wageIron} a day, and no more than the days that fit under {@code maxPaidDays}.
+     */
+    public static int daysToPay(int requested, long wageIron, long balanceIron, int maxPaidDays, int daysAlreadyPaid) {
+        int room = Math.max(0, maxPaidDays - daysAlreadyPaid);
+        long affordable = wageIron <= 0 ? 0 : balanceIron / wageIron;
+        return (int) Math.max(0, Math.min(Math.min(requested, room), affordable));
+    }
 }

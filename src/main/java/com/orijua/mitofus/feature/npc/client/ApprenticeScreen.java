@@ -7,8 +7,10 @@ import com.orijua.mitofus.core.client.MitofusCard;
 import com.orijua.mitofus.core.client.MitofusConfirmScreen;
 import com.orijua.mitofus.core.client.UiStyle;
 import com.orijua.mitofus.feature.economy.CarriedItems;
-import com.orijua.mitofus.feature.economy.CoinPurse;
 import com.orijua.mitofus.feature.economy.Money;
+import com.orijua.mitofus.feature.economy.MoneyText;
+import com.orijua.mitofus.feature.economy.Wallet;
+import com.orijua.mitofus.feature.economy.client.CoinBalanceView;
 import com.orijua.mitofus.feature.view.ViewRules;
 import com.orijua.mitofus.feature.view.Observation;
 import com.orijua.mitofus.feature.npc.ApprenticeActionPayload;
@@ -40,6 +42,8 @@ import java.util.Optional;
 public final class ApprenticeScreen extends Screen implements MitofusStyledScreen {
     private static final int WIDTH = 300;
     private static final int PADDING = 10;
+    /** The line with the coins the player has, under the buttons. */
+    private static final int COIN_LINE = 20;
     /** Kept tight: with the head and the three sections the window must still fit at GUI scale 3 on 1080p. */
     private static final int ROW = 20;
     private static final int CARD_HEIGHT = ROW - 2;
@@ -139,6 +143,11 @@ public final class ApprenticeScreen extends Screen implements MitofusStyledScree
         return cardX() + cardWidth() - 4 - BUTTON_WIDTH;
     }
 
+    /** The daily wage in iron, the unit of the balance. */
+    private static long wageIron() {
+        return (long) ApprenticeBalance.current().dailyWage() * Money.IRON_PER_GOLD;
+    }
+
     private int buttonY(Row row) {
         return rowY(row) + (CARD_HEIGHT - BUTTON_HEIGHT) / 2;
     }
@@ -152,12 +161,15 @@ public final class ApprenticeScreen extends Screen implements MitofusStyledScree
     protected void init() {
         hint = font.split(Component.translatable("screen.mitofus.apprentice.hint", Money.format(ApprenticeBalance.current().dailyWage())), WIDTH - 2 * PADDING);
         top = 0;
-        panelHeight = buttonsY() + 18 + 8 + hint.size() * 10 + PADDING;
+        panelHeight = buttonsY() + 18 + 8 + COIN_LINE + hint.size() * 10 + PADDING;
         left = (width - WIDTH) / 2;
         top = (height - panelHeight) / 2;
         cancel = rowButton(Row.ORDER, "screen.mitofus.apprentice.cancel", ApprenticeActionPayload.Action.CANCEL_ORDER);
-        pay = rowButton(Row.WAGE, "screen.mitofus.apprentice.pay", ApprenticeActionPayload.Action.PAY_DAY);
-        pay.setTooltip(Tooltip.create(Component.translatable("screen.mitofus.apprentice.pay_tooltip", Money.format(ApprenticeBalance.current().dailyWage()),
+        pay = addRenderableWidget(Button.builder(Component.translatable("screen.mitofus.apprentice.pay"), b -> send(
+                        hasControlDown() ? ApprenticeActionPayload.Action.PAY_10_DAYS
+                                : hasShiftDown() ? ApprenticeActionPayload.Action.PAY_5_DAYS : ApprenticeActionPayload.Action.PAY_DAY))
+                .bounds(buttonX(), buttonY(Row.WAGE), BUTTON_WIDTH, BUTTON_HEIGHT).build(MitofusButton::new));
+        pay.setTooltip(Tooltip.create(Component.translatable("screen.mitofus.apprentice.pay_tooltip", MoneyText.iron(wageIron()),
                 ApprenticeBalance.current().maxPaidDays())));
         // Assigning closes the window so the next right-click can pick the container.
         addRenderableWidget(Button.builder(Component.translatable("screen.mitofus.apprentice.assign"), b -> assign(ApprenticeActionPayload.Action.ASSIGN_MATERIALS))
@@ -200,7 +212,7 @@ public final class ApprenticeScreen extends Screen implements MitofusStyledScree
     private void updateButtons() {
         cancel.active = !apprentice.shownOrder().isEmpty();
         pay.active = apprentice.shownDaysPaid() < ApprenticeBalance.current().maxPaidDays()
-                && CoinPurse.canAfford(minecraft.player.getInventory(), ApprenticeBalance.current().dailyWage() * Money.IRON_PER_GOLD);
+                && Wallet.canAfford(minecraft.player, wageIron());
         clear.active = apprentice.assigned(ApprenticeSmith.Slot.MATERIALS).isPresent() || apprentice.assigned(ApprenticeSmith.Slot.OUTPUT).isPresent();
         boolean hasHammer = !apprentice.getMainHandItem().isEmpty();
         hammer.setMessage(Component.translatable(hasHammer ? "screen.mitofus.apprentice.hammer_take" : "screen.mitofus.apprentice.hammer_give"));
@@ -295,7 +307,15 @@ public final class ApprenticeScreen extends Screen implements MitofusStyledScree
             wideRow(graphics, Row.GRADE, hidden(view, ViewRules.HIGH), UiStyle.MUTED);
         }
 
-        int hintY = buttonsY() + 18 + 8;
+        int coinsY = buttonsY() + 18 + 10;
+        Component purseLabel = Component.translatable("screen.mitofus.apprentice.purse");
+        UiStyle.text(graphics, font, purseLabel, left + PADDING, coinsY, UiStyle.MUTED);
+        int coinsX = left + PADDING + font.width(purseLabel) + 6;
+        int coinsWidth = CoinBalanceView.render(graphics, font, Wallet.totalCopper(minecraft.player), coinsX, coinsY, UiStyle.GOLD);
+        if (mouseX >= coinsX && mouseX < coinsX + coinsWidth && mouseY >= coinsY - 5 && mouseY < coinsY + 12) {
+            graphics.renderComponentTooltip(font, CoinBalanceView.tooltip(), mouseX, mouseY);
+        }
+        int hintY = buttonsY() + 18 + 8 + COIN_LINE;
         for (FormattedCharSequence line : hint) {
             graphics.drawString(font, line, left + PADDING, hintY, UiStyle.MUTED);
             hintY += 10;

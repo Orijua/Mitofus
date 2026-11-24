@@ -146,4 +146,23 @@ class ApprenticeRulesTest {
         assertThrows(IllegalArgumentException.class, () -> new ApprenticeBalance(50, 0, 5, 1, 14, 21, 60, 20), "0 levels per apprentice");
         assertThrows(IllegalArgumentException.class, () -> new ApprenticeBalance(50, 10, 5, 0, 14, 21, 60, 20), "a free wage");
     }
+
+    @Test
+    void aClickBuysTheRequestedDaysWhenTheBalanceAndTheLimitAllow() {
+        assertEquals(1, ApprenticeRules.daysToPay(1, 100, 100_000, 14, 0));
+        assertEquals(5, ApprenticeRules.daysToPay(5, 100, 100_000, 14, 0));
+        assertEquals(10, ApprenticeRules.daysToPay(10, 100, 100_000, 14, 0));
+    }
+
+    @Test
+    void theBalanceLimitsTheDaysPaid() {
+        assertEquals(3, ApprenticeRules.daysToPay(10, 100, 350, 14, 0), "it pays the days it can");
+        assertEquals(0, ApprenticeRules.daysToPay(5, 100, 99, 14, 0), "not even a day");
+    }
+
+    @Test
+    void theDaysAheadLimitTheDaysPaid() {
+        assertEquals(4, ApprenticeRules.daysToPay(10, 100, 100_000, 14, 10));
+        assertEquals(0, ApprenticeRules.daysToPay(5, 100, 100_000, 14, 14));
+    }
 }

@@ -26,7 +26,9 @@ import com.orijua.mitofus.feature.quest.QuestActionPayload;
 import com.orijua.mitofus.feature.vrhelmet.LogoutRequestPayload;
 import com.orijua.mitofus.feature.vrhelmet.ResidencePayload;
 import com.orijua.mitofus.feature.coach.CoachTripPayload;
+import com.orijua.mitofus.feature.storage.StorageInfoPayload;
 import com.orijua.mitofus.feature.storage.StoragePayload;
+import com.orijua.mitofus.feature.coach.CoachInfoPayload;
 import com.orijua.mitofus.feature.quest.QuestsSeenPayload;
 import com.orijua.mitofus.feature.skill.AssignSkillPayload;
 import com.orijua.mitofus.feature.skill.UseSkillPayload;
@@ -80,6 +82,11 @@ public final class ModNetwork {
                 menu.receive(payload.offers(), payload.message());
             }
         });
+        // The windows of the storekeeper and the coachman open when the server sends what they show.
+        registrar.playToClient(StorageInfoPayload.TYPE, StorageInfoPayload.STREAM_CODEC,
+                (payload, context) -> com.orijua.mitofus.feature.storage.client.StorageScreen.show(payload));
+        registrar.playToClient(CoachInfoPayload.TYPE, CoachInfoPayload.STREAM_CODEC,
+                (payload, context) -> com.orijua.mitofus.feature.coach.client.CoachScreen.show(payload));
         // Like the one below, the handler only touches a client-state class with no client imports.
         registrar.playToClient(VrHelmetConnectingPayload.TYPE, VrHelmetConnectingPayload.STREAM_CODEC,
                 (payload, context) -> ClientVrHelmet.connecting(payload.ticks(), Util.getMillis()));

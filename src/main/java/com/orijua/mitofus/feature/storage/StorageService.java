@@ -18,6 +18,7 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 
 /** Opening, expanding and using a character's storage; the storekeeper's window asks for it. */
@@ -27,6 +28,26 @@ public final class StorageService {
 
     public static Storage of(ServerPlayer player) {
         return player.getData(ModAttachments.STORAGE.get());
+    }
+
+    /** Sends the player the state the storekeeper's window shows (rows, free slots and the real prices). */
+    public static void sendInfo(ServerPlayer player, StorekeeperNpc keeper) {
+        if (!inReach(player, keeper)) {
+            return;
+        }
+        Storage storage = of(player);
+        int used = 0;
+        if (storage.opened()) {
+            NonNullList<ItemStack> saved = NonNullList.withSize(storage.slots(), ItemStack.EMPTY);
+            ContainerHelper.loadAllItems(storage.items(), saved, player.registryAccess());
+            for (ItemStack stack : saved) {
+                if (!stack.isEmpty()) {
+                    used++;
+                }
+            }
+        }
+        PacketDistributor.sendToPlayer(player, new StorageInfoPayload(keeper.getId(), storage.rows(), used,
+                StorageRules.openCost(), storage.opened() ? StorageRules.nextRowCost(storage.rows()) : -1L));
     }
 
     /** Opens the storage, buying it first if the player has none. Returns true if the window opened. */
@@ -72,6 +93,7 @@ public final class StorageService {
         player.setData(ModAttachments.STORAGE.get(), storage.withRows(storage.rows() + 1));
         player.displayClientMessage(Component.translatable("message.mitofus.storage.expanded",
                 storage.rows() + 1, MoneyText.iron(cost)), false);
+        sendInfo(player, keeper);
         return true;
     }
 

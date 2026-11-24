@@ -13,6 +13,7 @@ import com.orijua.mitofus.feature.fusion.client.FusionText;
 import com.orijua.mitofus.feature.progression.ChooseClassPayload;
 import com.orijua.mitofus.feature.progression.ChooseJobPayload;
 import com.orijua.mitofus.feature.progression.ClassSlot;
+import com.orijua.mitofus.feature.progression.DefenseRules;
 import com.orijua.mitofus.feature.progression.ProgressionRules;
 import com.orijua.mitofus.feature.progression.ClassSlotRules;
 import com.orijua.mitofus.feature.progression.JobDefinition;
@@ -30,6 +31,10 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
@@ -81,7 +86,7 @@ public class ProfileTab extends MitofusTab {
     }
 
     /** Vertical offsets (from the top of the tab) of each block; the buttons are built where the render draws the labels. */
-    private record Layout(int classLines, int classButtons, int jobHeading, int jobRow, int titles) {
+    private record Layout(int classLines, int classButtons, int jobHeading, int jobRow, int defenseHeading, int titles) {
     }
 
     private static Layout layout() {
@@ -97,7 +102,10 @@ public class ProfileTab extends MitofusTab {
         int jobHeading = y + 2;
         int jobRow = jobHeading + 14;
         y = jobRow + (classes().job().isPresent() ? LINE : BUTTON_HEIGHT) + 6;
-        return new Layout(classLines, classButtons, jobHeading, jobRow, Math.max(TITLES_TOP, y + 14));
+        int defenseHeading = y + 4;
+        // The defense block: its heading, then the armor line and the line of where it comes from.
+        int titles = defenseHeading + 14 + 2 * LINE + 14;
+        return new Layout(classLines, classButtons, jobHeading, jobRow, defenseHeading, Math.max(TITLES_TOP, titles));
     }
 
     @Override
@@ -184,6 +192,66 @@ public class ProfileTab extends MitofusTab {
         return text;
     }
 
+    /** A defense value with no useless ".0": 12 or 12.5. */
+    private static String number(double value) {
+        return Math.abs(value - Math.rint(value)) < 0.05 ? String.valueOf((long) Math.rint(value)) : String.format(java.util.Locale.ROOT, "%.1f", value);
+    }
+
+    private static Component sourceName(DefenseRules.Source source) {
+        return Component.translatable("screen.mitofus.defense.source." + source.name().toLowerCase(java.util.Locale.ROOT));
+    }
+
+    /** The total armor and toughness of the player, live, and where they come from; the hover lists the pieces. */
+    private void renderDefense(GuiGraphics graphics, int headingY, int mouseX, int mouseY) {
+        DefenseRules.Breakdown armor = DefenseRules.of(player(), Attributes.ARMOR);
+        DefenseRules.Breakdown toughness = DefenseRules.of(player(), Attributes.ARMOR_TOUGHNESS);
+        UiStyle.heading(graphics, font(), Component.translatable("screen.mitofus.defense"), left, top + headingY);
+        int y = top + headingY + 14;
+        UiStyle.text(graphics, font(), Component.translatable("screen.mitofus.defense.total", number(armor.total()), number(toughness.total())),
+                left, y, armor.total() > 0 ? UiStyle.TEXT : UiStyle.MUTED);
+        MutableComponent sources = Component.empty();
+        for (DefenseRules.Source source : DefenseRules.Source.values()) {
+            double value = armor.of(source);
+            if (Math.abs(value) >= 0.05) {
+                if (!sources.getSiblings().isEmpty()) {
+                    sources.append(Component.literal("  ·  "));
+                }
+                sources.append(Component.translatable("screen.mitofus.defense.part", sourceName(source), (value > 0 ? "+" : "") + number(value)));
+            }
+        }
+        if (sources.getSiblings().isEmpty()) {
+            sources.append(Component.translatable("screen.mitofus.defense.none"));
+        }
+        UiStyle.text(graphics, font(), UiStyle.ellipsize(font(), sources, width), left, y + LINE, UiStyle.MUTED);
+        if (mouseX >= left && mouseX < left + width && mouseY >= y - 1 && mouseY < y + 2 * LINE) {
+            graphics.renderComponentTooltip(font(), defenseTooltip(armor, toughness), mouseX, mouseY);
+        }
+    }
+
+    /** Every part of armor and toughness, and each piece worn with the armor it gives. */
+    private static List<Component> defenseTooltip(DefenseRules.Breakdown armor, DefenseRules.Breakdown toughness) {
+        List<Component> lines = new java.util.ArrayList<>();
+        lines.add(Component.translatable("screen.mitofus.defense.tip.armor", number(armor.total())).withStyle(net.minecraft.ChatFormatting.GOLD));
+        for (DefenseRules.Source source : DefenseRules.Source.values()) {
+            if (Math.abs(armor.of(source)) >= 0.05) {
+                lines.add(Component.translatable("screen.mitofus.defense.part", sourceName(source), number(armor.of(source))));
+            }
+        }
+        lines.add(Component.translatable("screen.mitofus.defense.tip.toughness", number(toughness.total())).withStyle(net.minecraft.ChatFormatting.GOLD));
+        for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+            ItemStack worn = player().getItemBySlot(slot);
+            if (worn.isEmpty()) {
+                continue;
+            }
+            double base = worn.getAttributeModifiers().modifiers().stream()
+                    .filter(entry -> entry.attribute().equals(Attributes.ARMOR) && entry.slot().test(slot)
+                            && entry.modifier().operation() == AttributeModifier.Operation.ADD_VALUE)
+                    .mapToDouble(entry -> entry.modifier().amount()).sum();
+            lines.add(Component.translatable("screen.mitofus.defense.tip.piece", worn.getHoverName(), number(base)));
+        }
+        return lines;
+    }
+
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY) {
         Layout layout = layout();
@@ -207,6 +275,7 @@ public class ProfileTab extends MitofusTab {
                 id -> UiStyle.text(graphics, font(), Definitions.get(player().level(), ModDatapackRegistries.JOB, id)
                         .map(JobDefinition::name).orElse(Component.literal(id.toString())), left, top + layout.jobRow(), UiStyle.TEXT),
                 () -> UiStyle.text(graphics, font(), Component.translatable("screen.mitofus.choose_job"), left + 50, top + layout.jobHeading(), UiStyle.MUTED));
+        renderDefense(graphics, layout.defenseHeading(), mouseX, mouseY);
         int titlesTop = layout.titles();
 
         UiStyle.heading(graphics, font(), Component.translatable("screen.mitofus.titles"), left, top + titlesTop - 14);

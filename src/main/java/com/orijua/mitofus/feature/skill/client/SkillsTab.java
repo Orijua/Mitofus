@@ -11,18 +11,17 @@ import com.orijua.mitofus.feature.talent.TalentEffects;
 import com.orijua.mitofus.core.registry.ModDatapackRegistries;
 import com.orijua.mitofus.feature.effect.PassiveDefinition;
 import com.orijua.mitofus.feature.effect.ActiveTraits;
-import com.orijua.mitofus.feature.skill.AssignSkillPayload;
 import com.orijua.mitofus.feature.skill.MasteryText;
 import com.orijua.mitofus.feature.skill.PlayerSkills;
 import com.orijua.mitofus.feature.skill.SlotRules;
 import com.orijua.mitofus.feature.skill.SkillDefinition;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,9 +37,8 @@ public class SkillsTab extends MitofusTab {
     private static final int ROW = 22;
     private static final int LIST_TOP = 16;
     private static final int VISIBLE_ROWS = 7;
-    private static final int SLOT_BUTTON = 18;
-    private static final int SLOT_BUTTON_WIDTH = 64;
     private static final int FILTER_WIDTH = 74;
+    private static final int ASSIGN_WIDTH = 110;
 
     /** Which rows the list shows; the button cycles it. */
     enum Filter {
@@ -74,7 +72,7 @@ public class SkillsTab extends MitofusTab {
         }
     }
 
-    private record Row(Entry entry, List<Button> slotButtons) {
+    private record Row(Entry entry) {
     }
 
     private final List<Row> rows = new ArrayList<>();
@@ -123,31 +121,22 @@ public class SkillsTab extends MitofusTab {
             scroll.clamp(0);
             dirty = true;
         }).bounds(left + width - FILTER_WIDTH, top - 4, FILTER_WIDTH, 14).build(MitofusButton::new));
+        // Placing skills on the bars has its own window, so this list only shows skills.
+        addWidget.accept(Button.builder(Component.translatable("screen.mitofus.skill_assign_bars"),
+                        b -> Minecraft.getInstance().setScreen(new SkillBarsScreen(Minecraft.getInstance().screen)))
+                .bounds(left + width - FILTER_WIDTH - 4 - ASSIGN_WIDTH, top - 4, ASSIGN_WIDTH, 14).build(MitofusButton::new));
 
         List<Entry> entries = entries();
         shownCount = entries.size();
         scroll.clamp(entries.size());
         for (int i = scroll.first(); i < scroll.end(entries.size()); i++) {
             Entry entry = entries.get(i);
-            List<Button> buttons = new ArrayList<>();
-            if (!entry.passive()) {
-                Button button = Button.builder(slotLabel(entry.id()), b -> cycle(entry.id()))
-                        .bounds(left + width - SLOT_BUTTON_WIDTH, rowY(rows.size()) - 2, SLOT_BUTTON_WIDTH, SLOT_BUTTON)
-                        .build(MitofusButton::new);
-                buttons.add(button);
-                addWidget.accept(button);
-            }
-            rows.add(new Row(entry, buttons));
+            rows.add(new Row(entry));
         }
-        tick();
     }
 
     private int rowY(int index) {
         return top + LIST_TOP + index * ROW;
-    }
-
-    private static int level() {
-        return com.orijua.mitofus.feature.progression.ProgressionService.get(player()).level();
     }
 
     /** The slot this skill sits in (0-based), or -1. */
@@ -162,17 +151,6 @@ public class SkillsTab extends MitofusTab {
                 : Component.translatable("screen.mitofus.skill_slot", slot / SlotRules.PAGE_SIZE + 1, slot % SlotRules.PAGE_SIZE + 1);
     }
 
-    /** Each click moves the skill to the next open slot; after the last one it comes out of the slots. */
-    private static void cycle(ResourceLocation skill) {
-        int current = slotOf(skill);
-        int next = SlotRules.nextOpen(level(), current);
-        if (next < 0 && current < 0) {
-            return; // no open slot at all: nothing to do
-        }
-        PacketDistributor.sendToServer(next < 0 ? new AssignSkillPayload(current, Optional.empty())
-                : new AssignSkillPayload(next, Optional.of(skill)));
-    }
-
     @Override
     public boolean needsRebuild() {
         return dirty || skills().learned().size() != shownLearnedCount
@@ -182,16 +160,6 @@ public class SkillsTab extends MitofusTab {
     @Override
     public boolean mouseScrolled(double wheel) {
         return scroll.scroll(wheel, shownCount);
-    }
-
-    /** Shows the slot where each skill is equipped. */
-    @Override
-    public void tick() {
-        for (Row row : rows) {
-            if (!row.slotButtons().isEmpty()) {
-                row.slotButtons().get(0).setMessage(slotLabel(row.entry().id()));
-            }
-        }
     }
 
     @Override
@@ -210,6 +178,11 @@ public class SkillsTab extends MitofusTab {
             UiStyle.text(graphics, font(), entry.name(), left + 20, y, UiStyle.TEXT);
             UiStyle.text(graphics, font(), tag, left + 24 + font().width(entry.name()), y, UiStyle.MUTED);
             UiStyle.text(graphics, font(), entry.detail(), left + 20, y + 10, UiStyle.MUTED);
+            if (!entry.passive()) {
+                // Where it is placed, for reading only: the assigning is done in its own window.
+                Component slot = slotLabel(entry.id());
+                UiStyle.text(graphics, font(), slot, left + width - font().width(slot), y, slotOf(entry.id()) < 0 ? UiStyle.MUTED : UiStyle.GOOD);
+            }
             if (mouseX >= left && mouseX < left + 180 && mouseY >= y - 2 && mouseY < y + ROW - 4) {
                 hovered = rows.get(i);
             }

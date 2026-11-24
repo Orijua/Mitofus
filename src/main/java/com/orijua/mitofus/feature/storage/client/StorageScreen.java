@@ -4,59 +4,104 @@ import com.orijua.mitofus.core.client.MitofusButton;
 import com.orijua.mitofus.core.client.MitofusStyledScreen;
 import com.orijua.mitofus.core.client.UiStyle;
 import com.orijua.mitofus.feature.economy.MoneyText;
+import com.orijua.mitofus.feature.economy.Wallet;
+import com.orijua.mitofus.feature.storage.StorageInfoPayload;
 import com.orijua.mitofus.feature.storage.StoragePayload;
 import com.orijua.mitofus.feature.storage.StorageRules;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.entity.Entity;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 
-/** The storekeeper's window: open the storage (buying it the first time) or buy one more row. */
+/**
+ * The storekeeper's window. It shows what the player has (rows and free slots) and only offers what can be done: buying the
+ * storage while there is none, opening it once there is one, and one more row (with its real price) until the most. Client only.
+ */
 public final class StorageScreen extends Screen implements MitofusStyledScreen {
     private static final int WIDTH = 230;
     private static final int PADDING = 10;
     private static final int BUTTON_HEIGHT = 18;
 
-    private final Entity npc;
+    private StorageInfoPayload info;
     private List<FormattedCharSequence> lines = List.of();
     private int left;
     private int top;
     private int height;
 
-    private StorageScreen(Entity npc) {
+    private StorageScreen(StorageInfoPayload info) {
         super(Component.translatable("screen.mitofus.storage_title"));
-        this.npc = npc;
+        this.info = info;
     }
 
-    /** Client only. */
-    public static void open(Entity npc) {
-        Minecraft.getInstance().setScreen(new StorageScreen(npc));
+    /** Opens the window, or refreshes it if it is already open (after buying a row). */
+    public static void show(StorageInfoPayload info) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.screen instanceof StorageScreen open && open.info.npc() == info.npc()) {
+            open.info = info;
+            open.rebuildWidgets();
+        } else {
+            minecraft.setScreen(new StorageScreen(info));
+        }
+    }
+
+    private boolean opened() {
+        return info.rows() > 0;
+    }
+
+    private boolean canExpand() {
+        return opened() && info.nextRowCost() >= 0L;
+    }
+
+    /** What the window says, by state: no storage yet, with rows to buy, or at the most. */
+    private Component text() {
+        if (!opened()) {
+            return Component.translatable("screen.mitofus.storage_new", MoneyText.iron(info.openCost()),
+                    StorageRules.FIRST_ROWS * StorageRules.SLOTS_PER_ROW);
+        }
+        Component state = Component.translatable("screen.mitofus.storage_state", info.rows(), info.slots(), info.freeSlots());
+        Component next = canExpand()
+                ? Component.translatable("screen.mitofus.storage_next", StorageRules.SLOTS_PER_ROW, MoneyText.iron(info.nextRowCost()))
+                : Component.translatable("screen.mitofus.storage_max", StorageRules.MAX_ROWS);
+        return Component.empty().append(state).append(Component.literal(" ")).append(next);
     }
 
     @Override
     protected void init() {
-        Component info = Component.translatable("screen.mitofus.storage_info", MoneyText.iron(StorageRules.openCost()),
-                StorageRules.FIRST_ROWS * StorageRules.SLOTS_PER_ROW, MoneyText.iron(StorageRules.nextRowCost(StorageRules.FIRST_ROWS)));
-        lines = font.split(info, WIDTH - 2 * PADDING);
-        height = PADDING + UiStyle.LINE + 4 + lines.size() * UiStyle.LINE + 8 + 2 * (BUTTON_HEIGHT + 4) + PADDING;
+        lines = font.split(text(), WIDTH - 2 * PADDING);
+        int buttons = canExpand() ? 2 : 1;
+        height = PADDING + UiStyle.LINE + 4 + lines.size() * UiStyle.LINE + 8 + buttons * (BUTTON_HEIGHT + 4) + PADDING;
         left = (width - WIDTH) / 2;
         top = (super.height - height) / 2;
-        int y = top + height - PADDING - 2 * (BUTTON_HEIGHT + 4) + 4;
-        addRenderableWidget(Button.builder(Component.translatable("screen.mitofus.storage_open"), b -> {
-            PacketDistributor.sendToServer(new StoragePayload(npc.getId(), false));
+        int y = top + height - PADDING - buttons * (BUTTON_HEIGHT + 4) + 4;
+        Component openLabel = opened() ? Component.translatable("screen.mitofus.storage_open")
+                : Component.translatable("screen.mitofus.storage_buy", MoneyText.iron(info.openCost()));
+        Button open = addRenderableWidget(Button.builder(openLabel, b -> {
+            PacketDistributor.sendToServer(new StoragePayload(info.npc(), false));
             onClose();
         }).bounds(left + PADDING, y, WIDTH - 2 * PADDING, BUTTON_HEIGHT).build(MitofusButton::new));
-        y += BUTTON_HEIGHT + 4;
-        addRenderableWidget(Button.builder(Component.translatable("screen.mitofus.storage_expand"), b -> {
-            PacketDistributor.sendToServer(new StoragePayload(npc.getId(), true));
-            onClose();
-        }).bounds(left + PADDING, y, WIDTH - 2 * PADDING, BUTTON_HEIGHT).build(MitofusButton::new));
+        if (!opened()) {
+            open.active = Wallet.canAfford(Minecraft.getInstance().player, info.openCost());
+            if (!open.active) {
+                open.setTooltip(Tooltip.create(Component.translatable("screen.mitofus.storage_no_coins")));
+            }
+        }
+        if (canExpand()) {
+            y += BUTTON_HEIGHT + 4;
+            // The window stays open after buying, so the next price and the free slots update in front of the player.
+            Button expand = addRenderableWidget(Button.builder(Component.translatable("screen.mitofus.storage_expand", MoneyText.iron(info.nextRowCost())),
+                            b -> PacketDistributor.sendToServer(new StoragePayload(info.npc(), true)))
+                    .bounds(left + PADDING, y, WIDTH - 2 * PADDING, BUTTON_HEIGHT).build(MitofusButton::new));
+            expand.active = Wallet.canAfford(Minecraft.getInstance().player, info.nextRowCost());
+            if (!expand.active) {
+                expand.setTooltip(Tooltip.create(Component.translatable("screen.mitofus.storage_no_coins")));
+            }
+        }
     }
 
     @Override

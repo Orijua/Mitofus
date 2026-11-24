@@ -37,4 +37,13 @@ class CoachRulesTest {
         assertFalse(CoachRules.canGo("covadonga", "torre_del_oro"));
         assertFalse(CoachRules.canGo("covadonga", "nowhere"));
     }
+
+    @Test
+    void theTripTakesAFewSecondsByDefaultAndTheLimitsAreChecked() {
+        org.junit.jupiter.api.Assertions.assertEquals(3, com.orijua.mitofus.core.config.CoachBalance.DEFAULT.travelSeconds());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new com.orijua.mitofus.core.config.CoachBalance(500, 10, 500, -1));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new com.orijua.mitofus.core.config.CoachBalance(500, 10, 500, 61));
+    }
 }
