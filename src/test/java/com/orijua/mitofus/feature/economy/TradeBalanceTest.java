@@ -11,6 +11,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TradeBalanceTest {
     @Test
@@ -164,5 +165,26 @@ class TradeBalanceTest {
         source.put(ResourceLocation.withDefaultNamespace("bow"), 3.0);
         source.put(sword, 50.0);
         assertEquals(Map.of(sword, 2.0), balance.itemMultiplier(), "changing the source map afterwards does not change the balance");
+    }
+
+    /**
+     * The defaults above are numbers someone approved. These are the relations between them that must hold if one is tuned, so
+     * a change fails here with a reason instead of only "expected 37".
+     */
+    @Test
+    void theDefaultNumbersKeepTheirRelations() {
+        TradeBalance b = TradeBalance.DEFAULT;
+        // The pressure cap is the first one where the curve reaches the floor.
+        assertTrue(Math.pow(b.saturationStep(), b.pressureCap()) <= b.saturationFloor());
+        assertTrue(Math.pow(b.saturationStep(), b.pressureCap() - 1) > b.saturationFloor());
+        // Every rating is worth more than the one below.
+        long previous = 0;
+        for (ItemRating rating : ItemRating.values()) {
+            long price = b.basePrice().get(rating);
+            assertTrue(price > previous, rating + " is worth more than the rating below");
+            previous = price;
+        }
+        assertTrue(b.sellShare() > 0 && b.sellShare() < 1, "a piece sells for less than its reference");
+        assertTrue(b.saturationFloor() > 0 && b.saturationFloor() < 1);
     }
 }

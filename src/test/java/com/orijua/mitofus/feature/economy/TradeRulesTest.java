@@ -698,4 +698,45 @@ class TradeRulesTest {
         assertFalse(TradeRules.payableIron((cap + 1) * 100, B));
         assertFalse(TradeRules.payableIron(0, B));
     }
+
+    @Test
+    void hugeReferencesSaturateWithoutOverflowOrExceptions() {
+        long huge = Long.MAX_VALUE;
+        assertEquals(Long.MAX_VALUE, TradeRules.sellPriceIron(huge, 0, B));
+        assertFalse(TradeRules.payableIron(Long.MAX_VALUE, B), "far above the sell cap");
+        assertFalse(TradeRules.payable(Long.MAX_VALUE, B));
+        assertTrue(TradeRules.sellPrice(huge, 0, B) > B.maxSellGold());
+        assertEquals(Long.MAX_VALUE, TradeRules.reference(ItemRating.ANCESTRAL, 1e300, 1_000_000, 1_000_000, 1_000_000, false, B));
+        assertEquals(1, TradeRules.reference(ItemRating.NORMAL, Double.NaN, 1, 0, 0, false, B), "a NaN material still prices at 1");
+    }
+
+    @Test
+    void aFullBatchAtTheCapTotalsWithoutOverflow() {
+        long capIron = B.maxSellGold() * Money.IRON_PER_GOLD;
+        long[] prices = new long[TradeRules.MAX_BATCH];
+        java.util.Arrays.fill(prices, capIron);
+        assertEquals(capIron * TradeRules.MAX_BATCH, TradeRules.total(prices));
+        assertTrue(TradeRules.total(prices) > 0);
+    }
+
+    @Test
+    void twoSalesOfTheSameKeyInTheSameTickAddTwoPoints() {
+        TradeKey key = new TradeKey(TradeCategory.SWORD, ItemRating.EPIC);
+        TradeSaturation once = TradeSaturation.EMPTY.recordSale(key, 100, B);
+        TradeSaturation twice = once.recordSale(key, 100, B);
+        assertEquals(1, once.pressure(key, 100, B));
+        assertEquals(2, twice.pressure(key, 100, B));
+        assertEquals(0, TradeSaturation.EMPTY.pressure(key, 100, B), "the earlier value is not changed");
+        // The second one is paid less than the first, as in a batch.
+        assertTrue(TradeRules.sellPrice(40, 2, B) <= TradeRules.sellPrice(40, 1, B));
+    }
+
+    @Test
+    void salesOfDifferentKeysInTheSameTickDoNotShareTheirPressure() {
+        TradeKey sword = new TradeKey(TradeCategory.SWORD, ItemRating.EPIC);
+        TradeKey axe = new TradeKey(TradeCategory.AXE, ItemRating.EPIC);
+        TradeSaturation both = TradeSaturation.EMPTY.recordSale(sword, 7, B).recordSale(axe, 7, B);
+        assertEquals(1, both.pressure(sword, 7, B));
+        assertEquals(1, both.pressure(axe, 7, B));
+    }
 }
