@@ -12,21 +12,21 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Shared look of every Mitofus screen and HUD element, modeled on RPG system windows: a translucent
- * steel-blue panel, light-blue double lines on top and bottom, a crest above and white text with a shadow.
+ * forest-green panel, warm gold double lines on top and bottom, a crest above and cream text with a shadow.
  * Change colors here, not in each screen.
  */
 public final class UiStyle {
-    public static final int TEXT = 0xFFFFFF;
-    public static final int MUTED = 0xC4D3E6;
-    public static final int HEADING = 0xD6EEFF;
+    public static final int TEXT = 0xFAF6E8;
+    public static final int MUTED = 0xBED6C8;
+    public static final int HEADING = 0xFFE9A8;
     public static final int GOLD = 0xFFD700;
-    public static final int GOOD = 0x6CFF7A;
-    public static final int BAD = 0xFF6B6B;
-    public static final int MANA = 0xFF3F8CFF;
-    public static final int XP = 0xFF55CC55;
+    public static final int GOOD = 0x96E68C;
+    public static final int BAD = 0xFFBFB4;
+    public static final int MANA = 0xFF7FB6FF;
+    public static final int XP = 0xFFA6E86B;
     public static final int COOLDOWN = 0xFFFFC23F;
     /** Energy (fatigue): lavender, distinct from mana, XP and warnings. */
-    public static final int FATIGUE = 0xFFB48CFF;
+    public static final int FATIGUE = 0xFFD0B4FF;
 
     /**
      * The color of the name of a rated piece (its rating color, opaque); Normal's while its rating is hidden (unappraised);
@@ -41,36 +41,36 @@ public final class UiStyle {
     }
 
     /** Window background, lighter at the top like the reference window. */
-    public static final int WINDOW_TOP = 0xD27D97B8;
-    public static final int WINDOW_BOTTOM = 0xD23C5679;
+    public static final int WINDOW_TOP = 0xD23A5C54;
+    public static final int WINDOW_BOTTOM = 0xD21E3834;
     /** The bright outer line and the softer inner one of the top and bottom edges. */
-    public static final int LINE_BRIGHT = 0xFFE6F4FF;
-    public static final int LINE_SOFT = 0xFF9DC4EA;
+    public static final int LINE_BRIGHT = 0xFFF4E2AA;
+    public static final int LINE_SOFT = 0xFFC9B070;
     /** The system-sign panel: darker at the top and bottom edges, lit in the middle. */
-    public static final int WINDOW_EDGE = 0xD25A7698;
-    public static final int WINDOW_CENTER = 0xD27E9ABC;
+    public static final int WINDOW_EDGE = 0xD2284A44;
+    public static final int WINDOW_CENTER = 0xD23E6A5F;
     /** The rods above and below the panel: how far they stick out on each side, their height and their color. */
     public static final int ROD_OVERHANG = 3;
     public static final int ROD_HEIGHT = 3;
-    public static final int ROD = 0xFF607DAC;
+    public static final int ROD = 0xFF8C7A3E;
     /** Height of the small label above a title and of a title line in {@link #titleBlock}. */
     public static final int KICKER_HEIGHT = 7;
     public static final int TITLE_HEIGHT = 10;
-    private static final int SIDE_LINE = 0x90D6ECFF;
-    private static final int CREST_FILL = 0xFFCFE9FF;
-    private static final int CREST_OUTLINE = 0xFF4F7CB0;
+    private static final int SIDE_LINE = 0x90F4E2AA;
+    private static final int CREST_FILL = 0xFFF4E2AA;
+    private static final int CREST_OUTLINE = 0xFF8A6A2A;
 
     /** The colors of a window: background (top and bottom), the bright and soft lines of the top and bottom edges, and the side lines. */
     public record Palette(int top, int bottom, int bright, int soft, int side) {
     }
 
-    /** The Mitofus windows: steel blue with light-blue lines. */
+    /** The Mitofus windows: forest green with warm gold lines. */
     public static final Palette MITOFUS = new Palette(WINDOW_TOP, WINDOW_BOTTOM, LINE_BRIGHT, LINE_SOFT, SIDE_LINE);
     /** The real-world devices (terminal, phone): dark grey with cyan lines. */
     public static final Palette DEVICE = new Palette(0xE02A2F35, 0xE015181C, 0xFF4FE3EC, 0xFF2A9BA3, 0x904FE3EC);
 
-    private static final int BAR_BORDER = 0xC09DC4EA;
-    private static final int BAR_EMPTY = 0xC01B2A40;
+    private static final int BAR_BORDER = 0xC0C9B070;
+    private static final int BAR_EMPTY = 0xC0142824;
 
     public static final int LINE = 12;
 

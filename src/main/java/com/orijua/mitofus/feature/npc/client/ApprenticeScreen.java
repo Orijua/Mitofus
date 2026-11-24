@@ -338,7 +338,7 @@ public final class ApprenticeScreen extends Screen implements MitofusStyledScree
             int thumb = Math.max(8, trackHeight * panelHeight / contentHeight);
             int thumbY = trackTop + (trackHeight - thumb) * scrollY / (contentHeight - panelHeight);
             graphics.fill(left + WIDTH - 5, trackTop, left + WIDTH - 2, trackTop + trackHeight, 0x60FFFFFF);
-            graphics.fill(left + WIDTH - 5, thumbY, left + WIDTH - 2, thumbY + thumb, 0xFFA0A0D0);
+            graphics.fill(left + WIDTH - 5, thumbY, left + WIDTH - 2, thumbY + thumb, UiStyle.LINE_SOFT);
         }
         if (coinsTooltip) {
             graphics.renderComponentTooltip(font, CoinBalanceView.tooltip(), mouseX, mouseY);

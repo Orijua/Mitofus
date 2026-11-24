@@ -30,7 +30,7 @@ public final class MitofusCard {
             case NORMAL -> 0x30FFFFFF;
             case HOVER -> 0x50FFFFFF;
             case DIM -> 0x18FFFFFF;
-            case SELECTED -> 0x509DC4EA;
+            case SELECTED -> 0x50F4E2AA;
         };
     }
 

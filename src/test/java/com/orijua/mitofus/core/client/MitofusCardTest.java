@@ -38,6 +38,6 @@ class MitofusCardTest {
         assertEquals(0x30FFFFFF, MitofusCard.fill(NORMAL));
         assertEquals(0x50FFFFFF, MitofusCard.fill(HOVER));
         assertEquals(0x18FFFFFF, MitofusCard.fill(DIM));
-        assertEquals(0x509DC4EA, MitofusCard.fill(SELECTED));
+        assertEquals(0x50F4E2AA, MitofusCard.fill(SELECTED));
     }
 }
