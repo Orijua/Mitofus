@@ -70,7 +70,8 @@ public record ForgingRecipe(Ingredient material, int materialCount, Ingredient h
      * The recipes the anvil can forge from these inputs. Several can match at once (armor pieces of one material share the
      * ingot and have no handle: 8 ingots also match the helmet, leggings and boots), so only the ones that ask for the most
      * material count; otherwise the chestplate would never come out. Some tie (pickaxe and axe, sword and hoe take the same
-     * items), and then the smith chooses: the list is sorted by recipe id so the order is the same on server and client.
+     * items), and then the smith chooses: the list is sorted by recipe id, descending, so the order is the same on server and client
+     * and the first one is the useful default (pickaxe before axe, sword before hoe).
      */
     public static List<RecipeHolder<ForgingRecipe>> candidates(RecipeManager recipes, ForgingRecipeInput input, Level level) {
         List<RecipeHolder<ForgingRecipe>> matching = recipes.getAllRecipesFor(ModRecipes.FORGING.get()).stream()
@@ -79,7 +80,7 @@ public record ForgingRecipe(Ingredient material, int materialCount, Ingredient h
         int most = matching.stream().mapToInt(holder -> holder.value().materialCount()).max().orElse(0);
         return matching.stream()
                 .filter(holder -> holder.value().materialCount() == most)
-                .sorted(Comparator.comparing(holder -> holder.id().toString()))
+                .sorted(Comparator.comparing((RecipeHolder<ForgingRecipe> holder) -> holder.id().toString()).reversed())
                 .toList();
     }
 

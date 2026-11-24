@@ -154,9 +154,9 @@ public class SmithingAnvilMenu extends AbstractContainerMenu {
         return forging.get(DATA_RECIPE_CHOICE);
     }
 
-    /** Picks the next recipe that fits the inputs (pickaxe, then axe), wrapping around. */
+    /** Picks the next recipe that fits the inputs (pickaxe, then axe; sword, then hoe), wrapping around. */
     private boolean cycleRecipe() {
-        if (autoForging() || lastCandidates.size() < 2) {
+        if (autoForging() || manualStart >= 0 || lastCandidates.size() < 2) {
             return false;
         }
         forging.set(DATA_RECIPE_CHOICE, (recipeChoice() + 1) % lastCandidates.size());

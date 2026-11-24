@@ -169,7 +169,7 @@ public class SmithingAnvilScreen extends AbstractContainerScreen<SmithingAnvilMe
         int choices = ForgingRecipe.candidates(minecraft.level.getRecipeManager(), input, minecraft.level).size();
         recipe = ForgingRecipe.find(minecraft.level.getRecipeManager(), input, minecraft.level, menu.recipeChoice())
                 .map(RecipeHolder::value);
-        recipeButton.visible = forgeable && choices > 1;
+        recipeButton.visible = !enhanceButton.visible && choices > 1;
         recipeButton.active = idle;
         recipeButton.setMessage(Component.translatable("screen.mitofus.recipe", Math.floorMod(menu.recipeChoice(), Math.max(1, choices)) + 1, choices));
         // A recipe with a rating range (Guadalete: Unique or Legendary) shows the odds within it.

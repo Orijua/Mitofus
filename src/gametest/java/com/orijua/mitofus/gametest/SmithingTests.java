@@ -59,6 +59,14 @@ public final class SmithingTests {
         }
         helper.assertTrue(results.equals(Set.of(Items.IRON_PICKAXE, Items.IRON_AXE)),
                 "3 iron ingots + stick should reach the pickaxe and the axe, got " + results);
+        // The default (nothing chosen yet) is the useful one: pickaxe over axe, sword over hoe.
+        helper.assertTrue(find(helper, pickaxeOrAxe).orElseThrow().value().result().is(Items.IRON_PICKAXE), "default is the pickaxe");
+        ForgingRecipeInput swordOrHoe = new ForgingRecipeInput(new ItemStack(Items.IRON_INGOT, 2), new ItemStack(Items.STICK));
+        helper.assertTrue(find(helper, swordOrHoe).orElseThrow().value().result().is(Items.IRON_SWORD), "default is the sword");
+        helper.assertTrue(ForgingRecipe.find(helper.getLevel().getRecipeManager(), swordOrHoe, helper.getLevel(), 1)
+                .orElseThrow().value().result().is(Items.IRON_HOE), "the second choice is the hoe");
+        helper.assertTrue(ForgingRecipe.find(helper.getLevel().getRecipeManager(), swordOrHoe, helper.getLevel(), -1)
+                .orElseThrow().value().result().is(Items.IRON_HOE), "a negative choice wraps around");
         helper.assertTrue(ForgingRecipe.candidates(helper.getLevel().getRecipeManager(), pickaxeOrAxe, helper.getLevel()).size() == 2,
                 "only the two recipes that ask for the most material are candidates");
         helper.succeed();
