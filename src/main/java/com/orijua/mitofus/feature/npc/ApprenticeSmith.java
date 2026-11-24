@@ -8,6 +8,7 @@ import com.orijua.mitofus.core.registry.ModItems;
 import com.orijua.mitofus.core.registry.ModRecipes;
 import com.orijua.mitofus.feature.economy.CarriedItems;
 import com.orijua.mitofus.feature.economy.CoinPurse;
+import com.orijua.mitofus.feature.economy.Wallet;
 import com.orijua.mitofus.feature.economy.Money;
 import com.orijua.mitofus.feature.equipment.AppraisalService;
 import com.orijua.mitofus.feature.equipment.EquipmentService;
@@ -369,17 +370,27 @@ public class ApprenticeSmith extends PathfinderMob implements PeacefulNpc {
 
     /** From his window: one day of wage, taken from what he carries (see {@link CarriedItems}). */
     public boolean payDay(ServerPlayer master) {
-        if (ApprenticeRules.daysBought(ApprenticeBalance.current().dailyWage(), daysPaid()) == 0) {
+        return payDays(master, 1);
+    }
+
+    /**
+     * From his window: up to {@code requested} days of wage (a click is 1, Shift 5, Ctrl 10), taken from the balance. If the
+     * balance or the limit of days ahead is short, it pays as many days as it can.
+     */
+    public boolean payDays(ServerPlayer master, int requested) {
+        ApprenticeBalance balance = ApprenticeBalance.current();
+        if (balance.maxPaidDays() - daysPaid() <= 0) {
             master.displayClientMessage(Component.translatable("message.mitofus.apprentice_paid_enough", getDisplayName()), true);
             return false;
         }
-        long wageIron = ApprenticeBalance.current().dailyWage() * Money.IRON_PER_GOLD;
-        if (!CoinPurse.pay(master, wageIron)) {
-            master.displayClientMessage(Component.translatable("message.mitofus.apprentice_no_gold", Money.format(ApprenticeBalance.current().dailyWage())), true);
+        long wageIron = (long) balance.dailyWage() * Money.IRON_PER_GOLD;
+        int days = ApprenticeRules.daysToPay(requested, wageIron, Wallet.balance(master), balance.maxPaidDays(), daysPaid());
+        if (days == 0 || !CoinPurse.pay(master, days * wageIron)) {
+            master.displayClientMessage(Component.translatable("message.mitofus.apprentice_no_gold", Money.format(balance.dailyWage())), true);
             return false;
         }
         master.inventoryMenu.sendAllDataToRemote();
-        addPaidDays(master, 1);
+        addPaidDays(master, days);
         return true;
     }
 

@@ -270,7 +270,9 @@ final class ServerPayloadHandler {
             return;
         }
         switch (payload.action()) {
-            case PAY_DAY -> apprentice.payDay(player);
+            case PAY_DAY -> apprentice.payDays(player, 1);
+            case PAY_5_DAYS -> apprentice.payDays(player, 5);
+            case PAY_10_DAYS -> apprentice.payDays(player, 10);
             case CANCEL_ORDER -> apprentice.cancelOrder(player);
             case ASSIGN_MATERIALS -> ApprenticeAssignments.start(player, apprentice, ApprenticeSmith.Slot.MATERIALS);
             case ASSIGN_OUTPUT -> ApprenticeAssignments.start(player, apprentice, ApprenticeSmith.Slot.OUTPUT);
