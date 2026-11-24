@@ -3,6 +3,7 @@ package com.orijua.mitofus.feature.skill.client;
 import com.orijua.mitofus.MitofusClient;
 import com.orijua.mitofus.core.client.MitofusButton;
 import com.orijua.mitofus.core.client.MitofusTab;
+import com.orijua.mitofus.core.client.PanelFit;
 import com.orijua.mitofus.core.client.ScrollList;
 import com.orijua.mitofus.core.client.UiStyle;
 import com.orijua.mitofus.core.registry.Definitions;
@@ -36,7 +37,6 @@ import java.util.function.Consumer;
 public class SkillsTab extends MitofusTab {
     private static final int ROW = 22;
     private static final int LIST_TOP = 16;
-    private static final int VISIBLE_ROWS = 7;
     private static final int FILTER_WIDTH = 74;
     private static final int ASSIGN_WIDTH = 110;
 
@@ -76,12 +76,13 @@ public class SkillsTab extends MitofusTab {
     }
 
     private final List<Row> rows = new ArrayList<>();
-    private final ScrollList scroll = new ScrollList(VISIBLE_ROWS);
+    private final ScrollList scroll = new ScrollList(1);
     private Filter filter = Filter.ALL;
     private boolean dirty;
     private int shownCount;
     private int shownLearnedCount;
     private int shownPassiveCount;
+    private int visibleRows = 1;
 
     public SkillsTab() {
         super(Component.translatable("tab.mitofus.skills"));
@@ -114,6 +115,8 @@ public class SkillsTab extends MitofusTab {
     protected void addWidgets(Consumer<AbstractWidget> addWidget) {
         rows.clear();
         dirty = false;
+        visibleRows = PanelFit.rows(height - LIST_TOP, ROW);
+        scroll.setVisibleRows(visibleRows);
         shownLearnedCount = skills().learned().size();
         shownPassiveCount = ActiveTraits.active(player()).size();
         addWidget.accept(Button.builder(Component.translatable(filter.key), b -> {
@@ -187,7 +190,7 @@ public class SkillsTab extends MitofusTab {
                 hovered = rows.get(i);
             }
         }
-        scroll.renderBar(graphics, left + width + 3, top + LIST_TOP - 2, VISIBLE_ROWS * ROW - 4, shownCount);
+        scroll.renderBar(graphics, left + width + 3, top + LIST_TOP - 2, visibleRows * ROW - 4, shownCount);
         if (hovered != null) {
             graphics.renderTooltip(font(), font().split(hovered.entry().description(), 180), mouseX, mouseY);
         }

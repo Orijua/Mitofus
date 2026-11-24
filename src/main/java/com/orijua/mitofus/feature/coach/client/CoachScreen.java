@@ -3,6 +3,8 @@ package com.orijua.mitofus.feature.coach.client;
 import com.orijua.mitofus.core.client.MitofusButton;
 import com.orijua.mitofus.core.client.MitofusConfirmScreen;
 import com.orijua.mitofus.core.client.MitofusStyledScreen;
+import com.orijua.mitofus.core.client.PanelFit;
+import com.orijua.mitofus.core.client.ScrollList;
 import com.orijua.mitofus.core.client.UiStyle;
 import com.orijua.mitofus.core.config.CoachBalance;
 import com.orijua.mitofus.feature.coach.CoachInfoPayload;
@@ -31,6 +33,7 @@ public final class CoachScreen extends Screen implements MitofusStyledScreen {
     private int left;
     private int top;
     private int height;
+    private final ScrollList scroll = new ScrollList(1);
 
     private CoachScreen(CoachInfoPayload info) {
         super(Component.translatable("screen.mitofus.coach_title"));
@@ -48,13 +51,16 @@ public final class CoachScreen extends Screen implements MitofusStyledScreen {
                 : Component.translatable("screen.mitofus.coach_info", Component.translatable("screen.mitofus.coach_travel_time",
                 CoachBalance.current().travelSeconds()));
         lines = font.split(text, WIDTH - 2 * PADDING);
-        int destinations = info.destinations().size();
-        height = PADDING + UiStyle.LINE + 4 + lines.size() * UiStyle.LINE + 8
-                + destinations * (BUTTON_HEIGHT + 4) + PADDING;
+        int total = info.destinations().size();
+        int fixed = PADDING + UiStyle.LINE + 4 + lines.size() * UiStyle.LINE + 8 + PADDING;
+        int destinations = Math.min(total, PanelFit.rows(super.height - 2 * PanelFit.MARGIN - fixed, BUTTON_HEIGHT + 4));
+        scroll.setVisibleRows(destinations);
+        scroll.clamp(total);
+        height = fixed + destinations * (BUTTON_HEIGHT + 4);
         left = (width - WIDTH) / 2;
         top = (super.height - height) / 2;
         int y = top + height - PADDING - destinations * (BUTTON_HEIGHT + 4) + 4;
-        for (int i = 0; i < destinations; i++) {
+        for (int i = scroll.first(); i < scroll.end(total); i++) {
             String destination = info.destinations().get(i);
             long fare = info.fares().get(i);
             Component place = Component.translatable("site.mitofus." + destination);
@@ -99,6 +105,15 @@ public final class CoachScreen extends Screen implements MitofusStyledScreen {
             graphics.drawCenteredString(font, line, centerX, y, UiStyle.TEXT);
             y += UiStyle.LINE;
         }
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (scroll.scroll(scrollY, info.destinations().size())) {
+            rebuildWidgets();
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.orijua.mitofus.feature.progression.client;
 
 import com.orijua.mitofus.core.client.MitofusButton;
 import com.orijua.mitofus.core.client.MitofusTab;
+import com.orijua.mitofus.core.client.PanelFit;
 import com.orijua.mitofus.core.client.UiStyle;
 import com.orijua.mitofus.core.config.Balance;
 import com.orijua.mitofus.core.config.VrHelmetBalance;
@@ -56,11 +57,16 @@ import java.util.function.Consumer;
 /** Level, XP, resources and the five stats with "+" buttons. */
 public class StatusTab extends MitofusTab {
     private static final int STATS_TOP = 66;
-    private static final int STAT_ROW = 18;
+    private static final int MAX_STAT_ROW = 18;
+    private static final int MIN_STAT_ROW = 12;
+    /** Space kept under the stats for the logout row. */
+    private static final int BOTTOM = 16;
     private static final int LOGOUT_WIDTH = 110;
     private static final int COIN_ICON = 9;
 
     private final List<Button> plusButtons = new ArrayList<>();
+    /** Height of each stat row: 18 when the window has room, tighter when the screen is small. */
+    private int statRow = MAX_STAT_ROW;
 
     public StatusTab() {
         super(Component.translatable("tab.mitofus.status"));
@@ -73,12 +79,13 @@ public class StatusTab extends MitofusTab {
     @Override
     protected void addWidgets(Consumer<AbstractWidget> addWidget) {
         plusButtons.clear();
+        statRow = PanelFit.spread(height - STATS_TOP - BOTTOM, StatType.values().length, MIN_STAT_ROW, MAX_STAT_ROW);
         StatType[] types = StatType.values();
         for (int i = 0; i < types.length; i++) {
             StatType stat = types[i];
             Button button = Button.builder(Component.literal("+"),
                             b -> PacketDistributor.sendToServer(new AllocateStatPayload(stat, pointsPerClick())))
-                    .bounds(left + width - 18, top + STATS_TOP + i * STAT_ROW - 4, 16, 16)
+                    .bounds(left + width - 18, top + STATS_TOP + i * statRow - 4, 16, Math.min(16, statRow))
                     .tooltip(Tooltip.create(Component.translatable("screen.mitofus.allocate_hint")))
                     .build(MitofusButton::new);
             plusButtons.add(button);
@@ -140,7 +147,7 @@ public class StatusTab extends MitofusTab {
         StatType[] types = StatType.values();
         StatType hovered = null;
         for (int i = 0; i < types.length; i++) {
-            int y = top + STATS_TOP + i * STAT_ROW;
+            int y = top + STATS_TOP + i * statRow;
             UiStyle.text(graphics, font(), types[i].displayName(), left, y, UiStyle.TEXT);
             UiStyle.text(graphics, font(), Component.literal(String.valueOf(stats.get(types[i]))), left + width - 60, y, UiStyle.GOLD);
             int bonus = effective.get(types[i]) - stats.get(types[i]);
@@ -148,7 +155,7 @@ public class StatusTab extends MitofusTab {
             if (bonus != 0) {
                 UiStyle.text(graphics, font(), Component.literal((bonus > 0 ? "+" : "") + bonus), left + width - 42, y, bonus > 0 ? UiStyle.GOOD : UiStyle.BAD);
             }
-            if (mouseX >= left && mouseX < left + width - 20 && mouseY >= y - 4 && mouseY < y + STAT_ROW - 4) {
+            if (mouseX >= left && mouseX < left + width - 20 && mouseY >= y - 4 && mouseY < y + statRow - 4) {
                 hovered = types[i];
             }
         }

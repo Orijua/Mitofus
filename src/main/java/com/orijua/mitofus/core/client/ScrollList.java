@@ -23,6 +23,10 @@ public final class ScrollList {
         this.visibleRows = Math.max(1, visibleRows);
     }
 
+    public int visibleRows() {
+        return visibleRows;
+    }
+
     public int first() {
         return offset;
     }

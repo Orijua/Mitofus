@@ -33,6 +33,11 @@ public final class PanelFit {
         return Math.max(1, availableHeight / rowHeight);
     }
 
+    /** The height of each of {@code count} rows sharing {@code available}, kept between {@code min} and {@code max}. */
+    public static int spread(int available, int count, int min, int max) {
+        return Math.clamp(available / Math.max(1, count), min, max);
+    }
+
     public static boolean needsScroll(int contentHeight, int availableHeight) {
         return contentHeight > availableHeight;
     }
