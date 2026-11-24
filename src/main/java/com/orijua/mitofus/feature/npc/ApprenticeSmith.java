@@ -58,8 +58,6 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BarrelBlockEntity;
@@ -638,17 +636,17 @@ public class ApprenticeSmith extends PathfinderMob implements PeacefulNpc {
             return room;
         }
         List<Container> sources = sources();
-        ItemStack missing = missing(sources, recipe.material(), recipe.materialCount());
+        ItemStack missing = ContainerItems.missing(sources, recipe.material(), recipe.materialCount());
         if (missing.isEmpty() && !recipe.handle().isEmpty()) {
-            missing = missing(sources, recipe.handle(), 1);
+            missing = ContainerItems.missing(sources, recipe.handle(), 1);
         }
         entityData.set(DATA_MISSING, missing);
         if (!missing.isEmpty()) {
             return Status.NO_MATERIALS;
         }
-        onAnvil.addAll(take(sources, recipe.material(), recipe.materialCount()));
+        onAnvil.addAll(ContainerItems.take(sources, recipe.material(), recipe.materialCount()));
         if (!recipe.handle().isEmpty()) {
-            onAnvil.addAll(take(sources, recipe.handle(), 1));
+            onAnvil.addAll(ContainerItems.take(sources, recipe.handle(), 1));
         }
         workTicks = 0;
         return Status.WORKING;
@@ -693,7 +691,7 @@ public class ApprenticeSmith extends PathfinderMob implements PeacefulNpc {
                 getRandom());
         // What an apprentice forges comes unappraised; judgePiece below still uses the real rating.
         AppraisalService.markUnappraised(piece, getRandom());
-        put(output, piece);
+        ContainerItems.put(output, piece);
         level().playSound(null, anvil, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.8f, 1.0f);
         ItemRating rating = piece.get(ModDataComponents.ITEM_RATING);
         if (rating != null) {
@@ -708,7 +706,7 @@ public class ApprenticeSmith extends PathfinderMob implements PeacefulNpc {
         if (output.isEmpty()) {
             return Status.NO_OUTPUT;
         }
-        return hasRoom(output.get()) ? Status.WORKING : Status.BARREL_FULL;
+        return ContainerItems.hasRoom(output.get()) ? Status.WORKING : Status.BARREL_FULL;
     }
 
     private List<Container> sources() {
@@ -795,61 +793,6 @@ public class ApprenticeSmith extends PathfinderMob implements PeacefulNpc {
             }
         }
         return found;
-    }
-
-    /** What is short of {@code count} of {@code ingredient} in the containers (one of its items, with the count missing), or empty. */
-    private static ItemStack missing(List<Container> containers, Ingredient ingredient, int count) {
-        int found = 0;
-        for (Container container : containers) {
-            for (int slot = 0; slot < container.getContainerSize(); slot++) {
-                ItemStack stack = container.getItem(slot);
-                if (ingredient.test(stack)) {
-                    found += stack.getCount();
-                }
-            }
-        }
-        if (found >= count) {
-            return ItemStack.EMPTY;
-        }
-        ItemStack[] options = ingredient.getItems();
-        return options.length == 0 ? new ItemStack(Items.BARRIER, count - found) : options[0].copyWithCount(count - found);
-    }
-
-    /** Takes {@code count} of {@code ingredient} from the containers; returns what was taken. */
-    private static List<ItemStack> take(List<Container> containers, Ingredient ingredient, int count) {
-        List<ItemStack> taken = new ArrayList<>();
-        int missing = count;
-        for (Container container : containers) {
-            for (int slot = 0; slot < container.getContainerSize() && missing > 0; slot++) {
-                ItemStack stack = container.getItem(slot);
-                if (ingredient.test(stack)) {
-                    ItemStack removed = container.removeItem(slot, Math.min(missing, stack.getCount()));
-                    missing -= removed.getCount();
-                    taken.add(removed);
-                }
-            }
-            container.setChanged();
-        }
-        return taken;
-    }
-
-    private static boolean hasRoom(Container container) {
-        for (int slot = 0; slot < container.getContainerSize(); slot++) {
-            if (container.getItem(slot).isEmpty()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static void put(Container container, ItemStack piece) {
-        for (int slot = 0; slot < container.getContainerSize(); slot++) {
-            if (container.getItem(slot).isEmpty()) {
-                container.setItem(slot, piece);
-                container.setChanged();
-                return;
-            }
-        }
     }
 
     @Override
