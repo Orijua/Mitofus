@@ -33,7 +33,7 @@ class MitofusSitesTest {
         assertEquals(new ChunkPos(0, 0), site(WorldSites.COVADONGA), "the map's origin is Covadonga's pixel");
     }
 
-    /** The rules of the search ({@link StartingVillage#search}) hold for the fixed sites. */
+    /** The rules the sites were chosen by hold for the fixed sites. */
     @Test
     void theSitesKeepTheRulesOfTheSearch() {
         ChunkPos covadonga = site(WorldSites.COVADONGA);

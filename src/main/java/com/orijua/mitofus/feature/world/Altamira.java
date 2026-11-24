@@ -3,7 +3,6 @@ package com.orijua.mitofus.feature.world;
 import com.orijua.mitofus.Mitofus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.QuartPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -27,8 +26,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.IntConsumer;
 import java.util.function.Predicate;
 
 /**
@@ -55,22 +52,17 @@ public final class Altamira {
 
     /**
      * Where to look: the cold target on the map, in source pixels. That
-     * pixel is in the sea (35 chunks north of Covadonga): the search heads for the nearest snowy coast from it.
+     * pixel is in the sea (35 chunks north of Covadonga): it is where the map puts the glacier.
      */
     public static final int MAP_PIXEL_X = 1288;
     public static final int MAP_PIXEL_Z = 178;
     /** Never less than this, in chunks, north of Covadonga (the label is 35 chunks north, in the sea; the snowy coast is nearer). */
     public static final int MIN_DISTANCE = 16;
-    /** Around that point, how far to look for cold land: closely (every other chunk), then farther and sparser. */
-    static final int SEARCH_RADIUS = 40;
-    static final int FAR_SEARCH_RADIUS = 128;
     /** How many blocks of difference the ground under the mound may have. */
     private static final int MAX_SLOPE = 3;
-    /** The most jigsaw assemblies ({@code fits}) the first search may make before giving up on cold land. */
-    public static final int MAX_ASSEMBLIES = 200;
     /** On the map, land with this relief or more is mountain: the mound almost never fits on it (MAX_SLOPE). */
     static final double MAX_MAP_RELIEF = 8;
-    /** The cold biomes the cave prefers (the structure itself may generate anywhere: the search decides). */
+    /** The cold biomes the cave prefers (the structure itself may generate anywhere). */
     static final TagKey<Biome> COLD = TagKey.create(Registries.BIOME, Mitofus.id("has_structure/altamira"));
 
     /** How many blocks the descent goes down. */
@@ -211,66 +203,8 @@ public final class Altamira {
     }
 
     /**
-     * The site for this world's cave: the cold land of the map nearest the cold target ({@link #mapOffset}, taken
-     * from Covadonga) where the mound stands on dry, fairly flat ground, looking up to about 2000 blocks around it (never
-     * less than {@link #MIN_DISTANCE} north of Covadonga). With no cold land within reach, the first dry ground around that
-     * point. Empty if this world's generator doesn't have the cave or there is no reachable dry land (the point itself
-     * is sea: it is never returned as a last resort).
-     */
-    public static Optional<ChunkPos> findSite(RegistryAccess registries, ChunkGenerator generator, RandomState random,
-                                              StructureTemplateManager templates, long seed, LevelHeightAccessor height, ChunkPos covadonga) {
-        return findSite(registries, generator, random, templates, seed, height, covadonga, count -> {
-        });
-    }
-
-    /** As {@link #findSite} and reports how many assemblies ({@code fits}) the search made. */
-    public static Optional<ChunkPos> findSite(RegistryAccess registries, ChunkGenerator generator, RandomState random,
-                                              StructureTemplateManager templates, long seed, LevelHeightAccessor height, ChunkPos covadonga,
-                                              IntConsumer assemblies) {
-        Structure cave = registries.registryOrThrow(Registries.STRUCTURE).get(KEY);
-        if (cave == null) {
-            return Optional.empty();
-        }
-        Predicate<Holder<Biome>> cold = registries.registryOrThrow(Registries.BIOME).getTag(COLD)
-                .<Predicate<Holder<Biome>>>map(set -> set::contains).orElse(biome -> false);
-        ChunkPos offset = mapOffset(MitofusMapData.west());
-        ChunkPos target = new ChunkPos(covadonga.x + offset.x, covadonga.z + offset.z);
-        int made = 0;
-        for (ChunkPos chunk : ChunkSpiral.around(target, FAR_SEARCH_RADIUS)) {
-            if (made >= MAX_ASSEMBLIES) {
-                break;
-            }
-            int step = target.getChessboardDistance(chunk) <= SEARCH_RADIUS ? 2 : 4;
-            if (Math.floorMod(chunk.x, step) == 0 && Math.floorMod(chunk.z, step) == 0 && covadonga.z - chunk.z >= MIN_DISTANCE
-                    && MitofusBiomeSource.onMapLand(generator.getBiomeSource(), chunk.getMiddleBlockX(), chunk.getMiddleBlockZ())
-                    && MitofusBiomeSource.reliefBelow(generator.getBiomeSource(), chunk.getMiddleBlockX(), chunk.getMiddleBlockZ(), MAX_MAP_RELIEF)
-                    && cold.test(seaLevelBiome(generator, random, chunk))) {
-                made++;
-                if (fits(cave, registries, generator, random, templates, seed, height, chunk, cold)) {
-                    Mitofus.LOGGER.debug("Altamira cave: {} assemblies, site {}", made, chunk);
-                    assemblies.accept(made);
-                    return Optional.of(chunk);
-                }
-            }
-        }
-        for (ChunkPos chunk : ChunkSpiral.around(target, 8)) {
-            if (MitofusBiomeSource.onMapLand(generator.getBiomeSource(), chunk.getMiddleBlockX(), chunk.getMiddleBlockZ())) {
-                made++;
-                if (fits(cave, registries, generator, random, templates, seed, height, chunk, biome -> true)) {
-                    Mitofus.LOGGER.debug("Altamira cave: {} assemblies, dry-land site {}", made, chunk);
-                    assemblies.accept(made);
-                    return Optional.of(chunk);
-                }
-            }
-        }
-        assemblies.accept(made);
-        Mitofus.LOGGER.warn("Altamira cave: no site found around {} after {} assemblies; this world has no cave", target, made);
-        return Optional.empty();
-    }
-
-    /**
      * Whether the cave assembles at this chunk with its mound in a cold biome, on dry ground that is not too steep: what
-     * the search asks of its site. False if the generator doesn't have the cave.
+     * a fixed site asks of its place. False if the generator doesn't have the cave.
      */
     public static boolean fitsAt(RegistryAccess registries, ChunkGenerator generator, RandomState random, StructureTemplateManager templates,
                                  long seed, LevelHeightAccessor height, ChunkPos chunk) {
@@ -278,12 +212,6 @@ public final class Altamira {
         Predicate<Holder<Biome>> cold = registries.registryOrThrow(Registries.BIOME).getTag(COLD)
                 .<Predicate<Holder<Biome>>>map(set -> set::contains).orElse(biome -> false);
         return cave != null && fits(cave, registries, generator, random, templates, seed, height, chunk, cold);
-    }
-
-    /** A cheap first look: the biome in the middle of the chunk at sea level (temperature doesn't change with height). */
-    private static Holder<Biome> seaLevelBiome(ChunkGenerator generator, RandomState random, ChunkPos chunk) {
-        return generator.getBiomeSource().getNoiseBiome(QuartPos.fromBlock(chunk.getMiddleBlockX()), QuartPos.fromBlock(generator.getSeaLevel()),
-                QuartPos.fromBlock(chunk.getMiddleBlockZ()), random.sampler());
     }
 
     /** Whether the cave assembles here with its mound in a biome {@code biomes} accepts, on dry ground that is not too steep. */

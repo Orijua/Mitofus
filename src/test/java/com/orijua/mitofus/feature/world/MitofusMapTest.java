@@ -205,30 +205,6 @@ class MitofusMapTest {
     }
 
     @Test
-    void theCaveIsLookedForOnTheSnowyNorthCoast() {
-        MitofusMapData west = MitofusMapData.west();
-        Set<String> cold = biomeTag("has_structure/altamira");
-        ChunkPos target = Altamira.mapOffset(west);
-        assertTrue(target.z <= -Altamira.MIN_DISTANCE, "the cold target is far north of Covadonga: " + target);
-        assertEquals("sea", west.biomeAtBlock(target.getMiddleBlockX(), target.getMiddleBlockZ()), "the target itself is at sea");
-        // Cold land of the map close to the target, and far enough north of Covadonga.
-        int found = 0;
-        for (int dx = -Altamira.SEARCH_RADIUS; dx <= Altamira.SEARCH_RADIUS; dx += 2) {
-            for (int dz = -Altamira.SEARCH_RADIUS; dz <= Altamira.SEARCH_RADIUS; dz += 2) {
-                ChunkPos chunk = new ChunkPos(target.x + dx, target.z + dz);
-                if (-chunk.z >= Altamira.MIN_DISTANCE && cold.contains(west.biomeAtBlock(chunk.getMiddleBlockX(), chunk.getMiddleBlockZ()))) {
-                    found++;
-                }
-            }
-        }
-        assertTrue(found >= 1, "at least one cold candidate near the target: " + found);
-        assertTrue(found >= MIN_COLD_CANDIDATES, "plenty of cold land to choose from near the target: " + found);
-    }
-
-    /** Cold candidates (every other chunk within SEARCH_RADIUS of the cold target, 16+ chunks north of Covadonga): measured 115, half of it. */
-    private static final int MIN_COLD_CANDIDATES = 57;
-
-    @Test
     void theMountainPrefilterRejectsPeaksAndKeepsTheCoast() {
         // A uniform 21x21 map of cells with block 0 at its middle (cell 10): the warp never takes it off the map.
         byte[] region = new byte[21 * 21];

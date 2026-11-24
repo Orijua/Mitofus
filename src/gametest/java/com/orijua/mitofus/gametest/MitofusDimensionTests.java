@@ -4,16 +4,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import com.orijua.mitofus.Mitofus;
-import com.orijua.mitofus.feature.world.TorreDelOro;
-import com.orijua.mitofus.feature.world.Altamira;
 import com.orijua.mitofus.feature.world.MitofusBiomeSource;
 import com.orijua.mitofus.feature.world.MitofusMap;
 import com.orijua.mitofus.feature.world.MitofusMapData;
 import com.orijua.mitofus.feature.world.StartingVillage;
-import com.orijua.mitofus.feature.world.Eibar;
 import com.orijua.mitofus.feature.world.WorldSitePlacement;
 import com.orijua.mitofus.feature.world.WorldSites;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.RegistryAccess;
@@ -23,7 +19,6 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
@@ -44,9 +39,7 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The Mitofus dimension: its lore map, the sites a new world chooses in it, and the real world having none. The game-test
@@ -56,15 +49,6 @@ import java.util.Map;
 @PrefixGameTestTemplate(false)
 public final class MitofusDimensionTests {
     static final LevelHeightAccessor HEIGHT = LevelHeightAccessor.create(-64, 384);
-    /** The farthest, in chunks, Covadonga may land from (0, 0), its place on the map: the terrain follows the map. */
-    private static final int COVADONGA_DRIFT = 2;
-    /**
-     * The farthest, in chunks, the cave may be from the cold target on the map (it looks for cold dry land near
-     * it). Measured 13 in seeds 1-12 (BUG-042's search); 13 + 2. Recalibrate if places.json, relief.png or the search change.
-     */
-    private static final int CAVE_DRIFT = 15;
-    /** The farthest, in chunks, Eibar may be from its place on the map. Measured 3 in seeds 1-12; 3 + 1. */
-    private static final int MAX_EIBAR_DRIFT = 4;
     /**
      * How wide, in blocks, the fringe of a shore may be: the beach climbs gently (about 3 blocks in half a cell), so the 3D
      * noise leaves puddles and sand bars on it. Half a cell.
@@ -187,95 +171,6 @@ public final class MitofusDimensionTests {
             }
             helper.assertTrue(checked > 500, "enough interior points were checked, seed " + seed + ": " + checked);
         }
-        helper.succeed();
-    }
-
-    /**
-     * The search that chose the fixed sites ({@link StartingVillage#search}; every world ran it before they were fixed)
-     * finds all four in every seed, in the right places of the map, and a landing on Covadonga's plaza.
-     */
-    @GameTest(template = TestSupport.EMPTY, timeoutTicks = 2400)
-    public static void everyWorldChoosesItsSitesInMitofus(GameTestHelper helper) {
-        var registries = helper.getLevel().registryAccess();
-        ChunkGenerator generator = generator(helper);
-        MitofusMap map = ((MitofusBiomeSource) generator.getBiomeSource()).map();
-        ChunkPos eibarOnTheMap = Eibar.mapOffset(map.data());
-        ChunkPos caveOnTheMap = Altamira.mapOffset(map.data());
-        var cold = TagKey.create(Registries.BIOME, Mitofus.id("has_structure/altamira"));
-        int[] assembled = new int[1];
-        List<String> failures = new ArrayList<>();
-        int[] farthest = new int[4]; // Covadonga from (0, 0), Eibar and the cave from their places, the manor from Covadonga
-        for (long seed = 1; seed <= 12; seed++) {
-            RandomState random = random(registries, seed);
-            StartingVillage.Chosen chosen = StartingVillage.search(registries, generator, random,
-                    helper.getLevel().getStructureManager(), seed, HEIGHT);
-            Map<String, ChunkPos> sites = chosen.sites();
-            // The cave search is capped (200 in the first loop, at most 17x17 in the second): re-run it to count them.
-            int[] made = new int[1];
-            Altamira.findSite(registries, generator, random, helper.getLevel().getStructureManager(), seed, HEIGHT,
-                    sites.get(WorldSites.COVADONGA), count -> made[0] = count);
-            helper.assertTrue(made[0] <= Altamira.MAX_ASSEMBLIES + 289, "the cave search is bounded, seed " + seed + ": " + made[0] + " assemblies");
-            assembled[0] = Math.max(assembled[0], made[0]);
-            for (String site : List.of(WorldSites.COVADONGA, WorldSites.ALTAMIRA, WorldSites.TORRE_DEL_ORO, WorldSites.EIBAR)) {
-                helper.assertTrue(sites.containsKey(site), "seed " + seed + " has no " + site + ": " + sites.keySet());
-            }
-            ChunkPos covadonga = sites.get(WorldSites.COVADONGA);
-            check(failures, map.regionAt(covadonga.getMiddleBlockX(), covadonga.getMiddleBlockZ()) == MitofusMapData.PLAINS,
-                    "Covadonga is in the plains region of the lore map, seed " + seed + ": " + covadonga);
-            check(failures, covadonga.getChessboardDistance(new ChunkPos(0, 0)) <= COVADONGA_DRIFT,
-                    "Covadonga is at its place on the map, (0, 0), seed " + seed + ": " + covadonga);
-            Ground village = Ground.at(generator, random, covadonga.getMiddleBlockX(), covadonga.getMiddleBlockZ());
-            check(failures, village.dry() && village.height() > generator.getSeaLevel(), "Covadonga is on dry land above the sea, seed " + seed + ": " + village);
-            helper.assertTrue(chosen.landing().isPresent(), "a landing for seed " + seed);
-            BlockPos landing = chosen.landing().get();
-            check(failures, covadonga.getChessboardDistance(new ChunkPos(landing)) <= 2, "the landing is on Covadonga's plaza, seed " + seed + ": " + landing + " vs " + covadonga);
-            ChunkPos cave = sites.get(WorldSites.ALTAMIRA);
-            ChunkPos manor = sites.get(WorldSites.TORRE_DEL_ORO);
-            ChunkPos eibar = sites.get(WorldSites.EIBAR);
-            check(failures, cave.z <= covadonga.z - Altamira.MIN_DISTANCE, "the cave is far north of Covadonga, seed " + seed + ": " + cave);
-            check(failures, map.isLand(cave.getMiddleBlockX(), cave.getMiddleBlockZ()), "the cave is on the map's land, seed " + seed + ": " + cave);
-            check(failures, generator.getBiomeSource().getNoiseBiome(QuartPos.fromBlock(cave.getMiddleBlockX()), 16,
-                    QuartPos.fromBlock(cave.getMiddleBlockZ()), random.sampler()).is(cold), "the cave is in the snowy north, seed " + seed + ": " + cave);
-            int toManor = covadonga.getChessboardDistance(manor);
-            check(failures, toManor >= TorreDelOro.MIN_DISTANCE && toManor <= TorreDelOro.MAX_DISTANCE, "the manor is " + toManor + " chunks from Covadonga, seed " + seed);
-            check(failures, map.isLand(manor.getMiddleBlockX(), manor.getMiddleBlockZ()), "the manor is on the map's land, seed " + seed);
-            ChunkPos eibarTarget = new ChunkPos(covadonga.x + eibarOnTheMap.x, covadonga.z + eibarOnTheMap.z);
-            check(failures, eibar.getChessboardDistance(eibarTarget) <= MAX_EIBAR_DRIFT,
-                    "Eibar near its place on the map, seed " + seed + ": " + eibar + " vs " + eibarTarget);
-            check(failures, covadonga.getChessboardDistance(eibar) >= Eibar.KEEP_AWAY, "Eibar away from Covadonga, seed " + seed);
-            check(failures, eibar.getChessboardDistance(cave) >= Eibar.KEEP_AWAY, "Eibar away from the cave, seed " + seed);
-            check(failures, eibar.getChessboardDistance(manor) >= Eibar.KEEP_AWAY, "Eibar away from the manor, seed " + seed);
-            // Every place stands on dry land above the sea (the terrain follows the map), the cave near the glacier.
-            for (String site : List.of(WorldSites.ALTAMIRA, WorldSites.TORRE_DEL_ORO, WorldSites.EIBAR)) {
-                ChunkPos chunk = sites.get(site);
-                Ground ground = Ground.at(generator, random, chunk.getMiddleBlockX(), chunk.getMiddleBlockZ());
-                check(failures, ground.dry() && ground.top() > generator.getSeaLevel(), site + " is on dry land, seed " + seed + ": " + ground);
-            }
-            ChunkPos caveTarget = new ChunkPos(covadonga.x + caveOnTheMap.x, covadonga.z + caveOnTheMap.z);
-            check(failures, cave.getChessboardDistance(caveTarget) <= CAVE_DRIFT, "the cave near the cold target, seed " + seed + ": "
-                    + cave + " vs " + caveTarget);
-            farthest[0] = Math.max(farthest[0], covadonga.getChessboardDistance(new ChunkPos(0, 0)));
-            farthest[1] = Math.max(farthest[1], eibar.getChessboardDistance(eibarTarget));
-            farthest[2] = Math.max(farthest[2], cave.getChessboardDistance(caveTarget));
-            farthest[3] = Math.max(farthest[3], toManor);
-        }
-        check(failures, farthest[0] <= COVADONGA_DRIFT && farthest[1] <= MAX_EIBAR_DRIFT && farthest[2] <= CAVE_DRIFT,
-                "the farthest drifts are within their measured bounds: " + Arrays.toString(farthest));
-        helper.assertTrue(failures.isEmpty(), "the sites of " + failures.size() + " checks are wrong: " + failures);
-        Mitofus.LOGGER.info("Mitofus cave search: at most {} assemblies in 12 seeds", assembled[0]);
-        Mitofus.LOGGER.info("Mitofus sites in 12 seeds, farthest (chunks): Covadonga {} from (0, 0), Eibar {} and the cave {} from their"
-                + " places on the map, the manor {} from Covadonga", farthest[0], farthest[1], farthest[2], farthest[3]);
-        helper.succeed();
-    }
-
-    /** With Covadonga off the map there is no land to look at: the cave has no site, instead of the sea point of the glacier. */
-    @GameTest(template = TestSupport.EMPTY)
-    public static void caveHasNoSiteWhereThereIsNoLand(GameTestHelper helper) {
-        var registries = helper.getLevel().registryAccess();
-        ChunkGenerator generator = generator(helper);
-        var site = Altamira.findSite(registries, generator, random(registries, 1L), helper.getLevel().getStructureManager(), 1L, HEIGHT,
-                new ChunkPos(10000, 10000));
-        helper.assertTrue(site.isEmpty(), "no cave site without land, not the glacier's sea point: " + site);
         helper.succeed();
     }
 

@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
 /**
  * The fixed chunks of the one-per-world places of a {@link MitofusMapData} map, read from its {@code sites.json}: Mitofus
  * is a world with a known map, so Covadonga, Eibar, the Altamira Cave and Conde Nuno's manor are at the
- * same chunks in every new world, whatever its seed ({@link StartingVillage#choose}). They were chosen once with the old
- * search over the map ({@link StartingVillage#search}) and checked to hold their structure in many seeds (the gametests
+ * same chunks in every new world, whatever its seed ({@link StartingVillage#choose}). They were chosen once with a
+ * search over the map (since removed) and checked to hold their structure in many seeds (the gametests
  * of {@code MitofusFixedWorldTests}). Pure, so it is unit-tested.
  */
 public final class MitofusSites {

@@ -104,7 +104,7 @@ public final class MitofusBiomeSource extends BiomeSource {
         return lore != null ? lore : outside.getNoiseBiome(quartX, quartY, quartZ, sampler);
     }
 
-    /** The lore map (tests and the site search use it). */
+    /** The lore map (the tests use it). */
     public MitofusMap map() {
         return map;
     }
@@ -112,14 +112,6 @@ public final class MitofusBiomeSource extends BiomeSource {
     /** Where the map has no land: the sea, the lakes and beyond the map. */
     public BiomeSource outside() {
         return outside;
-    }
-
-    /**
-     * Whether block (x, z) is in the given region of the lore map (after the warp). Always true for any other biome
-     * source (the real world, tests on vanilla terrain).
-     */
-    public static boolean inMapRegion(BiomeSource biomes, int blockX, int blockZ, int region) {
-        return !(biomes instanceof MitofusBiomeSource mitofus) || mitofus.map.regionAt(blockX, blockZ) == region;
     }
 
     /**
