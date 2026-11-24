@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'idea'
+    id 'jacoco'
     id 'net.neoforged.moddev' version '2.0.148'
 }
 
@@ -180,6 +181,15 @@ neoForge.addModdingDependenciesTo(sourceSets.gametest)
 
 test {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+// Informative only: it shows what the unit tests cover (build/reports/jacoco/test/html) and never fails the build.
+jacocoTestReport {
+    reports {
+        xml.required = true
+        html.required = true
+    }
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
