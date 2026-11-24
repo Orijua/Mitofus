@@ -55,6 +55,7 @@ import com.orijua.mitofus.feature.progression.ProgressionEvents;
 import com.orijua.mitofus.feature.progression.XpRateService;
 import com.orijua.mitofus.feature.quest.QuestDeadlines;
 import com.orijua.mitofus.feature.equipment.WeightService;
+import com.orijua.mitofus.feature.coach.CoachService;
 import com.orijua.mitofus.feature.economy.WalletEvents;
 import com.orijua.mitofus.feature.quest.goal.GoalTracker;
 import com.orijua.mitofus.feature.rumor.MaterialFinds;
@@ -126,6 +127,7 @@ public class Mitofus {
         GoalTracker.register(NeoForge.EVENT_BUS);
         QuestDeadlines.register(NeoForge.EVENT_BUS);
         WalletEvents.register(NeoForge.EVENT_BUS);
+        CoachService.register(NeoForge.EVENT_BUS);
         WeightService.register(NeoForge.EVENT_BUS);
         ContentValidationEvents.register(NeoForge.EVENT_BUS);
         NotificationEvents.register(NeoForge.EVENT_BUS);

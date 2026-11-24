@@ -1,19 +1,21 @@
 package com.orijua.mitofus.feature.coach.client;
 
 import com.orijua.mitofus.core.client.MitofusButton;
+import com.orijua.mitofus.core.client.MitofusConfirmScreen;
 import com.orijua.mitofus.core.client.MitofusStyledScreen;
 import com.orijua.mitofus.core.client.UiStyle;
 import com.orijua.mitofus.core.config.CoachBalance;
-import com.orijua.mitofus.feature.coach.CoachRules;
+import com.orijua.mitofus.feature.coach.CoachInfoPayload;
 import com.orijua.mitofus.feature.coach.CoachTripPayload;
 import com.orijua.mitofus.feature.economy.MoneyText;
+import com.orijua.mitofus.feature.economy.Wallet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.entity.Entity;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
@@ -24,41 +26,58 @@ public final class CoachScreen extends Screen implements MitofusStyledScreen {
     private static final int PADDING = 10;
     private static final int BUTTON_HEIGHT = 18;
 
-    private final Entity npc;
+    private final CoachInfoPayload info;
     private List<FormattedCharSequence> lines = List.of();
     private int left;
     private int top;
     private int height;
 
-    private CoachScreen(Entity npc) {
+    private CoachScreen(CoachInfoPayload info) {
         super(Component.translatable("screen.mitofus.coach_title"));
-        this.npc = npc;
+        this.info = info;
     }
 
-    /** Client only. */
-    public static void open(Entity npc) {
-        Minecraft.getInstance().setScreen(new CoachScreen(npc));
+    /** Client only: opens the window with the fares the server worked out. */
+    public static void show(CoachInfoPayload info) {
+        Minecraft.getInstance().setScreen(new CoachScreen(info));
     }
 
     @Override
     protected void init() {
-        Component info = Component.translatable("screen.mitofus.coach_info", MoneyText.iron(CoachBalance.current().baseIron()));
-        lines = font.split(info, WIDTH - 2 * PADDING);
-        int destinations = CoachRules.DESTINATIONS.size();
+        Component text = info.destinations().isEmpty() ? Component.translatable("screen.mitofus.coach_none")
+                : Component.translatable("screen.mitofus.coach_info", Component.translatable("screen.mitofus.coach_travel_time",
+                CoachBalance.current().travelSeconds()));
+        lines = font.split(text, WIDTH - 2 * PADDING);
+        int destinations = info.destinations().size();
         height = PADDING + UiStyle.LINE + 4 + lines.size() * UiStyle.LINE + 8
                 + destinations * (BUTTON_HEIGHT + 4) + PADDING;
         left = (width - WIDTH) / 2;
         top = (super.height - height) / 2;
         int y = top + height - PADDING - destinations * (BUTTON_HEIGHT + 4) + 4;
-        for (String destination : CoachRules.DESTINATIONS) {
-            addRenderableWidget(Button.builder(Component.translatable("screen.mitofus.coach_travel",
-                            Component.translatable("site.mitofus." + destination)), b -> {
-                        PacketDistributor.sendToServer(new CoachTripPayload(npc.getId(), destination));
-                        onClose();
-                    })
+        for (int i = 0; i < destinations; i++) {
+            String destination = info.destinations().get(i);
+            long fare = info.fares().get(i);
+            Component place = Component.translatable("site.mitofus." + destination);
+            Button button = addRenderableWidget(Button.builder(Component.translatable("screen.mitofus.coach_travel", place, MoneyText.iron(fare)),
+                            b -> confirm(destination, place, fare))
                     .bounds(left + PADDING, y, WIDTH - 2 * PADDING, BUTTON_HEIGHT).build(MitofusButton::new));
+            button.active = Wallet.canAfford(Minecraft.getInstance().player, fare);
+            if (!button.active) {
+                button.setTooltip(Tooltip.create(Component.translatable("screen.mitofus.coach_no_coins", MoneyText.iron(fare))));
+            }
             y += BUTTON_HEIGHT + 4;
         }
+    }
+
+    /** The total cost is shown before accepting, next to what the player has. */
+    private void confirm(String destination, Component place, long fare) {
+        Minecraft minecraft = Minecraft.getInstance();
+        minecraft.setScreen(new MitofusConfirmScreen(this, Component.translatable("screen.mitofus.coach_confirm_title", place),
+                Component.translatable("screen.mitofus.coach_confirm", place, MoneyText.iron(fare), MoneyText.iron(Wallet.balance(minecraft.player))),
+                () -> {
+                    PacketDistributor.sendToServer(new CoachTripPayload(info.npc(), destination));
+                    minecraft.tell(() -> minecraft.setScreen(null));
+                }));
     }
 
     @Override

@@ -367,6 +367,9 @@ public final class Config {
     private static final ModConfigSpec.IntValue COACH_MAX_SURCHARGE = BUILDER
             .comment("The most the surcharge can add to the fare, in iron.")
             .defineInRange("coachMaxSurchargeIron", CoachBalance.DEFAULT.maxSurchargeIron(), 0, CoachBalance.MAX_IRON);
+    private static final ModConfigSpec.IntValue COACH_TRAVEL_SECONDS = BUILDER
+            .comment("Seconds the trip lasts: you go blind and cannot move, then you arrive. 0 = you arrive at once.")
+            .defineInRange("coachTravelSeconds", CoachBalance.DEFAULT.travelSeconds(), 0, CoachBalance.MAX_SECONDS);
 
     static {
         BUILDER.pop().push("storage");
@@ -827,7 +830,7 @@ public final class Config {
             RARITY_EPIC.get(), RARITY_UNIQUE.get(), RARITY_LEGENDARY.get(), RARITY_ANCESTRAL.get(), RARITY_SKILL_SCALE.get(),
             RARITY_PITY_ENABLED.get(), RARITY_PITY_START.get(), RARITY_PITY_PER_ROLL.get(), RARITY_PITY_CAP.get()));
     private static final Cached<DeathBalance> DEATH_BALANCE_CACHE = cache(Config::buildDeathBalance);
-    private static final Cached<CoachBalance> COACH_BALANCE_CACHE = cache(() -> new CoachBalance(COACH_BASE.get(), COACH_SURCHARGE.get(), COACH_MAX_SURCHARGE.get()));
+    private static final Cached<CoachBalance> COACH_BALANCE_CACHE = cache(() -> new CoachBalance(COACH_BASE.get(), COACH_SURCHARGE.get(), COACH_MAX_SURCHARGE.get(), COACH_TRAVEL_SECONDS.get()));
     private static final Cached<StorageBalance> STORAGE_BALANCE_CACHE = cache(() -> new StorageBalance(STORAGE_OPEN.get(), STORAGE_ROW3.get(),
             STORAGE_ROW4.get(), STORAGE_ROW5.get(), STORAGE_ROW6.get()));
     private static final Cached<ResidenceBalance> RESIDENCE_BALANCE_CACHE = cache(() -> new ResidenceBalance(RESIDENCE_COOLDOWN.get()));
