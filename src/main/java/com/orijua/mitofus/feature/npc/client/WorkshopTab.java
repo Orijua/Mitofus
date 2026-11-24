@@ -2,6 +2,7 @@ package com.orijua.mitofus.feature.npc.client;
 
 import com.orijua.mitofus.core.config.ApprenticeBalance;
 import com.orijua.mitofus.core.client.MitofusCard;
+import com.orijua.mitofus.core.client.MitofusEmptyState;
 import com.orijua.mitofus.core.client.ScrollList;
 import com.orijua.mitofus.core.client.MitofusTab;
 import com.orijua.mitofus.core.client.UiStyle;
@@ -119,8 +120,8 @@ public class WorkshopTab extends MitofusTab {
         UiStyle.text(graphics, font(), smithingLevel, left + cardWidth() - font().width(smithingLevel), top, UiStyle.MUTED);
 
         if (entries.isEmpty()) {
-            graphics.drawWordWrap(font(), Component.translatable("screen.mitofus.workshop.empty", ApprenticeBalance.current().firstLevel()),
-                    left, top + LIST_TOP + 4, width, UiStyle.MUTED);
+            MitofusEmptyState.draw(graphics, font(), left, top + LIST_TOP, width, height - LIST_TOP,
+                    Component.translatable("screen.mitofus.workshop.empty", ApprenticeBalance.current().firstLevel()), MitofusEmptyState.Kind.EMPTY);
             return;
         }
         int stopped = Workshop.stoppedCount(entries, now());

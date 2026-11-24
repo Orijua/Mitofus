@@ -3,6 +3,7 @@ package com.orijua.mitofus.feature.economy.client;
 import com.orijua.mitofus.core.client.MitofusButton;
 import com.orijua.mitofus.core.client.MitofusConfirmScreen;
 import com.orijua.mitofus.core.client.MitofusTab;
+import com.orijua.mitofus.core.client.MitofusEmptyState;
 import com.orijua.mitofus.core.client.ScrollList;
 import com.orijua.mitofus.core.client.UiStyle;
 import com.orijua.mitofus.core.config.TradeBalance;
@@ -248,8 +249,8 @@ public class TradeTab extends MitofusTab {
 
         List<Integer> slots = slots();
         if (slots.isEmpty()) {
-            graphics.drawWordWrap(font(), Component.translatable("screen.mitofus.trade.empty"),
-                    left, top + LIST_TOP + 4, width, UiStyle.MUTED);
+            MitofusEmptyState.draw(graphics, font(), left, top + LIST_TOP, width, height - LIST_TOP,
+                    Component.translatable("screen.mitofus.trade.empty"), MitofusEmptyState.Kind.EMPTY);
             if (overCoins) {
                 graphics.renderComponentTooltip(font(), CoinBalanceView.tooltip(), mouseX, mouseY);
             }

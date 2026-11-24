@@ -2,8 +2,10 @@ package com.orijua.mitofus.feature.quest.client;
 
 import com.orijua.mitofus.core.client.MitofusButton;
 import com.orijua.mitofus.core.client.MitofusConfirmScreen;
+import com.orijua.mitofus.core.client.MitofusEmptyState;
 import com.orijua.mitofus.core.client.MitofusTab;
 import com.orijua.mitofus.core.client.ScrollList;
+import com.orijua.mitofus.core.client.TextFit;
 import com.orijua.mitofus.core.client.UiStyle;
 import com.orijua.mitofus.core.registry.Definitions;
 import com.orijua.mitofus.core.registry.ModAttachments;
@@ -28,6 +30,8 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
@@ -62,6 +66,8 @@ public class QuestsTab extends MitofusTab {
     private static final int INDENT = 8;
     private static final int DETAIL_GAP = 10;
     private static final int ITEM = 18;
+    /** Lines of story shown in the detail; the rest is in the hover. */
+    private static final int STORY_LINES = 2;
 
     private static final int GUIDE = 0x709DC4EA;
     private static final int SELECTED = 0x50FFFFFF;
@@ -244,8 +250,11 @@ public class QuestsTab extends MitofusTab {
         graphics.drawString(font(), Component.translatable("screen.mitofus.npc_rumor"), x, y, UiStyle.HEADING);
         y += 10;
         Component teller = Component.translatable("screen.mitofus.rumor_from", Component.translatable(groupKey(rumor)));
-        graphics.drawString(font(), teller, x, y, UiStyle.GOLD);
-        y += 13;
+        for (FormattedCharSequence line : font().split(teller, detailWidth)) {
+            graphics.drawString(font(), line, x, y, UiStyle.GOLD);
+            y += 10;
+        }
+        y += 3;
         for (FormattedCharSequence line : font().split(rumor.text().copy().withStyle(ChatFormatting.ITALIC), detailWidth)) {
             graphics.drawString(font(), line, x, y, UiStyle.TEXT);
             y += 10;
@@ -426,8 +435,8 @@ public class QuestsTab extends MitofusTab {
         int listTop = top + LIST_TOP;
         graphics.fill(left + LIST_WIDTH + DETAIL_GAP / 2, listTop - 2, left + LIST_WIDTH + DETAIL_GAP / 2 + 1, top + height, DIVIDER);
         if (lines.isEmpty()) {
-            UiStyle.text(graphics, font(), Component.translatable("screen.mitofus.no_quests_" + section.name().toLowerCase()),
-                    left, listTop, UiStyle.MUTED);
+            MitofusEmptyState.draw(graphics, font(), left, listTop, LIST_WIDTH, visibleRows() * ROW,
+                    Component.translatable("screen.mitofus.no_quests_" + section.name().toLowerCase()), MitofusEmptyState.Kind.EMPTY);
         }
         Line hovered = lineAt(mouseX, mouseY);
         int y = listTop;
@@ -497,19 +506,29 @@ public class QuestsTab extends MitofusTab {
             graphics.drawString(font(), line, x, y, UiStyle.HEADING);
             y += 10;
         }
+        List<Component> hoverText = new ArrayList<>();
         if (quest.giver().isPresent()) {
-            for (FormattedCharSequence line : font().split(quest.giverHint().orElseThrow(), detailWidth)) {
-                graphics.drawString(font(), line, x, y, UiStyle.GOLD);
-                y += 10;
+            // One line; the full hint is in the hover.
+            Component hint = quest.giverHint().orElseThrow();
+            graphics.drawString(font(), UiStyle.ellipsize(font(), hint, detailWidth), x, y, UiStyle.GOLD);
+            if (font().width(hint) > detailWidth && mouseX >= x && mouseX < x + detailWidth && mouseY >= y && mouseY < y + 10) {
+                hoverText.add(hint);
             }
-        }
-        // Up to 4 lines of story, fewer when the name or the hint took two lines, so the buttons stay clear.
-        int storyLines = Math.max(2, 4 - (y - top - LIST_TOP) / 10 + 2);
-        y += 3;
-        List<FormattedCharSequence> story = font().split(quest.description(), detailWidth);
-        for (int i = 0; i < Math.min(story.size(), storyLines); i++) {
-            graphics.drawString(font(), story.get(i), x, y, UiStyle.MUTED);
             y += 10;
+        }
+        // The story is cut to two lines ("…" when there is more); the whole story is in the hover over it.
+        y += 3;
+        int storyTop = y;
+        List<String> story = font().getSplitter().splitLines(quest.description(), detailWidth, Style.EMPTY).stream()
+                .map(FormattedText::getString).toList();
+        List<String> shownStory = TextFit.clampLines(story, STORY_LINES, detailWidth, font()::width);
+        for (String line : shownStory) {
+            graphics.drawString(font(), line, x, y, UiStyle.MUTED);
+            y += 10;
+        }
+        boolean storyCut = story.size() > STORY_LINES;
+        if (storyCut && mouseX >= x && mouseX < x + detailWidth && mouseY >= storyTop && mouseY < y) {
+            hoverText.add(quest.description());
         }
         y += 3;
         for (FormattedCharSequence line : font().split(quest.goal().describe(), detailWidth)) {
@@ -529,9 +548,8 @@ public class QuestsTab extends MitofusTab {
             y += 12;
             OptionalLong deadline = shownState.deadline(id);
             if (deadline.isPresent()) {
-                graphics.drawString(font(), Component.translatable("screen.mitofus.quest_time_left",
-                        QuestDeadlines.timeLeft(deadline.getAsLong(), QuestDeadlines.now(player()))), x, y, UiStyle.BAD);
-                y += 10;
+                y = drawWrapped(graphics, Component.translatable("screen.mitofus.quest_time_left",
+                        QuestDeadlines.timeLeft(deadline.getAsLong(), QuestDeadlines.now(player()))), x, y, detailWidth, UiStyle.BAD);
             }
         } else if (shownState.isFailed(id)) {
             graphics.drawString(font(), Component.literal("✖ ").append(Component.translatable("screen.mitofus.quest_failed")), x, y, UiStyle.BAD);
@@ -545,15 +563,13 @@ public class QuestsTab extends MitofusTab {
         }
         Optional<Component> requiredClass = classAllows(quest) ? Optional.empty() : quest.requiredClass().flatMap(QuestsTab::className);
         if (requiredClass.isPresent()) {
-            graphics.drawString(font(), Component.translatable("screen.mitofus.quest_requires_class", requiredClass.get()), x, y, UiStyle.BAD);
-            y += 10;
+            y = drawWrapped(graphics, Component.translatable("screen.mitofus.quest_requires_class", requiredClass.get()), x, y, detailWidth, UiStyle.BAD);
         }
         if (!shownState.isActive(id) && !shownState.isCompleted(id)) {
             Optional<GradeQuestRules.Check> blocked = QuestService.gradeCheck(player(), quest)
                     .filter(check -> check == GradeQuestRules.Check.LEVEL_TOO_LOW || check == GradeQuestRules.Check.TREE_INCOMPLETE);
             if (blocked.isPresent()) {
-                graphics.drawString(font(), Component.translatable("screen.mitofus.quest_grade_" + blocked.get().name().toLowerCase()), x, y, UiStyle.BAD);
-                y += 10;
+                y = drawWrapped(graphics, Component.translatable("screen.mitofus.quest_grade_" + blocked.get().name().toLowerCase()), x, y, detailWidth, UiStyle.BAD);
             }
         }
 
@@ -578,11 +594,22 @@ public class QuestsTab extends MitofusTab {
         y += ITEM;
         Optional<Component> newClass = quest.classReward().flatMap(QuestsTab::className);
         if (newClass.isPresent()) {
-            graphics.drawString(font(), Component.translatable("screen.mitofus.quest_class_reward", newClass.get()), x, y, UiStyle.GOLD);
+            drawWrapped(graphics, Component.translatable("screen.mitofus.quest_class_reward", newClass.get()), x, y, detailWidth, UiStyle.GOLD);
         }
         if (!hoveredItem.isEmpty()) {
             graphics.renderTooltip(font(), hoveredItem, mouseX, mouseY);
+        } else if (!hoverText.isEmpty()) {
+            graphics.renderTooltip(font(), hoverText.stream().flatMap(text -> font().split(text, 220).stream()).toList(), mouseX, mouseY);
         }
+    }
+
+    /** Draws {@code text} wrapped to {@code maxWidth}; returns the y under it. */
+    private int drawWrapped(GuiGraphics graphics, Component text, int x, int y, int maxWidth, int color) {
+        for (FormattedCharSequence line : font().split(text, maxWidth)) {
+            graphics.drawString(font(), line, x, y, color);
+            y += 10;
+        }
+        return y;
     }
 
     @Nullable
