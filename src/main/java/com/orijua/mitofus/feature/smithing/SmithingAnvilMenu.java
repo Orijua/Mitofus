@@ -34,6 +34,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -61,6 +62,7 @@ public class SmithingAnvilMenu extends AbstractContainerMenu {
     public static final int MANUAL_FORGE_BUTTON = 2;
     public static final int BATCH_BUTTON = 3;
     public static final int STOP_BUTTON = 4;
+    public static final int RECIPE_BUTTON = 5;
     private static final int INVENTORY_START = 3;
     private static final int INVENTORY_END = INVENTORY_START + 36;
     /** Synced to the client: automatic forging progress and total, in ticks (total 0 = not forging). */
@@ -70,6 +72,8 @@ public class SmithingAnvilMenu extends AbstractContainerMenu {
     private static final int DATA_BATCH_CHOICE = 2;
     private static final int DATA_BATCH_DONE = 3;
     private static final int DATA_BATCH_COUNT = 4;
+    /** Synced too: which of the recipes that fit the inputs is chosen (pickaxe or axe), see {@link ForgingRecipe#candidates}. */
+    private static final int DATA_RECIPE_CHOICE = 5;
 
     private final ContainerLevelAccess access;
     private final Player player;
@@ -81,8 +85,10 @@ public class SmithingAnvilMenu extends AbstractContainerMenu {
         }
     };
     private final ResultContainer result = new ResultContainer();
-    private final ContainerData forging = new SimpleContainerData(5);
+    private final ContainerData forging = new SimpleContainerData(6);
     private RecipeHolder<ForgingRecipe> currentRecipe;
+    /** Server only: the recipes that fit the inputs the last time, so a new set of them starts again at the first. */
+    private List<ResourceLocation> lastCandidates = List.of();
     // Server only: when the automatic or manual forge began (game time), and the recipe the automatic one is for.
     private long autoStart = -1;
     private RecipeHolder<ForgingRecipe> autoRecipe;
@@ -131,10 +137,31 @@ public class SmithingAnvilMenu extends AbstractContainerMenu {
      */
     private void updateResult(Level level) {
         ForgingRecipeInput input = new ForgingRecipeInput(inputs.getItem(TOP_SLOT), inputs.getItem(BOTTOM_SLOT));
-        Optional<RecipeHolder<ForgingRecipe>> recipe = ForgingRecipe.find(level.getRecipeManager(), input, level)
+        List<ResourceLocation> candidates = ForgingRecipe.candidates(level.getRecipeManager(), input, level).stream()
+                .map(RecipeHolder::id).toList();
+        if (!candidates.equals(lastCandidates)) {
+            lastCandidates = candidates;
+            forging.set(DATA_RECIPE_CHOICE, 0);
+        }
+        Optional<RecipeHolder<ForgingRecipe>> recipe = ForgingRecipe.find(level.getRecipeManager(), input, level, recipeChoice())
                 .filter(holder -> holder.value().extras().allows(player.getData(ModAttachments.PLAYER_CLASSES).job()));
         currentRecipe = recipe.orElse(null);
         result.setItem(0, recipe.map(holder -> holder.value().assemble(input, level.registryAccess())).orElse(ItemStack.EMPTY));
+    }
+
+    /** Which of the recipes that fit the inputs is chosen (0 = the first); the screen uses it to find the same one. */
+    public int recipeChoice() {
+        return forging.get(DATA_RECIPE_CHOICE);
+    }
+
+    /** Picks the next recipe that fits the inputs (pickaxe, then axe), wrapping around. */
+    private boolean cycleRecipe() {
+        if (autoForging() || lastCandidates.size() < 2) {
+            return false;
+        }
+        forging.set(DATA_RECIPE_CHOICE, (recipeChoice() + 1) % lastCandidates.size());
+        access.execute((level, pos) -> updateResult(level));
+        return true;
     }
 
     /** Whether the inputs make something (the preview slot holds it); synced, so the screen can use it. */
@@ -425,6 +452,7 @@ public class SmithingAnvilMenu extends AbstractContainerMenu {
             case MANUAL_FORGE_BUTTON -> startManualForge(smith);
             case BATCH_BUTTON -> cycleBatch(smith);
             case STOP_BUTTON -> stopPressed(smith);
+            case RECIPE_BUTTON -> cycleRecipe();
             default -> false;
         };
     }

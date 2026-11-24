@@ -426,6 +426,8 @@
   "screen.mitofus.forge_manual": "Manual",
   "screen.mitofus.forge_manual.tooltip": "Forja manual: calienta el metal y martillea. Bien hecho, mejor rango y quizá una opción extra; mal hecho, peor que la automática. Doble XP de herrería.",
   "screen.mitofus.forge_stop": "Parar",
+  "screen.mitofus.recipe": "Receta %s/%s",
+  "screen.mitofus.recipe.tooltip": "Estos objetos sirven para más de una cosa. Clic para cambiar lo que forja el yunque.",
   "screen.mitofus.batch.all": "Máx",
   "screen.mitofus.batch.tooltip": "Forja en lote: Auto forja esta cantidad seguida, cada objeto con su propio rango. Clic para cambiar la cantidad.",
   "screen.mitofus.batch.locked": "Forja en lote: se desbloquea con herrería 10.",
