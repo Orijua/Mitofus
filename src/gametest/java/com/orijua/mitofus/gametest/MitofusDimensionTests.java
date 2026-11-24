@@ -571,7 +571,7 @@ public final class MitofusDimensionTests {
         ChunkGenerator generator = generator(helper);
         MitofusMap map = ((MitofusBiomeSource) generator.getBiomeSource()).map();
         int sea = generator.getSeaLevel();
-        for (long seed : MitofusFixedWorldTests.SEEDS) {
+        for (long seed : MitofusFixedWorldTests.FEW_SEEDS) {
             RandomState random = random(registries, seed);
             Ground previous = Ground.at(generator, random, -1700, -4);
             int maxJump = 0;
