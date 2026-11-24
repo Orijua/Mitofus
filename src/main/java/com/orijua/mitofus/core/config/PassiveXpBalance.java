@@ -28,7 +28,7 @@ public record PassiveXpBalance(int fullXpUntilLevel, int oneXpFromLevel) {
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static PassiveXpBalance override;
+    private static volatile PassiveXpBalance override;
 
     /** The active server config, or the defaults before a world is loaded. */
     public static PassiveXpBalance current() {

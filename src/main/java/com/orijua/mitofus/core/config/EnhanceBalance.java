@@ -98,7 +98,7 @@ public record EnhanceBalance(int normalStoneFailLoss, int blessedStoneFailLoss, 
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static EnhanceBalance override;
+    private static volatile EnhanceBalance override;
 
     /** The active server config, or the defaults before a world is loaded (e.g. on the title screen). */
     public static EnhanceBalance current() {

@@ -30,7 +30,7 @@ public record StorageBalance(int openIron, int row3Iron, int row4Iron, int row5I
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static StorageBalance override;
+    private static volatile StorageBalance override;
 
     /** The active server config, or the defaults before a world is loaded. */
     public static StorageBalance current() {

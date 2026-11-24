@@ -46,7 +46,7 @@ public record SmithShopBalance(int stonePrice, int blessedStonePrice, int blesse
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static SmithShopBalance override;
+    private static volatile SmithShopBalance override;
 
     /** The active server config, or the defaults before a world is loaded. */
     public static SmithShopBalance current() {

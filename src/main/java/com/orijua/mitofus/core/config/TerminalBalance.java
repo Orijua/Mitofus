@@ -58,7 +58,7 @@ public record TerminalBalance(double buyMultiplier, int offerPerRank, ItemRating
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static TerminalBalance override;
+    private static volatile TerminalBalance override;
 
     /** The active server config, or the defaults before a world is loaded (e.g. on the title screen). */
     public static TerminalBalance current() {

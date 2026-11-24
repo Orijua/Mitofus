@@ -767,7 +767,7 @@ public final class Config {
      * the balance every frame (BUG-104). {@link #invalidate()} runs from the config events, and the cache is built
      * lazily on the next read.
      */
-    private static final class Cached<T> {
+    static final class Cached<T> {
         private final java.util.function.Supplier<T> builder;
         private volatile T value;
 

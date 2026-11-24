@@ -50,7 +50,7 @@ public record FatigueBalance(
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static FatigueBalance override;
+    private static volatile FatigueBalance override;
 
     /** The active server config, or the defaults before a world is loaded (e.g. on the title screen). */
     public static FatigueBalance current() {

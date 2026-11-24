@@ -135,7 +135,7 @@ public record RuleBalance(
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static RuleBalance override;
+    private static volatile RuleBalance override;
 
     /** The active server config, or the defaults before a world is loaded. */
     public static RuleBalance current() {
