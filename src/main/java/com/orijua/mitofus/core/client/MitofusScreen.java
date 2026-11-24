@@ -5,6 +5,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -96,6 +97,29 @@ public class MitofusScreen extends Screen implements MitofusStyledScreen {
             return true;
         }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+    }
+
+    /** Ctrl+Tab goes to the next tab and Ctrl+Shift+Tab to the previous; any other key goes to the open tab. */
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_TAB && hasControlDown()) {
+            select(Math.floorMod(lastTab + (hasShiftDown() ? -1 : 1), tabs.size()));
+            return true;
+        }
+        // Enter belongs to the focused button, if any; the arrows and pages go to the tab before vanilla moves the focus with them.
+        boolean enter = keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER;
+        if (!enter && current().keyPressed(keyCode, modifiers)) {
+            rebuildWidgets();
+            return true;
+        }
+        if (super.keyPressed(keyCode, scanCode, modifiers)) {
+            return true;
+        }
+        if (enter && current().keyPressed(keyCode, modifiers)) {
+            rebuildWidgets();
+            return true;
+        }
+        return false;
     }
 
     @Override

@@ -48,6 +48,24 @@ public final class ScrollList {
         return offset != before;
     }
 
+    /** One page (the visible rows) up or down, for Page Up / Page Down. @return true if the visible rows changed. */
+    public boolean page(int direction, int total) {
+        int before = offset;
+        offset += direction * visibleRows;
+        clamp(total);
+        return offset != before;
+    }
+
+    /** Scrolls the least that brings row {@code index} into view; for a selection moved with the keys. */
+    public void reveal(int index, int total) {
+        if (index < offset) {
+            offset = index;
+        } else if (index >= offset + visibleRows) {
+            offset = index - visibleRows + 1;
+        }
+        clamp(total);
+    }
+
     /** A thin bar at {@code x}, only when there is something to scroll. */
     public void renderBar(GuiGraphics graphics, int x, int y, int height, int total) {
         if (total <= visibleRows) {

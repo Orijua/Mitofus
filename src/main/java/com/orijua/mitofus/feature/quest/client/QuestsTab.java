@@ -1,5 +1,6 @@
 package com.orijua.mitofus.feature.quest.client;
 
+import com.orijua.mitofus.core.client.ListNav;
 import com.orijua.mitofus.core.client.MitofusButton;
 import com.orijua.mitofus.core.client.MitofusConfirmScreen;
 import com.orijua.mitofus.core.client.MitofusEmptyState;
@@ -37,6 +38,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -409,6 +411,64 @@ public class QuestsTab extends MitofusTab {
     @Override
     public boolean mouseScrolled(double wheel) {
         return scroll.scroll(wheel, lines.size());
+    }
+
+    /** Up / Down move the selection, Page Up / Page Down scroll the list, Enter claims the chosen quest when it is done. */
+    @Override
+    public boolean keyPressed(int keyCode, int modifiers) {
+        switch (keyCode) {
+            case GLFW.GLFW_KEY_DOWN -> {
+                return moveSelection(1);
+            }
+            case GLFW.GLFW_KEY_UP -> {
+                return moveSelection(-1);
+            }
+            case GLFW.GLFW_KEY_PAGE_DOWN -> {
+                return scroll.page(1, lines.size());
+            }
+            case GLFW.GLFW_KEY_PAGE_UP -> {
+                return scroll.page(-1, lines.size());
+            }
+            case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER -> {
+                if (claimButton != null && claimButton.active) {
+                    claimButton.onPress();
+                    return true;
+                }
+                return false;
+            }
+            default -> {
+                return false;
+            }
+        }
+    }
+
+    /** Moves the chosen quest (or rumor) to the previous or next one that can be chosen, scrolling it into view. */
+    private boolean moveSelection(int delta) {
+        Kind wanted = section == Section.RUMORS ? Kind.RUMOR : Kind.QUEST;
+        ResourceLocation current = wanted == Kind.RUMOR ? selectedRumor : selected;
+        List<Integer> choosable = new ArrayList<>();
+        int at = -1;
+        for (int i = 0; i < lines.size(); i++) {
+            if (lines.get(i).kind() == wanted) {
+                if (lines.get(i).quest().equals(current)) {
+                    at = choosable.size();
+                }
+                choosable.add(i);
+            }
+        }
+        int target = ListNav.move(at, delta, choosable.size());
+        if (target < 0 || target == at) {
+            return false;
+        }
+        int lineIndex = choosable.get(target);
+        ResourceLocation chosen = lines.get(lineIndex).quest();
+        if (wanted == Kind.RUMOR) {
+            selectedRumor = chosen;
+        } else {
+            selected = chosen;
+        }
+        scroll.reveal(lineIndex, lines.size());
+        return true;
     }
 
     /** Rebuild when the quests changed, a section or fold was clicked, or the chosen quest's Claim became possible. */

@@ -18,6 +18,7 @@ import com.orijua.mitofus.feature.economy.TradeSellPayload;
 import com.orijua.mitofus.feature.economy.TradeService;
 import com.orijua.mitofus.feature.equipment.AppraisalService;
 import com.orijua.mitofus.feature.equipment.ItemRating;
+import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -237,6 +238,18 @@ public class TradeTab extends MitofusTab {
     @Override
     public boolean needsRebuild() {
         return prune() || dirty || !TradeService.saturation(player()).equals(shownSaturation);
+    }
+
+    /** Page Up / Page Down scroll the list a page at a time. */
+    @Override
+    public boolean keyPressed(int keyCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
+            return scroll.page(1, slots().size());
+        }
+        if (keyCode == GLFW.GLFW_KEY_PAGE_UP) {
+            return scroll.page(-1, slots().size());
+        }
+        return false;
     }
 
     @Override
