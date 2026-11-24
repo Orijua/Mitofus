@@ -61,6 +61,11 @@ public final class FatigueRules {
         return distanceSquared < RuleBalance.current().restMaxMove() * RuleBalance.current().restMaxMove();
     }
 
+    /** Whether a held player has moved too far from where the hold began: horizontally, or upwards (a jump). Falling is fine. */
+    public static boolean driftedTooFar(double dx, double dy, double dz, double leeway) {
+        return dx * dx + dz * dz > leeway * leeway || dy > leeway;
+    }
+
     /**
      * Whether the safety protocol holds the player still: during the grace period (graceLeft >= 0) in Mitofus, for a living
      * survival or adventure player. The protection after reconnecting does NOT restrain.

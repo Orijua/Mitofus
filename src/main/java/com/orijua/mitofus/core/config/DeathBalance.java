@@ -46,7 +46,7 @@ public record DeathBalance(int doubleDeathWindowMinutes, int reconnectLockMinute
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static DeathBalance override;
+    private static volatile DeathBalance override;
 
     /** The active server config, or the defaults before a world is loaded. */
     public static DeathBalance current() {

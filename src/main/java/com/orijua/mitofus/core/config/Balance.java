@@ -49,7 +49,7 @@ public record Balance(
             ContestLoss.AUTO);
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static Balance override;
+    private static volatile Balance override;
 
     /** The active server config, or the defaults before a world is loaded (e.g. on the title screen). */
     public static Balance current() {

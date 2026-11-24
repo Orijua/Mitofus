@@ -107,7 +107,7 @@ class FatigueRulesTest {
 
     @Test
     void withTheFatigueOffNothingDrainsAndEveryoneMayConnect() {
-        FatigueBalance off = new FatigueBalance(false, 40, 0.5, 2, 20, 10, 0.1, 15, List.of(0.25), 0.3);
+        FatigueBalance off = new FatigueBalance(false, 40, 0.5, 2, 20, 10, 0.1, 15, List.of(0.25), 0.3, 1.0);
         assertEquals(0.0, FatigueRules.drainPerSecond(off, Activity.COMBAT, N));
         assertEquals(1.0, FatigueRules.afterForge(off, 1.0, N));
         assertTrue(FatigueRules.canConnect(off, 0.0));
@@ -116,7 +116,7 @@ class FatigueRulesTest {
 
     @Test
     void extremeConfigurationsDoNotDivideByZero() {
-        FatigueBalance silly = new FatigueBalance(true, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, List.of(), 0.3);
+        FatigueBalance silly = new FatigueBalance(true, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, List.of(), 0.3, 1.0);
         assertTrue(Double.isFinite(FatigueRules.drainPerSecond(silly, Activity.NORMAL, N)));
         assertTrue(Double.isFinite(FatigueRules.recoverPerSecond(silly, N)));
         assertEquals(0.0, FatigueRules.drainPerSecond(silly, Activity.REST, N), "a zero multiplier is a free activity");
@@ -137,7 +137,7 @@ class FatigueRulesTest {
 
     @Test
     void thresholdsThatAreNotExactInAFloatStillCompareEqual() {
-        FatigueBalance b = new FatigueBalance(true, 40, 0.5, 2, 20, 10, 0.35, 15, List.of(0.35, 0.1), 0.3);
+        FatigueBalance b = new FatigueBalance(true, 40, 0.5, 2, 20, 10, 0.35, 15, List.of(0.35, 0.1), 0.3, 1.0);
         assertTrue(FatigueRules.canConnect(b, 0.35f), "35 % saved as a float meets a 35 % minimum");
         assertFalse(FatigueRules.canConnect(b, 0.34f));
         assertEquals(OptionalDouble.of(0.35), FatigueRules.crossedWarning(0.36f, 0.35f, b.warnAt()), "reaching 35 % warns");
@@ -237,5 +237,14 @@ class FatigueRulesTest {
         assertTrue(FatigueRules.class.getName().startsWith(FatigueRules.MOD_PACKAGE));
         assertTrue("com.orijua.mitofus.feature.fatigue.client.FatigueRestraintClient".startsWith(FatigueRules.MOD_PACKAGE));
         assertTrue(com.orijua.mitofus.feature.fatigue.client.FatigueRestraintClient.class.getName().startsWith(FatigueRules.MOD_PACKAGE));
+    }
+
+    @Test
+    public void heldPlayerMayDriftOnlyWithinTheLeeway() {
+        assertFalse(FatigueRules.driftedTooFar(0.0, 0.0, 0.0, 1.0));
+        assertFalse(FatigueRules.driftedTooFar(0.7, 0.0, 0.7, 1.0));
+        assertTrue(FatigueRules.driftedTooFar(0.8, 0.0, 0.8, 1.0));
+        assertTrue(FatigueRules.driftedTooFar(0.0, 1.5, 0.0, 1.0));
+        assertFalse(FatigueRules.driftedTooFar(0.0, -20.0, 0.0, 1.0), "falling is allowed");
     }
 }

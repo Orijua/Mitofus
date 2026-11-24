@@ -47,7 +47,7 @@ public record ApprenticeBalance(int firstLevel, int levelsPerApprentice, int max
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static ApprenticeBalance override;
+    private static volatile ApprenticeBalance override;
 
     /** The active server config (synced to clients), or the defaults before a world is loaded. */
     public static ApprenticeBalance current() {

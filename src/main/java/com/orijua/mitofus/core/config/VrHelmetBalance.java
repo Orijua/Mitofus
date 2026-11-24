@@ -108,7 +108,7 @@ public record VrHelmetBalance(
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static VrHelmetBalance override;
+    private static volatile VrHelmetBalance override;
 
     /** The active server config, or the defaults before a world is loaded. */
     public static VrHelmetBalance current() {

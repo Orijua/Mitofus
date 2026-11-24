@@ -41,7 +41,7 @@ public record RarityBalance(double normal, double rare, double epic, double uniq
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static RarityBalance override;
+    private static volatile RarityBalance override;
 
     /** The active server config, or the defaults before a world is loaded. */
     public static RarityBalance current() {

@@ -49,7 +49,7 @@ public record EquipLevelBalance(
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static EquipLevelBalance override;
+    private static volatile EquipLevelBalance override;
 
     /** The active server config, or the defaults before a world is loaded (e.g. on the title screen). */
     public static EquipLevelBalance current() {

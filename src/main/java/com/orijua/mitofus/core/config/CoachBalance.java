@@ -31,7 +31,7 @@ public record CoachBalance(int baseIron, int surchargePer100Blocks, int maxSurch
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static CoachBalance override;
+    private static volatile CoachBalance override;
 
     /** The active server config, or the defaults before a world is loaded. */
     public static CoachBalance current() {

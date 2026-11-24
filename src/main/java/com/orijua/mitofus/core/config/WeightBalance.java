@@ -22,7 +22,7 @@ public record WeightBalance(boolean enabled, double baseLimitKg, double kgPerSta
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static WeightBalance override;
+    private static volatile WeightBalance override;
 
     /** The active server config, or the defaults before a world is loaded. */
     public static WeightBalance current() {

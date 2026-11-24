@@ -60,4 +60,26 @@ class TradeCategoryTest {
             assertTrue(names.add(category.getSerializedName()), category.getSerializedName());
         }
     }
+
+    /** Every pair of tags another mod can put on one item (a bow-axe, an armored shield...): the earlier in the order wins. */
+    @Test
+    void everyPairOfTagsGivesTheEarlierCategory() {
+        java.util.List<TagKey<Item>> order = List.of(ItemTags.SWORDS, ItemTags.AXES, ItemTags.PICKAXES, ItemTags.SHOVELS,
+                Tags.Items.TOOLS_BOW, Tags.Items.TOOLS_SHIELD, ItemTags.HEAD_ARMOR, ItemTags.CHEST_ARMOR, ItemTags.LEG_ARMOR,
+                ItemTags.FOOT_ARMOR);
+        for (int i = 0; i < order.size(); i++) {
+            TradeCategory expected = of(order.get(i));
+            for (int j = i + 1; j < order.size(); j++) {
+                assertEquals(expected, of(order.get(j), order.get(i)), order.get(i) + " beats " + order.get(j));
+            }
+        }
+    }
+
+    @Test
+    void tagsOfOtherModsAreNotACategory() {
+        TagKey<Item> foreign = TagKey.create(net.minecraft.core.registries.Registries.ITEM,
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("othermod", "swords"));
+        assertEquals(TradeCategory.OTHER, of(foreign));
+        assertEquals(TradeCategory.AXE, of(foreign, ItemTags.AXES));
+    }
 }

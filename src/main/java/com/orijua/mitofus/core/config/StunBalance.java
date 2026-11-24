@@ -34,7 +34,7 @@ public record StunBalance(double lifeFraction, int durationSeconds, int immunity
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static StunBalance override;
+    private static volatile StunBalance override;
 
     /** The active server config, or the defaults before a world is loaded. */
     public static StunBalance current() {

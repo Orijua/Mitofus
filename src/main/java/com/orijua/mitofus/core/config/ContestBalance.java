@@ -31,7 +31,7 @@ public record ContestBalance(int timeLimitMinutes, int rivalMinScore, int rivalM
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static ContestBalance override;
+    private static volatile ContestBalance override;
 
     /** The active server config (synced to clients), or the defaults before a world is loaded. */
     public static ContestBalance current() {

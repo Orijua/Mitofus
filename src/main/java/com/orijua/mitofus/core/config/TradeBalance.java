@@ -80,7 +80,7 @@ public record TradeBalance(
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static TradeBalance override;
+    private static volatile TradeBalance override;
 
     /** The active server config, or the defaults before a world is loaded (e.g. on the title screen). */
     public static TradeBalance current() {

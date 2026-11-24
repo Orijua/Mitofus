@@ -21,7 +21,7 @@ public record ResidenceBalance(int cooldownMinutes) {
     }
 
     /** Set only inside {@link #withOverride}; read by {@link #current()} before the config. */
-    private static ResidenceBalance override;
+    private static volatile ResidenceBalance override;
 
     /** The active server config, or the defaults before a world is loaded. */
     public static ResidenceBalance current() {

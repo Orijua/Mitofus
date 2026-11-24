@@ -326,7 +326,7 @@ class VrHelmetRulesTest {
 
     @Test
     void theTiersKeepTheirMinutesWhateverTheFatigueBalanceIs() {
-        FatigueBalance other = new FatigueBalance(true, 20.0, 0.8, 2.0, 20.0, 5.0, 0.25, 15, java.util.List.of(0.15, 0.08, 0.02), 0.30);
+        FatigueBalance other = new FatigueBalance(true, 20.0, 0.8, 2.0, 20.0, 5.0, 0.25, 15, java.util.List.of(0.15, 0.08, 0.02), 0.30, 1.0);
         for (VrHelmetTier tier : new VrHelmetTier[]{VrHelmetTier.ADVANCED, VrHelmetTier.DIAMOND}) {
             SessionModifiers m = VrHelmetRules.modifiers(tier, other, C);
             double session = 1.0 / FatigueRules.drainPerSecond(other, FatigueRules.Activity.NORMAL, m) / 60.0;
