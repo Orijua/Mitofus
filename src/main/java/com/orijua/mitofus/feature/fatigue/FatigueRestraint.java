@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.entity.EntityMountEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
@@ -23,9 +24,9 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
  * {@code FatigueRestraintClient}). Nothing is applied or removed: it is deduced from the grace attachment, so it cannot be left
  * stuck on. The protection after reconnecting does not restrain.
  *
- * <p>Known limits, accepted for now: the movement is held on the client only (pending to be enforced on the server if it ever
- * turns out to be needed); and there is a one-tick window when the grace period starts in which a bow being released or a
- * riptide trident already charged still goes off (left untouched on purpose). Any right click with an item stays refused, food
+ * <p>The movement is also held on the server ({@link #holdStill}): horizontal motion zeroed each tick and a player who drifts
+ * past {@link FatigueRules#RESTRAINT_LEEWAY} blocks is put back where the hold began. Releasing a bow or a charged trident is
+ * refused too, so the first tick of the hold has no window. Any right click with an item stays refused, food
  * included (final decision, BUG-087). Mining, placing and interacting with entities follow the same rules as
  * {@link #isRestrained}.
  *
@@ -42,6 +43,9 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
  * BUG-092); the server does not filter their payloads. Chat, the pause menu and system screens stay open.
  */
 public final class FatigueRestraint {
+    /** Where each restrained player was when the hold began; server-only, forgotten as soon as they are free or leave. */
+    private static final java.util.Map<java.util.UUID, Vec3> ANCHORS = new java.util.concurrent.ConcurrentHashMap<>();
+
     private FatigueRestraint() {
     }
 
@@ -50,6 +54,8 @@ public final class FatigueRestraint {
         gameBus.addListener(FatigueRestraint::onAttack);
         gameBus.addListener(FatigueRestraint::onUseItem);
         gameBus.addListener(FatigueRestraint::onStartUsing);
+        gameBus.addListener(FatigueRestraint::onStopUsing);
+        gameBus.addListener(FatigueRestraint::onLogout);
         gameBus.addListener(FatigueRestraint::onMount);
         gameBus.addListener(FatigueRestraint::onDamageDealt);
         gameBus.addListener(FatigueRestraint::onBreak);
@@ -78,8 +84,10 @@ public final class FatigueRestraint {
     /** What the server does every tick to a restrained player; harmless to repeat. */
     public static void enforce(ServerPlayer player) {
         if (!isRestrained(player)) {
+            ANCHORS.remove(player.getUUID());
             return;
         }
+        holdStill(player);
         if (player.isPassenger()) {
             player.stopRiding();
         }
@@ -96,6 +104,40 @@ public final class FatigueRestraint {
             // inventory (it only drops it when there is no room), so nothing is lost. Idempotent: the next tick finds it closed.
             player.closeContainer();
         }
+    }
+
+    /**
+     * Server-side hold (the client already zeroes its own input, but a modified client could ignore it): the horizontal motion is
+     * zeroed every tick, and a player who still ends up farther than the leeway from where the hold began is put back there.
+     * Falling is left alone so a player held in the air still lands.
+     */
+    private static void holdStill(ServerPlayer player) {
+        Vec3 anchor = ANCHORS.computeIfAbsent(player.getUUID(), id -> player.position());
+        Vec3 now = player.position();
+        if (FatigueRules.driftedTooFar(now.x - anchor.x, now.y - anchor.y, now.z - anchor.z)) {
+            // The connection's own teleport also tells the client where it is, so it cannot keep walking from the old spot.
+            player.moveTo(anchor.x, anchor.y, anchor.z, player.getYRot(), player.getXRot());
+            player.connection.teleport(anchor.x, anchor.y, anchor.z, player.getYRot(), player.getXRot());
+            player.setDeltaMovement(Vec3.ZERO);
+            player.hurtMarked = true;
+            return;
+        }
+        Vec3 motion = player.getDeltaMovement();
+        if (motion.x != 0.0 || motion.z != 0.0) {
+            player.setDeltaMovement(0.0, motion.y, 0.0);
+            player.hurtMarked = true;
+        }
+    }
+
+    /** Releasing a bow or a charged trident in the tick the hold begins goes nowhere (#32). */
+    private static void onStopUsing(LivingEntityUseItemEvent.Stop event) {
+        if (event.getEntity() instanceof Player player && isRestrained(player)) {
+            event.setCanceled(true);
+        }
+    }
+
+    private static void onLogout(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
+        ANCHORS.remove(event.getEntity().getUUID());
     }
 
     private static void onTick(PlayerTickEvent.Post event) {

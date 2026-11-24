@@ -238,4 +238,13 @@ class FatigueRulesTest {
         assertTrue("com.orijua.mitofus.feature.fatigue.client.FatigueRestraintClient".startsWith(FatigueRules.MOD_PACKAGE));
         assertTrue(com.orijua.mitofus.feature.fatigue.client.FatigueRestraintClient.class.getName().startsWith(FatigueRules.MOD_PACKAGE));
     }
+
+    @Test
+    public void heldPlayerMayDriftOnlyWithinTheLeeway() {
+        assertFalse(FatigueRules.driftedTooFar(0.0, 0.0, 0.0));
+        assertFalse(FatigueRules.driftedTooFar(0.7, 0.0, 0.7));
+        assertTrue(FatigueRules.driftedTooFar(0.8, 0.0, 0.8));
+        assertTrue(FatigueRules.driftedTooFar(0.0, 1.5, 0.0));
+        assertFalse(FatigueRules.driftedTooFar(0.0, -20.0, 0.0), "falling is allowed");
+    }
 }
