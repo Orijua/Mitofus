@@ -13,8 +13,8 @@
   },
   "goal": {
     "type": "milestone",
-    "milestone": "mitofus:logs_chopped",
-    "count": 50
+    "milestone": "mitofus:forest_time",
+    "count": 12
   },
   "xp_reward": 1500,
   "item_rewards": [

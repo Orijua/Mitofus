@@ -12,9 +12,19 @@
     "job": "mitofus:woodcutter"
   },
   "goal": {
-    "type": "milestone",
-    "milestone": "mitofus:logs_chopped",
-    "count": 150
+    "type": "all",
+    "goals": [
+      {
+        "type": "milestone",
+        "milestone": "mitofus:logs_chopped",
+        "count": 50
+      },
+      {
+        "type": "milestone",
+        "milestone": "mitofus:forest_time",
+        "count": 24
+      }
+    ]
   },
   "xp_reward": 4000,
   "item_rewards": [
