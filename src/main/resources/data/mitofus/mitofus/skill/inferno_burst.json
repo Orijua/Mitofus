@@ -1,0 +1,29 @@
+{
+  "name": {
+    "translate": "skill.mitofus.inferno_burst"
+  },
+  "description": {
+    "translate": "skill.mitofus.inferno_burst.desc"
+  },
+  "icon": "minecraft:fire_charge",
+  "mana_cost": 30,
+  "cooldown_ticks": 1200,
+  "required_item": "minecraft:swords",
+  "weapon_wear": 1,
+  "effects": [
+    {
+      "type": "area_damage",
+      "range": 5.5,
+      "cone_degrees": 360,
+      "damage_multiplier": 2.6,
+      "strength_scaling": 0.03,
+      "target_effects": [
+        {
+          "id": "minecraft:wither",
+          "amplifier": 1,
+          "duration": 100
+        }
+      ]
+    }
+  ]
+}

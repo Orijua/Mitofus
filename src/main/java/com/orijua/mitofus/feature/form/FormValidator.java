@@ -17,7 +17,8 @@ public final class FormValidator {
     }
 
     public static List<String> validate(Map<ResourceLocation, FormDefinition> forms, Map<ResourceLocation, ElementTypeDefinition> types,
-                                        Set<ResourceLocation> classes, Set<ResourceLocation> skills) {
+                                        Set<ResourceLocation> classes, Set<ResourceLocation> skills,
+                                        Set<ResourceLocation> passives, Map<ResourceLocation, ResourceLocation> questRewards) {
         List<String> problems = new ArrayList<>();
         types.forEach((id, type) -> type.strongAgainst().stream().filter(t -> !types.containsKey(t))
                 .forEach(t -> problems.add("element type " + id + ": strong_against unknown type " + t)));
@@ -29,9 +30,20 @@ public final class FormValidator {
             if (!types.containsKey(form.type())) {
                 problems.add("form " + id + ": unknown type " + form.type());
             }
-            form.skills().stream().filter(s -> !skills.contains(s)).forEach(s -> problems.add("form " + id + ": unknown skill " + s));
+            for (int i = 0; i < form.skills().size(); i++) {
+                ResourceLocation ref = form.skills().get(i);
+                boolean passive = i == FormDefinition.PASSIVE_INDEX;
+                if (!(passive ? passives : skills).contains(ref)) {
+                    problems.add("form " + id + ": unknown " + (passive ? "passive " : "skill ") + ref);
+                }
+            }
             if (!taken.add(form.playerClass() + "@" + form.unlockLevel())) {
                 problems.add("form " + id + ": class " + form.playerClass() + " already has a form at level " + form.unlockLevel());
+            }
+        });
+        questRewards.forEach((quest, form) -> {
+            if (!forms.containsKey(form)) {
+                problems.add("quest " + quest + ": form_reward unknown form " + form);
             }
         });
         return problems;
@@ -39,7 +51,14 @@ public final class FormValidator {
 
     public static List<String> problems(RegistryAccess access) {
         return validate(entries(access, ModDatapackRegistries.FORM), entries(access, ModDatapackRegistries.ELEMENT_TYPE),
-                entries(access, ModDatapackRegistries.PLAYER_CLASS).keySet(), entries(access, ModDatapackRegistries.SKILL).keySet());
+                entries(access, ModDatapackRegistries.PLAYER_CLASS).keySet(), entries(access, ModDatapackRegistries.SKILL).keySet(),
+                entries(access, ModDatapackRegistries.PASSIVE).keySet(), questRewards(access));
+    }
+
+    private static Map<ResourceLocation, ResourceLocation> questRewards(RegistryAccess access) {
+        Map<ResourceLocation, ResourceLocation> result = new HashMap<>();
+        entries(access, ModDatapackRegistries.QUEST).forEach((id, quest) -> quest.formReward().ifPresent(form -> result.put(id, form)));
+        return result;
     }
 
     private static <T> Map<ResourceLocation, T> entries(RegistryAccess access,

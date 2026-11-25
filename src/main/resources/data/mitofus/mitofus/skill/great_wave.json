@@ -1,0 +1,29 @@
+{
+  "name": {
+    "translate": "skill.mitofus.great_wave"
+  },
+  "description": {
+    "translate": "skill.mitofus.great_wave.desc"
+  },
+  "icon": "minecraft:heart_of_the_sea",
+  "mana_cost": 30,
+  "cooldown_ticks": 1200,
+  "required_item": "minecraft:swords",
+  "weapon_wear": 1,
+  "effects": [
+    {
+      "type": "area_damage",
+      "range": 6.0,
+      "cone_degrees": 360,
+      "damage_multiplier": 2.0,
+      "strength_scaling": 0.03,
+      "target_effects": [
+        {
+          "id": "minecraft:slowness",
+          "amplifier": 2,
+          "duration": 80
+        }
+      ]
+    }
+  ]
+}

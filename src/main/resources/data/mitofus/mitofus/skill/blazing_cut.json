@@ -1,0 +1,29 @@
+{
+  "name": {
+    "translate": "skill.mitofus.blazing_cut"
+  },
+  "description": {
+    "translate": "skill.mitofus.blazing_cut.desc"
+  },
+  "icon": "minecraft:blaze_powder",
+  "mana_cost": 8,
+  "cooldown_ticks": 60,
+  "required_item": "minecraft:swords",
+  "weapon_wear": 1,
+  "effects": [
+    {
+      "type": "area_damage",
+      "range": 3.5,
+      "cone_degrees": 60,
+      "damage_multiplier": 1.96,
+      "strength_scaling": 0.03,
+      "target_effects": [
+        {
+          "id": "minecraft:wither",
+          "amplifier": 0,
+          "duration": 60
+        }
+      ]
+    }
+  ]
+}

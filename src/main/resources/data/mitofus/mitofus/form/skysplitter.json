@@ -1,0 +1,18 @@
+{
+  "name": {
+    "translate": "form.mitofus.skysplitter"
+  },
+  "description": {
+    "translate": "form.mitofus.skysplitter.desc"
+  },
+  "class": "mitofus:swordsman",
+  "unlock_level": 450,
+  "source": "level",
+  "type": "mitofus:lightning",
+  "skills": [
+    "mitofus:sky_dash",
+    "mitofus:sky_charge",
+    "mitofus:skysplit_strike"
+  ],
+  "inheritable": false
+}

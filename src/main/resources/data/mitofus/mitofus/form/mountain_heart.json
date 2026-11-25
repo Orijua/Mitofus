@@ -1,0 +1,18 @@
+{
+  "name": {
+    "translate": "form.mitofus.mountain_heart"
+  },
+  "description": {
+    "translate": "form.mitofus.mountain_heart.desc"
+  },
+  "class": "mitofus:swordsman",
+  "unlock_level": 400,
+  "source": "grade_quest",
+  "type": "mitofus:earth",
+  "skills": [
+    "mitofus:mountain_strike",
+    "mitofus:mountain_skin",
+    "mitofus:great_quake"
+  ],
+  "inheritable": false
+}

@@ -1,0 +1,19 @@
+{
+  "name": {
+    "translate": "passive.mitofus.flowing_guard"
+  },
+  "description": {
+    "translate": "passive.mitofus.flowing_guard.desc"
+  },
+  "icon": "minecraft:nautilus_shell",
+  "bonuses": [
+    {
+      "type": "armor",
+      "amount": 3.0
+    },
+    {
+      "type": "mana_regen",
+      "amount": 0.1
+    }
+  ]
+}

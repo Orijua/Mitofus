@@ -166,9 +166,28 @@ class FormRulesTest {
         var repeated = form(SWORD, 50, FormSource.LEVEL, false);
         var badClass = form(MAGE, 50, FormSource.LEVEL, false);
         var problems = FormValidator.validate(Map.of(id("good"), good, id("repeated"), repeated, id("bad_class"), badClass), types,
-                java.util.Set.of(SWORD), java.util.Set.of(id("a"), id("b"), id("c")));
+                java.util.Set.of(SWORD), java.util.Set.of(id("a"), id("c")), java.util.Set.of(id("b")), Map.of(id("quest"), id("missing_form")));
         assertTrue(problems.stream().anyMatch(p -> p.contains("unknown type mitofus:nope")), problems.toString());
         assertTrue(problems.stream().anyMatch(p -> p.contains("unknown class mitofus:mage")), problems.toString());
         assertEquals(1, problems.stream().filter(p -> p.contains("already has a form at level 50")).count(), problems.toString());
+        assertTrue(problems.stream().anyMatch(p -> p.contains("quest mitofus:quest: form_reward unknown form")), problems.toString());
+        assertEquals(0, problems.stream().filter(p -> p.contains("unknown skill") || p.contains("unknown passive")).count(), problems.toString());
+    }
+
+    @Test
+    void theUltimateAndThePassiveAreSplitFromTheSkillsAndKeepTheirLevels() {
+        var form = form(SWORD, 50, FormSource.LEVEL, false);
+        assertEquals(List.of(id("a")), FormRules.unlockedActiveSkills(form, 29));
+        assertEquals(List.of(id("a")), FormRules.unlockedActiveSkills(form, 59));
+        assertEquals(List.of(id("a"), id("c")), FormRules.unlockedActiveSkills(form, 60));
+        assertEquals(Optional.empty(), FormRules.unlockedPassive(form, 29));
+        assertEquals(Optional.of(id("b")), FormRules.unlockedPassive(form, 30));
+    }
+
+    @Test
+    void theBarSlotOfAFormSkillIsRemembered() {
+        var forms = PlayerForms.EMPTY.withBar(id("a"), Optional.of(2));
+        assertEquals(Optional.of(2), forms.barSlot(id("a")));
+        assertEquals(Optional.empty(), forms.withBar(id("a"), Optional.empty()).barSlot(id("a")));
     }
 }

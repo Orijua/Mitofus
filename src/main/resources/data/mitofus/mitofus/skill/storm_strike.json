@@ -1,0 +1,22 @@
+{
+  "name": {
+    "translate": "skill.mitofus.storm_strike"
+  },
+  "description": {
+    "translate": "skill.mitofus.storm_strike.desc"
+  },
+  "icon": "minecraft:copper_ingot",
+  "mana_cost": 30,
+  "cooldown_ticks": 1200,
+  "required_item": "minecraft:swords",
+  "weapon_wear": 1,
+  "effects": [
+    {
+      "type": "area_damage",
+      "range": 7.0,
+      "cone_degrees": 90,
+      "damage_multiplier": 3.0,
+      "strength_scaling": 0.03
+    }
+  ]
+}

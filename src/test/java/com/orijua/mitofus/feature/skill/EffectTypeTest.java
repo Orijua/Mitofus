@@ -48,6 +48,12 @@ class EffectTypeTest {
                 "rending_slash", true, "sancho_link", true, "bisection", true, "flame_bolt", true,
                 "iron_guard", false, "blacksmith_rage", false, "heavy_strike", true,
                 "war_cry", false, "mana_shield", false);
+        // The form skills (attack and ultimate of every form) all start with an area attack.
+        java.util.Map<String, Boolean> expectedAll = new HashMap<>(expected);
+        for (String form : List.of("flame_slash", "inferno_burst", "tide_cut", "great_wave", "blazing_cut", "firestorm_burst", "stone_strike", "quake", "sky_dash", "skysplit_strike", "thunder_dash", "storm_strike", "abyss_cut", "abyssal_wave", "radiant_cut", "sunburst", "mountain_strike", "great_quake", "shadow_slash", "eclipse")) {
+            expectedAll.put(form, true);
+        }
+        expected = expectedAll;
         Map<String, EffectType> found = new HashMap<>();
         List<Path> files;
         try (Stream<Path> stream = Files.list(SKILLS)) {

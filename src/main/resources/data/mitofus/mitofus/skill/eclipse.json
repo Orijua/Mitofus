@@ -1,0 +1,39 @@
+{
+  "name": {
+    "translate": "skill.mitofus.eclipse"
+  },
+  "description": {
+    "translate": "skill.mitofus.eclipse.desc"
+  },
+  "icon": "minecraft:ender_eye",
+  "mana_cost": 30,
+  "cooldown_ticks": 1200,
+  "required_item": "minecraft:swords",
+  "weapon_wear": 1,
+  "effects": [
+    {
+      "type": "area_damage",
+      "range": 6.0,
+      "cone_degrees": 360,
+      "damage_multiplier": 3.0,
+      "strength_scaling": 0.03,
+      "target_effects": [
+        {
+          "id": "minecraft:weakness",
+          "amplifier": 1,
+          "duration": 100
+        }
+      ]
+    },
+    {
+      "type": "self_buff",
+      "effects": [
+        {
+          "id": "minecraft:resistance",
+          "amplifier": 1,
+          "duration": 100
+        }
+      ]
+    }
+  ]
+}

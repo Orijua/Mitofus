@@ -1,0 +1,22 @@
+{
+  "name": {
+    "translate": "skill.mitofus.mountain_strike"
+  },
+  "description": {
+    "translate": "skill.mitofus.mountain_strike.desc"
+  },
+  "icon": "minecraft:iron_ingot",
+  "mana_cost": 8,
+  "cooldown_ticks": 60,
+  "required_item": "minecraft:swords",
+  "weapon_wear": 1,
+  "effects": [
+    {
+      "type": "area_damage",
+      "range": 3.0,
+      "cone_degrees": 40,
+      "damage_multiplier": 2.66,
+      "strength_scaling": 0.03
+    }
+  ]
+}

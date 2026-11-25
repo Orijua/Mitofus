@@ -1,0 +1,19 @@
+{
+  "name": {
+    "translate": "passive.mitofus.static_charge"
+  },
+  "description": {
+    "translate": "passive.mitofus.static_charge.desc"
+  },
+  "icon": "minecraft:amethyst_shard",
+  "bonuses": [
+    {
+      "type": "damage",
+      "amount": 0.04
+    },
+    {
+      "type": "mana_regen",
+      "amount": 0.15
+    }
+  ]
+}

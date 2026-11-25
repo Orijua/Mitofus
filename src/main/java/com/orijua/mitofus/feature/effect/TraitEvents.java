@@ -21,5 +21,6 @@ public final class TraitEvents {
         if (bonus != 0) {
             event.setAmount((float) (event.getAmount() * (1 + bonus)));
         }
+        com.orijua.mitofus.feature.form.FormService.addUse(attacker);
     }
 }

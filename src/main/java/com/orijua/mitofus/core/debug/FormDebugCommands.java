@@ -51,6 +51,7 @@ final class FormDebugCommands {
                 Commands.literal("reset")
                         .then(Commands.literal("forms").executes(ctx -> {
                             ServerPlayer player = ctx.getSource().getPlayerOrException();
+                            FormService.forceUnequip(player);
                             player.setData(ModAttachments.PLAYER_FORMS, PlayerForms.EMPTY);
                             ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_forms_reset"), false);
                             return 1;
@@ -94,7 +95,7 @@ final class FormDebugCommands {
 
     private static int removeForm(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = DebugSupport.mitofusPlayer(ctx);
-        player.setData(ModAttachments.PLAYER_FORMS, FormService.forms(player).withEquipped(java.util.Optional.empty()));
+        FormService.forceUnequip(player);
         ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_form_removed"), false);
         return 1;
     }
