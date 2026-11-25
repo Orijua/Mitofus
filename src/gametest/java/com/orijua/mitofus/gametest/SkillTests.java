@@ -125,4 +125,19 @@ public final class SkillTests {
         helper.assertTrue(SkillService.get(player).slot(2).filter(IRON_GUARD::equals).isPresent(), "slot 3 is open");
         helper.succeed();
     }
+
+    /** Two different active skills cannot go off in the same moment: a short pause follows every cast, set in the config. */
+    @GameTest(template = TestSupport.EMPTY)
+    public static void aShortPauseFollowsEveryActiveSkill(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
+        SkillService.learn(player, SANCHO_LINK);
+        SkillService.learn(player, net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("mitofus", "heavy_strike"));
+        SkillService.assign(player, 1, java.util.Optional.of(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("mitofus", "heavy_strike")));
+        helper.assertTrue(SkillService.use(player, 0) == SkillService.Result.SUCCESS, "the first cast works");
+        helper.assertTrue(SkillService.use(player, 1) == SkillService.Result.ON_COOLDOWN, "a second skill right after is refused");
+        com.orijua.mitofus.core.config.SkillBalance.withOverride(new com.orijua.mitofus.core.config.SkillBalance(0),
+                () -> helper.assertTrue(SkillService.use(player, 1) == SkillService.Result.SUCCESS, "with no pause configured it goes off"));
+        helper.succeed();
+    }
 }

@@ -5,6 +5,7 @@ import com.orijua.mitofus.feature.talent.TalentEffects;
 import com.orijua.mitofus.core.registry.ModAttachments;
 import com.orijua.mitofus.core.registry.ModDataComponents;
 import com.orijua.mitofus.core.registry.ModDatapackRegistries;
+import com.orijua.mitofus.core.config.SkillBalance;
 import com.orijua.mitofus.feature.effect.ActiveTraits;
 import com.orijua.mitofus.feature.effect.BonusType;
 import com.orijua.mitofus.feature.effect.EffectContext;
@@ -34,6 +35,9 @@ public final class SkillService {
     public static final int WEAPON_SLOT = SlotRules.MAX_SLOTS;
 
     public enum Result { SUCCESS, EMPTY_SLOT, UNKNOWN_SKILL, WRONG_ITEM, REQUIREMENTS_UNMET, ON_COOLDOWN, NO_MANA, REAL_WORLD, RESTRAINED, CONDITION_UNMET }
+
+    /** The game time of each player's last cast, for the pause between skills. Not saved: a restart simply starts with no pause. */
+    private static final java.util.Map<java.util.UUID, Long> lastCast = new java.util.concurrent.ConcurrentHashMap<>();
 
     /** How far a skill that needs a target looks for it. */
     public static final double TARGET_RANGE = 16.0;
@@ -131,6 +135,10 @@ public final class SkillService {
         if (!EquipmentEvents.meetsRequirements(player, player.getMainHandItem())) {
             return fail(player, Result.REQUIREMENTS_UNMET, Component.translatable("message.mitofus.requirements_unmet"));
         }
+        // One cast at a time: a short pause between two active skills, so they cannot all go off at once.
+        if (now - lastCast.getOrDefault(player.getUUID(), Long.MIN_VALUE / 2) < SkillBalance.current().globalCooldownTicks()) {
+            return Result.ON_COOLDOWN;
+        }
         long remaining = skills.cooldownRemaining(id, now);
         if (remaining > 0) {
             return fail(player, Result.ON_COOLDOWN, Component.translatable("message.mitofus.cooldown",
@@ -167,6 +175,7 @@ public final class SkillService {
         if (wear > 0) {
             player.getMainHandItem().hurtAndBreak(wear, player, EquipmentSlot.MAINHAND);
         }
+        lastCast.put(player.getUUID(), now);
         player.setData(ModAttachments.MANA, mana - manaCost);
         player.setData(ModAttachments.PLAYER_SKILLS, skills.withCooldown(id, now + Math.round(tuning.cooldownTicks(skill.cooldownTicks())
                 * Math.max(0, 1 - ActiveTraits.total(player, BonusType.COOLDOWN_REDUCTION)))));

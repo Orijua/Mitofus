@@ -205,6 +205,14 @@ public final class Config {
             .defineInRange("immunitySeconds", StunBalance.DEFAULT_IMMUNITY_SECONDS, 0, StunBalance.MAX_IMMUNITY_SECONDS);
 
     static {
+        BUILDER.pop().push("skills");
+    }
+
+    private static final ModConfigSpec.IntValue SKILL_GLOBAL_COOLDOWN_TICKS = BUILDER
+            .comment("Ticks after casting an active skill before any other one can be cast (20 = 1 second). 0 = no pause. Passives and the cooldown of each skill are not affected.")
+            .defineInRange("globalCooldownTicks", SkillBalance.DEFAULT_TICKS, 0, SkillBalance.MAX_TICKS);
+
+    static {
         BUILDER.pop().push("mobs");
     }
 
@@ -839,6 +847,7 @@ public final class Config {
     private static final Cached<ResidenceBalance> RESIDENCE_BALANCE_CACHE = cache(() -> new ResidenceBalance(RESIDENCE_COOLDOWN.get()));
     private static final Cached<WeightBalance> WEIGHT_BALANCE_CACHE = cache(() -> new WeightBalance(WEIGHT_ENABLED.get(), WEIGHT_BASE_LIMIT.get(), WEIGHT_PER_STAMINA.get()));
     private static final Cached<StunBalance> STUN_BALANCE_CACHE = cache(Config::buildStunBalance);
+    private static final Cached<SkillBalance> SKILL_BALANCE_CACHE = cache(() -> new SkillBalance(SKILL_GLOBAL_COOLDOWN_TICKS.get()));
     private static final Cached<ApprenticeBalance> APPRENTICE_BALANCE_CACHE = cache(Config::buildApprenticeBalance);
     private static final Cached<SmithShopBalance> SMITH_SHOP_BALANCE_CACHE = cache(Config::buildSmithShopBalance);
     private static final Cached<ContestBalance> CONTEST_BALANCE_CACHE = cache(Config::buildContestBalance);
@@ -902,6 +911,10 @@ public final class Config {
 
     static WeightBalance weightBalance() {
         return WEIGHT_BALANCE_CACHE.get();
+    }
+
+    static SkillBalance skillBalance() {
+        return SKILL_BALANCE_CACHE.get();
     }
 
     static StunBalance stunBalance() {
