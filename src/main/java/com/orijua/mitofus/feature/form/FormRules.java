@@ -75,13 +75,13 @@ public final class FormRules {
 
     /**
      * Whether a form is unlocked: the class level reached {@code unlock_level} and, for a grade-quest form that the class
-     * owns, the quest was finished ({@code granted}). A form a fusion inherits needs only the level.
+     * owns, the quest was finished ({@code granted}).
      */
-    public static boolean unlocked(FormDefinition form, int classLevel, boolean granted, boolean inherited) {
+    public static boolean unlocked(FormDefinition form, int classLevel, boolean granted) {
         if (classLevel < form.unlockLevel()) {
             return false;
         }
-        return inherited || form.source() == FormSource.LEVEL || granted;
+        return form.source() == FormSource.LEVEL || granted;
     }
 
     /** The skills to learn (attack and ultimate, not the passive) at {@code level}. */

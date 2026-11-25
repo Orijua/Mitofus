@@ -1,0 +1,9 @@
+{
+  "branches": [
+    "mitofus:squire",
+    "mitofus:swordsman"
+  ],
+  "name": {
+    "translate": "combination.mitofus.paladin"
+  }
+}

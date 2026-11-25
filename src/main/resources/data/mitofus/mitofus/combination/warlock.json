@@ -1,0 +1,9 @@
+{
+  "branches": [
+    "mitofus:mage",
+    "mitofus:necromancer"
+  ],
+  "name": {
+    "translate": "combination.mitofus.warlock"
+  }
+}

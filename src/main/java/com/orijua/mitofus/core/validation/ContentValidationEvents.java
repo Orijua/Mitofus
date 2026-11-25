@@ -4,7 +4,7 @@ import com.orijua.mitofus.Mitofus;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import com.orijua.mitofus.feature.fusion.FusionScanner;
+import com.orijua.mitofus.feature.synergy.SynergyScanner;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
@@ -21,10 +21,11 @@ public final class ContentValidationEvents {
         gameBus.addListener(ContentValidationEvents::onRegisterCommands);
     }
 
-    /** The content problems plus those of fusions and synergies. */
+    /** The content problems plus those of synergies and combinations. */
     private static List<String> problems(net.minecraft.core.RegistryAccess access, net.minecraft.world.item.crafting.RecipeManager recipes) {
         List<String> problems = new java.util.ArrayList<>(ContentValidator.validate(ContentScanner.index(access, recipes)));
-        problems.addAll(FusionScanner.problems(access));
+        problems.addAll(SynergyScanner.problems(access));
+        problems.addAll(com.orijua.mitofus.feature.combination.CombinationScanner.problems(access));
         problems.addAll(com.orijua.mitofus.feature.form.FormValidator.problems(access));
         problems.addAll(com.orijua.mitofus.feature.effect.status.StatusValidator.problems(access));
         problems.sort(null);

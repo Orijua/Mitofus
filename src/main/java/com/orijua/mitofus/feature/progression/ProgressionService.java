@@ -6,7 +6,7 @@ import com.orijua.mitofus.core.registry.Definitions;
 import com.orijua.mitofus.feature.effect.BonusType;
 import com.orijua.mitofus.feature.effect.ActiveTraits;
 import com.orijua.mitofus.core.registry.ModAttachments;
-import com.orijua.mitofus.feature.fusion.SynergyService;
+import com.orijua.mitofus.feature.synergy.SynergyService;
 import com.orijua.mitofus.feature.talent.TalentEffects;
 import com.orijua.mitofus.core.registry.ModDataComponents;
 import com.orijua.mitofus.core.registry.ModDatapackRegistries;

@@ -16,7 +16,7 @@ public final class FormRows {
     public enum State { EQUIPPED, OWNED, LOCKED }
 
     /** One row: {@code level} is the form level (1 if never worn) and {@code xp} its uses; {@code lock} why it is locked, if it is. */
-    public record Row(ResourceLocation id, FormDefinition form, State state, Lock lock, int level, int xp, boolean inherited,
+    public record Row(ResourceLocation id, FormDefinition form, State state, Lock lock, int level, int xp,
                   Optional<ResourceLocation> blockedBy) {
     }
 
@@ -24,8 +24,7 @@ public final class FormRows {
     }
 
     /**
-     * The forms of every class the player has, in slot order and then by unlock level; the forms a hybrid class
-     * inherits come after its own. A form two slots give appears once, and as owned if either slot unlocks it (the same rule as
+     * The forms of every class the player has, in slot order and then by unlock level. A form two slots give appears once, and as owned if either slot unlocks it (the same rule as
      * {@link FormCatalogue}, which the server uses to check an equip).
      */
     public static List<Row> rows(List<Definitions.Entry<FormDefinition>> all, List<ClassSlot> slots, PlayerForms forms) {
@@ -34,7 +33,7 @@ public final class FormRows {
                         .thenComparing(Definitions.Entry::id))
                 .toList();
         return FormCatalogue.visible(sorted, slots, forms).stream()
-                .sorted(Comparator.comparingInt(FormCatalogue.Visible::slotIndex).thenComparing(FormCatalogue.Visible::inherited))
+                .sorted(Comparator.comparingInt(FormCatalogue.Visible::slotIndex))
                 .map(v -> row(v, forms))
                 .toList();
     }
@@ -44,9 +43,9 @@ public final class FormRows {
         if (!visible.unlocked()) {
             Lock lock = visible.blockedBy().isPresent() ? Lock.PREVIOUS_FORM
                     : visible.classLevel() < visible.form().unlockLevel() ? Lock.CLASS_LEVEL : Lock.GRADE_QUEST;
-            return new Row(visible.id(), visible.form(), State.LOCKED, lock, visible.level(), xp, visible.inherited(), visible.blockedBy());
+            return new Row(visible.id(), visible.form(), State.LOCKED, lock, visible.level(), xp, visible.blockedBy());
         }
         State state = forms.equipped().equals(Optional.of(visible.id())) ? State.EQUIPPED : State.OWNED;
-        return new Row(visible.id(), visible.form(), state, Lock.NONE, visible.level(), xp, visible.inherited(), Optional.empty());
+        return new Row(visible.id(), visible.form(), state, Lock.NONE, visible.level(), xp, Optional.empty());
     }
 }

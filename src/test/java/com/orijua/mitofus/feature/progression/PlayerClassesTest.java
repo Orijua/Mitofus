@@ -61,11 +61,10 @@ class PlayerClassesTest {
     }
 
     @Test
-    void aHybridSlotKeepsItsOriginAndPaidPointsThroughTheCodec() {
-        ClassSlot hybrid = new ClassSlot(0, MAGE, 40, 5, ClassGrade.ADEPT, List.of(), List.of(MAGE, SWORD), 7);
+    void aSlotKeepsItsTalentsThroughTheCodec() {
+        ClassSlot slot = new ClassSlot(0, MAGE, 40, 5, ClassGrade.ADEPT, List.of(ResourceLocation.parse("mitofus:bolt")));
         ClassSlot read = ClassSlot.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE,
-                ClassSlot.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, hybrid).getOrThrow()).getOrThrow();
-        assertEquals(hybrid, read);
-        assertEquals(List.of(MAGE, SWORD, MAGE), read.treeClasses());
+                ClassSlot.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, slot).getOrThrow()).getOrThrow();
+        assertEquals(slot, read);
     }
 }

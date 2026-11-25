@@ -11,8 +11,7 @@ import java.util.Set;
 
 /**
  * The rules of the talent tree, with no Minecraft state. A class earns 1 talent point per class level; a node costs what
- * its JSON says; roots are free and always owned. A hybrid class also owns the roots and bought nodes of its two parents' trees, and
- * the points its parents had spent ({@code paidPoints}) count as already paid. Points are never stored: they are the class level minus what the bought
+ * its JSON says; roots are free and always owned. Points are never stored: they are the class level minus what the bought
  * nodes cost now, so a datapack that changes a cost or removes a node can never leave a player with negative points.
  */
 public final class TalentRules {
@@ -40,7 +39,7 @@ public final class TalentRules {
     public static Set<ResourceLocation> owned(Map<ResourceLocation, ? extends TalentNode> all, ClassSlot slot) {
         Set<ResourceLocation> owned = new HashSet<>();
         all.forEach((id, node) -> {
-            if (slot.treeClasses().contains(node.playerClass()) && (node.isRoot() || slot.talents().contains(id))) {
+            if (slot.classId().equals(node.playerClass()) && (node.isRoot() || slot.talents().contains(id))) {
                 owned.add(id);
             }
         });
@@ -56,7 +55,7 @@ public final class TalentRules {
     }
 
     public static int pointsAvailable(Map<ResourceLocation, ? extends TalentNode> all, ClassSlot slot) {
-        return Math.max(0, pointsEarned(slot.classLevel()) + slot.paidPoints() - pointsSpent(all, slot));
+        return Math.max(0, pointsEarned(slot.classLevel()) - pointsSpent(all, slot));
     }
 
     /**
@@ -67,7 +66,7 @@ public final class TalentRules {
         Set<ResourceLocation> owned = owned(all, slot);
         for (Map.Entry<ResourceLocation, ? extends TalentNode> entry : all.entrySet()) {
             TalentNode node = entry.getValue();
-            if (slot.treeClasses().contains(node.playerClass()) && !owned.contains(entry.getKey())
+            if (slot.classId().equals(node.playerClass()) && !owned.contains(entry.getKey())
                     && slot.grade().ordinal() >= node.minGrade().ordinal()) {
                 return false;
             }
@@ -81,7 +80,7 @@ public final class TalentRules {
         if (definition == null) {
             return Buy.UNKNOWN;
         }
-        if (!slot.treeClasses().contains(definition.playerClass())) {
+        if (!slot.classId().equals(definition.playerClass())) {
             return Buy.WRONG_CLASS;
         }
         Set<ResourceLocation> owned = owned(all, slot);

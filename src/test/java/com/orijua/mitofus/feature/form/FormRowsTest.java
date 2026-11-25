@@ -16,25 +16,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class FormRowsTest {
     private static final ResourceLocation SWORD = id("swordsman");
     private static final ResourceLocation MAGE = id("mage");
-    private static final ResourceLocation HYBRID = id("spellsword");
 
     private static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath("mitofus", path);
     }
 
-    private static Definitions.Entry<FormDefinition> form(String name, ResourceLocation owner, int level, FormSource source, boolean inheritable) {
+    private static Definitions.Entry<FormDefinition> form(String name, ResourceLocation owner, int level, FormSource source) {
         return new Definitions.Entry<>(id(name), new FormDefinition(Component.empty(), Component.empty(), owner, level, source, id("fire"),
-                List.of(id("a"), id("b"), id("c")), 0.20, inheritable, 5, FormDefinition.Curve.DEFAULT));
+                List.of(id("a"), id("b"), id("c")), 0.20, 5, FormDefinition.Curve.DEFAULT));
     }
 
-    private static ClassSlot slot(ResourceLocation classId, int level, ResourceLocation... origin) {
-        return new ClassSlot(0, classId, level, 0, ClassGrade.APPRENTICE, List.of(), List.of(origin), 0);
+    private static ClassSlot slot(ResourceLocation classId, int level) {
+        return new ClassSlot(0, classId, level, 0, ClassGrade.APPRENTICE, List.of());
     }
 
     private static final List<Definitions.Entry<FormDefinition>> ALL = List.of(
-            form("sword_100", SWORD, 100, FormSource.GRADE_QUEST, true),
-            form("sword_50", SWORD, 50, FormSource.LEVEL, true),
-            form("mage_50", MAGE, 50, FormSource.LEVEL, false));
+            form("sword_100", SWORD, 100, FormSource.GRADE_QUEST),
+            form("sword_50", SWORD, 50, FormSource.LEVEL),
+            form("mage_50", MAGE, 50, FormSource.LEVEL));
 
     @Test
     void showsEveryFormOfTheClassByUnlockLevelWithItsState() {
@@ -62,27 +61,19 @@ class FormRowsTest {
     }
 
     @Test
-    void aFusionListsItsOwnFormsThenTheInheritedOnesAndNeverTwice() {
-        var rows = FormRows.rows(ALL, List.of(slot(HYBRID, 70, SWORD, MAGE), slot(MAGE, 60)), PlayerForms.EMPTY);
+    void twoHeldBranchesListTheirFormsInSlotOrder() {
+        var swordSlot = slot(SWORD, 70);
+        var mageSlot = new ClassSlot(1, MAGE, 60, 0, ClassGrade.APPRENTICE, List.of());
+        var rows = FormRows.rows(ALL, List.of(swordSlot, mageSlot), PlayerForms.EMPTY);
         assertEquals(List.of(id("sword_50"), id("sword_100"), id("mage_50")), rows.stream().map(FormRows.Row::id).toList());
-        assertTrue(rows.get(0).inherited() && rows.get(1).inherited());
         assertEquals(FormRows.State.OWNED, rows.get(0).state());
-        assertEquals(FormRows.State.LOCKED, rows.get(1).state(), "the inherited level 100 form waits for the fused class level");
-        assertTrue(rows.get(2).state() == FormRows.State.OWNED && !rows.get(2).inherited(), "the mage's own form from its slot");
+        assertEquals(FormRows.State.LOCKED, rows.get(1).state());
+        assertEquals(FormRows.State.OWNED, rows.get(2).state(), "the mage branch's own form");
     }
 
     @Test
     void noClassesNoRows() {
         assertTrue(FormRows.rows(ALL, List.of(), PlayerForms.EMPTY).isEmpty());
-    }
-
-    @Test
-    void aFormTwoSlotsGiveIsOwnedIfEitherSlotUnlocksIt() {
-        // the fusion (level 40) comes first and does not unlock the level 50 form; the swordsman slot does
-        var rows = FormRows.rows(ALL, List.of(slot(HYBRID, 40, SWORD, MAGE), slot(SWORD, 200)), PlayerForms.EMPTY);
-        var sword50 = rows.stream().filter(r -> r.id().equals(id("sword_50"))).toList();
-        assertEquals(1, sword50.size());
-        assertEquals(FormRows.State.OWNED, sword50.get(0).state());
     }
 
     @Test
@@ -95,8 +86,8 @@ class FormRowsTest {
 
     @Test
     void aFormHeldBackByAMissingQuestFormSaysWhichOne() {
-        var q100 = form("q_100", SWORD, 100, FormSource.GRADE_QUEST, false);
-        var l150 = form("l_150", SWORD, 150, FormSource.LEVEL, false);
+        var q100 = form("q_100", SWORD, 100, FormSource.GRADE_QUEST);
+        var l150 = form("l_150", SWORD, 150, FormSource.LEVEL);
         var rows = FormRows.rows(List.of(q100, l150), List.of(slot(SWORD, 300)), PlayerForms.EMPTY);
         var held = rows.stream().filter(r -> r.id().equals(id("l_150"))).findFirst().orElseThrow();
         assertEquals(FormRows.State.LOCKED, held.state());

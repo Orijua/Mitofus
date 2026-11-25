@@ -25,8 +25,7 @@ import com.orijua.mitofus.feature.eibar.VelascoContest;
 import com.orijua.mitofus.feature.eibar.StartContestPayload;
 import com.orijua.mitofus.feature.progression.AllocateStatPayload;
 import com.orijua.mitofus.feature.progression.ChooseClassPayload;
-import com.orijua.mitofus.feature.fusion.FuseClassesPayload;
-import com.orijua.mitofus.feature.fusion.FusionService;
+import com.orijua.mitofus.feature.progression.ChangeBranchPayload;
 import com.orijua.mitofus.feature.talent.BuyTalentPayload;
 import com.orijua.mitofus.feature.talent.TalentService;
 import com.orijua.mitofus.feature.progression.ChooseJobPayload;
@@ -105,9 +104,12 @@ final class ServerPayloadHandler {
         }
     }
 
-    static void fuseClasses(FuseClassesPayload payload, IPayloadContext context) {
-        if (context.player() instanceof ServerPlayer player && MitofusWorld.is(player.level())) {
-            FusionService.fuse(player, payload.fusion());
+    /** From the village chief's window: changes the branch of a slot (the player must stand near him; ClassService checks the rest). */
+    static void changeBranch(ChangeBranchPayload payload, IPayloadContext context) {
+        if (context.player() instanceof ServerPlayer player && MitofusWorld.is(player.level())
+                && player.level().getEntity(payload.npc()) instanceof VillageChiefNpc chief
+                && chief.distanceToSqr(player) <= QuestService.GIVER_REACH * QuestService.GIVER_REACH) {
+            ClassService.changeBranch(player, payload.slot(), payload.branch());
         }
     }
 

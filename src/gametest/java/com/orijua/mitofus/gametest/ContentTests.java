@@ -65,14 +65,34 @@ public final class ContentTests {
         helper.succeed();
     }
 
-    /** Every real fusion and synergy is consistent: hybrids are worth more than their parts, parents and jobs exist. */
+    /** Every real synergy is consistent: its class and job exist, once each. */
     @GameTest(template = TestSupport.EMPTY)
-    public static void realFusionsAndSynergiesAreConsistent(GameTestHelper helper) {
+    public static void realSynergiesAreConsistent(GameTestHelper helper) {
         var access = helper.getLevel().registryAccess();
-        List<String> problems = com.orijua.mitofus.feature.fusion.FusionScanner.problems(access);
-        helper.assertTrue(problems.isEmpty(), "fusion problems:\n" + String.join("\n", problems));
-        helper.assertTrue(Definitions.all(helper.getLevel(), ModDatapackRegistries.FUSION).size() == 6, "the six first fusions are loaded");
+        List<String> problems = com.orijua.mitofus.feature.synergy.SynergyScanner.problems(access);
+        helper.assertTrue(problems.isEmpty(), "synergy problems:\n" + String.join("\n", problems));
         helper.assertTrue(Definitions.all(helper.getLevel(), ModDatapackRegistries.SYNERGY).size() == 10, "five synergies and five job defaults are loaded");
+        helper.succeed();
+    }
+
+    /** The written combinations are consistent, are found in any order, and a set with no entry still gets a name. */
+    @GameTest(template = TestSupport.EMPTY)
+    public static void combinationsAreWrittenOrGenerated(GameTestHelper helper) {
+        var level = helper.getLevel();
+        List<String> problems = com.orijua.mitofus.feature.combination.CombinationScanner.problems(level.registryAccess());
+        helper.assertTrue(problems.isEmpty(), "combination problems:\n" + String.join("\n", problems));
+        helper.assertTrue(Definitions.all(level, ModDatapackRegistries.COMBINATION).size() == 6, "the six first combinations are loaded");
+        var sword = Mitofus.id("swordsman");
+        var mage = Mitofus.id("mage");
+        var archer = Mitofus.id("archer");
+        var necromancer = Mitofus.id("necromancer");
+        helper.assertTrue(com.orijua.mitofus.feature.combination.CombinationText.name(level, List.of(sword, mage))
+                .equals(com.orijua.mitofus.feature.combination.CombinationText.name(level, List.of(mage, sword))), "the slot order does not matter");
+        String written = com.orijua.mitofus.feature.combination.CombinationText.name(level, List.of(sword, mage)).getString();
+        helper.assertFalse(written.contains("-"), "a written name is not made of its branches: " + written);
+        String generated = com.orijua.mitofus.feature.combination.CombinationText.name(level, List.of(necromancer, archer)).getString();
+        helper.assertTrue(generated.contains("-"), "a set with no entry is named after its branches: " + generated);
+        helper.assertTrue(com.orijua.mitofus.feature.combination.CombinationText.name(level, List.of()).getString().isEmpty(), "no branch, no name");
         helper.succeed();
     }
 }

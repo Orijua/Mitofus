@@ -5,7 +5,11 @@ import com.orijua.mitofus.core.config.Balance;
 import com.orijua.mitofus.core.registry.Definitions;
 import com.orijua.mitofus.core.registry.ModAttachments;
 import com.orijua.mitofus.core.registry.ModDatapackRegistries;
+import com.orijua.mitofus.feature.economy.Money;
+import com.orijua.mitofus.feature.economy.Wallet;
 import com.orijua.mitofus.feature.skill.SkillService;
+import com.orijua.mitofus.feature.talent.TalentEffects;
+import com.orijua.mitofus.feature.talent.TalentService;
 import com.orijua.mitofus.feature.world.MitofusWorld;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -64,6 +68,58 @@ public final class ClassService {
         }
         place(player, slot, classId, definition.get(), false);
         return true;
+    }
+
+    /**
+     * Changes the branch of {@code slot} to {@code branch} (at the village chief). The branch that leaves sleeps with all its progress and a
+     * dormant one comes back as it was. The first change of each slot is free; after that it costs the new branch's {@code change_cost} in gold.
+     * @return false if the rules refuse it or the purse cannot pay it (the player is told why); nothing changes then.
+     */
+    public static boolean changeBranch(ServerPlayer player, int slot, ResourceLocation branch) {
+        if (!MitofusWorld.is(player.level())) {
+            return false;
+        }
+        Optional<PlayerClassDefinition> definition = Definitions.get(player.level(), ModDatapackRegistries.PLAYER_CLASS, branch);
+        if (definition.isEmpty() || !definition.get().selectable()) {
+            return false;
+        }
+        PlayerClasses before = classes(player);
+        ClassSlotRules.Swap check = ClassSlotRules.checkSwap(before, slot, branch, ProgressionService.get(player).level());
+        if (check != ClassSlotRules.Swap.OK) {
+            player.displayClientMessage(Component.translatable("message.mitofus.branch_" + check.name().toLowerCase()), false);
+            return false;
+        }
+        int gold = ClassSlotRules.swapCost(before, slot, definition.get().changeCost());
+        long cost = gold == 0 ? 0L : Money.iron(gold); // Money.iron never gives less than 1 iron
+        if (cost > 0 && !Wallet.pay(player, cost)) {
+            player.displayClientMessage(Component.translatable("message.mitofus.branch_poor"), false);
+            return false;
+        }
+        ClassSlot leaving = before.slot(slot).orElseThrow();
+        PlayerClasses after = ClassSlotRules.swap(before, slot, branch);
+        player.setData(ModAttachments.PLAYER_CLASSES, after);
+        syncBranchSkills(player, leaving, after);
+        ProgressionService.refreshEffects(player);
+        player.displayClientMessage(Component.translatable("message.mitofus.branch_changed", definition.get().name()), false);
+        player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0f, 0.8f);
+        NeoForge.EVENT_BUS.post(new ClassChangedEvent(player, slot, branch, false));
+        return true;
+    }
+
+    /** The skills a placed branch gives: its class skills plus those its bought talent nodes teach. */
+    private static java.util.Set<ResourceLocation> branchSkills(ServerPlayer player, ClassSlot placed) {
+        java.util.Set<ResourceLocation> skills = new java.util.HashSet<>();
+        Definitions.get(player.level(), ModDatapackRegistries.PLAYER_CLASS, placed.classId()).ifPresent(d -> skills.addAll(d.skills()));
+        skills.addAll(TalentEffects.grantedSkills(TalentService.all(player.level()), placed));
+        return skills;
+    }
+
+    /** After a swap: forgets what only the sleeping branch taught and learns what the held branches teach. */
+    private static void syncBranchSkills(ServerPlayer player, ClassSlot leaving, PlayerClasses after) {
+        java.util.Set<ResourceLocation> keep = new java.util.HashSet<>();
+        after.slots().forEach(held -> keep.addAll(branchSkills(player, held)));
+        branchSkills(player, leaving).stream().filter(skill -> !keep.contains(skill)).forEach(skill -> SkillService.forget(player, skill));
+        keep.forEach(skill -> SkillService.learn(player, skill));
     }
 
     /**
@@ -207,7 +263,9 @@ public final class ClassService {
     /** @param granted true when a quest (or a command) gives the class, false when the player picks it */
     private static void place(ServerPlayer player, int slot, ResourceLocation classId, PlayerClassDefinition definition, boolean granted) {
         String messageKey = granted ? "message.mitofus.class_granted" : "message.mitofus.class_chosen";
-        player.setData(ModAttachments.PLAYER_CLASSES, classes(player).withSlot(ClassSlot.fresh(slot, classId)));
+        PlayerClasses before = classes(player);
+        ClassSlot entering = before.dormant(classId).map(sleeping -> sleeping.inSlot(slot)).orElseGet(() -> ClassSlot.fresh(slot, classId));
+        player.setData(ModAttachments.PLAYER_CLASSES, before.withoutDormant(classId).withSlot(entering));
         definition.skills().forEach(skill -> SkillService.learn(player, skill));
         ProgressionService.refreshEffects(player);
 

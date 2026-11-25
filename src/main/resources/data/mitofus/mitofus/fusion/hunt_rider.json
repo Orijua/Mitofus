@@ -1,8 +1,0 @@
-{
-  "parents": [
-    "mitofus:archer",
-    "mitofus:spearman"
-  ],
-  "result_class": "mitofus:hunt_rider",
-  "cost": 10
-}

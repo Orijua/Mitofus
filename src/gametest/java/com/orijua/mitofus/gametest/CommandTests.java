@@ -254,7 +254,7 @@ public final class CommandTests {
                 == com.orijua.mitofus.feature.progression.ClassGrade.APPRENTICE, "grade lowered to 1");
         helper.assertTrue(execute(helper, player, "mitofus set grade mage 2") == 0, "a class that is not placed fails");
         var slot = com.orijua.mitofus.feature.progression.ClassService.classes(player).slot(0).orElseThrow();
-        helper.assertTrue(com.orijua.mitofus.feature.fusion.FusionRules.treeComplete(
+        helper.assertTrue(com.orijua.mitofus.feature.talent.TalentRules.treeComplete(
                 com.orijua.mitofus.feature.talent.TalentService.all(helper.getLevel()), slot), "its tree is complete");
         helper.succeed();
     }

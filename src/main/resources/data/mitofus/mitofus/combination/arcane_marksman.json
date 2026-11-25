@@ -1,0 +1,9 @@
+{
+  "branches": [
+    "mitofus:archer",
+    "mitofus:mage"
+  ],
+  "name": {
+    "translate": "combination.mitofus.arcane_marksman"
+  }
+}

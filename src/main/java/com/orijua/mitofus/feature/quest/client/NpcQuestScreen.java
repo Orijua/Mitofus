@@ -133,7 +133,11 @@ public final class NpcQuestScreen extends Screen implements MitofusStyledScreen 
         if (resident) {
             addRenderableWidget(Button.builder(Component.translatable("screen.mitofus.npc_residence"),
                             b -> PacketDistributor.sendToServer(new ResidencePayload(npc.getId())))
-                    .bounds(left + (WIDTH - 130) / 2, top + panelHeight - PADDING - 18, 130, 18)
+                    .bounds(left + PADDING, top + panelHeight - PADDING - 18, (WIDTH - 2 * PADDING - 4) / 2, 18)
+                    .build(MitofusButton::new));
+            addRenderableWidget(Button.builder(Component.translatable("screen.mitofus.branch_change"),
+                            b -> Minecraft.getInstance().setScreen(new com.orijua.mitofus.feature.progression.client.BranchChangeScreen(this, npc.getId())))
+                    .bounds(left + PADDING + (WIDTH - 2 * PADDING - 4) / 2 + 4, top + panelHeight - PADDING - 18, (WIDTH - 2 * PADDING - 4) / 2, 18)
                     .build(MitofusButton::new));
         }
         if (merchant) {

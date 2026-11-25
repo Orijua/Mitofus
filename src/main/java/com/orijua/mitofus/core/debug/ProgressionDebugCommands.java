@@ -265,7 +265,7 @@ public final class ProgressionDebugCommands {
         return setClassLevel(ctx, slot.get(), level);
     }
 
-    /** Raises the class level (enough points for the whole tree) and buys every node of its tree, for testing fusions. */
+    /** Raises the class level (enough points for the whole tree) and buys every node of its tree, for testing grades. */
     private static int buyAllTalents(CommandContext<CommandSourceStack> ctx, String name) throws CommandSyntaxException {
         ServerPlayer player = DebugSupport.mitofusPlayer(ctx);
         var slot = ClassService.slotOf(player, com.orijua.mitofus.Mitofus.id(name));

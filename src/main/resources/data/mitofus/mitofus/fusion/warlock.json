@@ -1,8 +1,0 @@
-{
-  "parents": [
-    "mitofus:mage",
-    "mitofus:necromancer"
-  ],
-  "result_class": "mitofus:warlock",
-  "cost": 10
-}
