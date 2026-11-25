@@ -24,7 +24,7 @@ import net.minecraft.network.chat.Component;
 public final class FormHudLayer implements LayeredDraw.Layer {
     private static final int WIDTH = 81;
     private static final int BAR_HEIGHT = 2;
-    private static final int ROW_HEIGHT = 13;
+    private static final int ROW_HEIGHT = 17;
 
     @Override
     public void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
@@ -52,6 +52,7 @@ public final class FormHudLayer implements LayeredDraw.Layer {
         gui.rightHeight += ROW_HEIGHT;
 
         UiStyle.text(graphics, minecraft.font, shown.label(minecraft.font), left, top - 8, color);
+        ElementIcons.draw(graphics, form.get().type(), left + WIDTH - ElementIcons.SIZE, top - ElementIcons.SIZE - 1);
         UiStyle.bar(graphics, left, top + 1, WIDTH, BAR_HEIGHT, fraction, color);
     }
 
@@ -80,7 +81,7 @@ public final class FormHudLayer implements LayeredDraw.Layer {
 
         Component label(net.minecraft.client.gui.Font font) {
             if (label == null) {
-                label = UiStyle.ellipsize(font, text, WIDTH);
+                label = UiStyle.ellipsize(font, text, WIDTH - ElementIcons.SIZE - 2);
             }
             return label;
         }
