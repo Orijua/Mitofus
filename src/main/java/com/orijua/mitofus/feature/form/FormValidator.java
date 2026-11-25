@@ -1,5 +1,6 @@
 package com.orijua.mitofus.feature.form;
 
+import com.orijua.mitofus.core.registry.Definitions;
 import com.orijua.mitofus.core.registry.ModDatapackRegistries;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
@@ -50,21 +51,14 @@ public final class FormValidator {
     }
 
     public static List<String> problems(RegistryAccess access) {
-        return validate(entries(access, ModDatapackRegistries.FORM), entries(access, ModDatapackRegistries.ELEMENT_TYPE),
-                entries(access, ModDatapackRegistries.PLAYER_CLASS).keySet(), entries(access, ModDatapackRegistries.SKILL).keySet(),
-                entries(access, ModDatapackRegistries.PASSIVE).keySet(), questRewards(access));
+        return validate(Definitions.entries(access, ModDatapackRegistries.FORM), Definitions.entries(access, ModDatapackRegistries.ELEMENT_TYPE),
+                Definitions.entries(access, ModDatapackRegistries.PLAYER_CLASS).keySet(), Definitions.entries(access, ModDatapackRegistries.SKILL).keySet(),
+                Definitions.entries(access, ModDatapackRegistries.PASSIVE).keySet(), questRewards(access));
     }
 
     private static Map<ResourceLocation, ResourceLocation> questRewards(RegistryAccess access) {
         Map<ResourceLocation, ResourceLocation> result = new HashMap<>();
-        entries(access, ModDatapackRegistries.QUEST).forEach((id, quest) -> quest.formReward().ifPresent(form -> result.put(id, form)));
-        return result;
-    }
-
-    private static <T> Map<ResourceLocation, T> entries(RegistryAccess access,
-                                                        net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>> key) {
-        Map<ResourceLocation, T> result = new HashMap<>();
-        access.registry(key).ifPresent(registry -> registry.entrySet().forEach(e -> result.put(e.getKey().location(), e.getValue())));
+        Definitions.entries(access, ModDatapackRegistries.QUEST).forEach((id, quest) -> quest.formReward().ifPresent(form -> result.put(id, form)));
         return result;
     }
 }

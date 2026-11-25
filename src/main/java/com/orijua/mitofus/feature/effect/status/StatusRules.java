@@ -31,6 +31,14 @@ public final class StatusRules {
         return status.immunityTicks() > 0 ? now + durationTicks + status.immunityTicks() : 0;
     }
 
+    /**
+     * Whether a status the target already has stays as it is instead of being replaced: the stronger one prevails, and at
+     * the same intensity the one that lasts longer, so a weak source never cancels a strong one.
+     */
+    public static boolean keepsExisting(int oldAmplifier, int oldTicksLeft, int newAmplifier, int newTicks) {
+        return oldAmplifier > newAmplifier || (oldAmplifier == newAmplifier && oldTicksLeft > newTicks);
+    }
+
     public static boolean isImmune(long now, long immuneUntil) {
         return now < immuneUntil;
     }
