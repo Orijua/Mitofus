@@ -18,7 +18,7 @@ import java.util.List;
  *       levels {@value FormRules#SKILL_LEVELS_TEXT}. The attack and the ultimate are skills; the passive is a passive
  *       (data/&lt;namespace&gt;/mitofus/passive).</li>
  *   <li>{@code max_type_bonus}: the damage bonus of its type at form level 100 (default 20%), growing in a straight line.</li>
- *   <li>{@code inheritable}: a fusion of this class gets it too, when the fused class reaches {@code unlock_level}.</li>
+ *   <li>{@code inheritable}: a fusion of this class gets it too, when the fused class reaches {@code unlock_level} (default true; in a fusion, forms of the same type upgrade each other).</li>
  *   <li>{@code switch_delay_seconds}: seconds without dealing or taking damage before this form can be put on or taken off (default 5).</li>
  *   <li>{@code curve}: how fast the form levels up, see {@link Curve}.</li>
  * </ul>
@@ -72,7 +72,7 @@ public record FormDefinition(Component name, Component description, ResourceLoca
             ResourceLocation.CODEC.fieldOf("type").forGetter(FormDefinition::type),
             ResourceLocation.CODEC.listOf().optionalFieldOf("skills", List.of()).forGetter(FormDefinition::skills),
             Codec.doubleRange(0.0, 5.0).optionalFieldOf("max_type_bonus", DEFAULT_MAX_TYPE_BONUS).forGetter(FormDefinition::maxTypeBonus),
-            Codec.BOOL.optionalFieldOf("inheritable", false).forGetter(FormDefinition::inheritable),
+            Codec.BOOL.optionalFieldOf("inheritable", true).forGetter(FormDefinition::inheritable),
             Codec.intRange(0, 600).optionalFieldOf("switch_delay_seconds", DEFAULT_SWITCH_DELAY_SECONDS).forGetter(FormDefinition::switchDelaySeconds),
             Curve.CODEC.optionalFieldOf("curve", Curve.DEFAULT).forGetter(FormDefinition::curve)
     ).apply(instance, FormDefinition::new)).validate(definition -> definition.skills().size() > FormRules.SKILL_LEVELS.size()

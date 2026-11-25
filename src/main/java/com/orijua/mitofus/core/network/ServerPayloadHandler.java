@@ -25,6 +25,7 @@ import com.orijua.mitofus.feature.eibar.VelascoContest;
 import com.orijua.mitofus.feature.eibar.StartContestPayload;
 import com.orijua.mitofus.feature.progression.AllocateStatPayload;
 import com.orijua.mitofus.feature.progression.ChooseClassPayload;
+import com.orijua.mitofus.feature.fusion.AbsorbClassPayload;
 import com.orijua.mitofus.feature.fusion.FuseClassesPayload;
 import com.orijua.mitofus.feature.fusion.FusionService;
 import com.orijua.mitofus.feature.talent.BuyTalentPayload;
@@ -108,6 +109,12 @@ final class ServerPayloadHandler {
     static void fuseClasses(FuseClassesPayload payload, IPayloadContext context) {
         if (context.player() instanceof ServerPlayer player && MitofusWorld.is(player.level())) {
             FusionService.fuse(player, payload.fusion());
+        }
+    }
+
+    static void absorbClass(AbsorbClassPayload payload, IPayloadContext context) {
+        if (context.player() instanceof ServerPlayer player && MitofusWorld.is(player.level())) {
+            FusionService.absorb(player, payload.hybridSlot(), payload.classId());
         }
     }
 

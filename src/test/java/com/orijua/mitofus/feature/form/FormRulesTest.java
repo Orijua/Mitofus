@@ -38,6 +38,11 @@ class FormRulesTest {
                 List.of(id("a"), id("b"), id("c")), 0.20, inheritable, 5, FormDefinition.Curve.DEFAULT);
     }
 
+    private static FormDefinition typed(ResourceLocation owner, int level, ResourceLocation type) {
+        return new FormDefinition(Component.empty(), Component.empty(), owner, level, FormSource.LEVEL, type,
+                List.of(id("a"), id("b"), id("c")), 0.20, true, 5, FormDefinition.Curve.DEFAULT);
+    }
+
     private static ClassSlot slot(ResourceLocation classId, int level, ResourceLocation... origin) {
         return new ClassSlot(0, classId, level, 0, ClassGrade.APPRENTICE, List.of(), List.of(origin), 0);
     }
@@ -128,8 +133,9 @@ class FormRulesTest {
 
     @Test
     void aFusionInheritsTheParentFormsOnlyWhenItReachesTheLevel() {
-        var f50 = new Definitions.Entry<>(id("sword_50"), form(SWORD, 50, FormSource.LEVEL, true));
-        var f100 = new Definitions.Entry<>(id("sword_100"), form(SWORD, 100, FormSource.GRADE_QUEST, true));
+        var f50 = new Definitions.Entry<>(id("sword_50"), typed(SWORD, 50, FIRE));
+        var f100 = new Definitions.Entry<>(id("sword_100"), new FormDefinition(Component.empty(), Component.empty(), SWORD, 100,
+                FormSource.GRADE_QUEST, WATER, List.of(id("a")), 0.20, true, 5, FormDefinition.Curve.DEFAULT));
         var f150 = new Definitions.Entry<>(id("sword_150"), form(SWORD, 150, FormSource.LEVEL, false));
         var all = List.of(f50, f100, f150);
         assertTrue(FormCatalogue.owned(all, List.of(slot(SPELLSWORD, 49, SWORD, MAGE)), PlayerForms.EMPTY).isEmpty());
@@ -140,6 +146,29 @@ class FormRulesTest {
         assertEquals(2, at100.size(), "inherited without redoing the grade quest");
         assertEquals(2, FormCatalogue.owned(all, List.of(slot(SPELLSWORD, 200, SWORD, MAGE)), PlayerForms.EMPTY).size(),
                 "forms that are not inheritable stay with the parent");
+    }
+
+    @Test
+    void inFusionTheFormsOfOneTypeUpgradeEachOtherAndKeepTheUses() {
+        var f50 = new Definitions.Entry<>(id("sword_50"), typed(SWORD, 50, FIRE));
+        var m100 = new Definitions.Entry<>(id("mage_100"), typed(MAGE, 100, FIRE));
+        var all = List.of(f50, m100);
+        var forms = PlayerForms.EMPTY.withXp(id("sword_50"), 5000);
+        var at70 = FormCatalogue.owned(all, List.of(slot(SPELLSWORD, 70, SWORD, MAGE)), forms);
+        assertEquals(List.of(id("sword_50")), at70.stream().map(FormCatalogue.Owned::id).toList());
+        var at100 = FormCatalogue.owned(all, List.of(slot(SPELLSWORD, 100, SWORD, MAGE)), forms);
+        assertEquals(List.of(id("mage_100")), at100.stream().map(FormCatalogue.Owned::id).toList(), "one fire form: the stronger one");
+        assertEquals(5000, at100.get(0).xp(), "it carries on from the old form's uses");
+        assertEquals(FormRules.level(FormDefinition.Curve.DEFAULT, 5000), at100.get(0).level());
+        assertEquals(id("mage_100"), FormCatalogue.ownedForm(id("sword_50"), f50.value(), all,
+                List.of(slot(SPELLSWORD, 100, SWORD, MAGE)), forms).orElseThrow().id(), "the old id resolves to the upgraded form");
+    }
+
+    @Test
+    void aNonHybridClassKeepsEveryFormOfAType() {
+        var f50 = new Definitions.Entry<>(id("sword_50"), typed(SWORD, 50, FIRE));
+        var f300 = new Definitions.Entry<>(id("sword_300"), typed(SWORD, 300, FIRE));
+        assertEquals(2, FormCatalogue.owned(List.of(f50, f300), List.of(slot(SWORD, 300)), PlayerForms.EMPTY).size());
     }
 
     @Test

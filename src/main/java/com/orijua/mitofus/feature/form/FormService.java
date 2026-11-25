@@ -57,8 +57,16 @@ public final class FormService {
      */
     public static Optional<FormCatalogue.Owned> equipped(Player player) {
         Optional<FormCatalogue.Owned> found = ownedEquipped(player);
-        if (found.isEmpty() && forms(player).equipped().isPresent() && player instanceof ServerPlayer server) {
-            setEquipped(server, Optional.empty());
+        if (player instanceof ServerPlayer server) {
+            Optional<ResourceLocation> stored = forms(player).equipped();
+            if (found.isEmpty() && stored.isPresent()) {
+                setEquipped(server, Optional.empty());
+            } else if (found.isPresent() && stored.isPresent() && !found.get().id().equals(stored.get())) {
+                // a fusion's form of this type was upgraded: wear the new one and carry the uses over
+                FormCatalogue.Owned head = found.get();
+                server.setData(ModAttachments.PLAYER_FORMS, forms(server).withXp(head.id(), head.xp()).withEquipped(Optional.of(head.id())));
+                sync(server);
+            }
         }
         return found;
     }
@@ -170,7 +178,7 @@ public final class FormService {
         FormCatalogue.Owned owned = equipped.get();
         PlayerForms before = forms(player);
         int gain = (int) Math.round(FormRules.useValue(owned.form().curve(), owned.level()));
-        int xp = before.xpOf(owned.id()) + gain;
+        int xp = owned.xp() + gain;
         player.setData(ModAttachments.PLAYER_FORMS, before.withXp(owned.id(), xp));
         boolean levelled = FormRules.level(owned.form().curve(), xp) > owned.level();
         if (levelled) {

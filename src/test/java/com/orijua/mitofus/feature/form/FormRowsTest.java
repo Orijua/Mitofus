@@ -23,7 +23,7 @@ class FormRowsTest {
     }
 
     private static Definitions.Entry<FormDefinition> form(String name, ResourceLocation owner, int level, FormSource source, boolean inheritable) {
-        return new Definitions.Entry<>(id(name), new FormDefinition(Component.empty(), Component.empty(), owner, level, source, id("fire"),
+        return new Definitions.Entry<>(id(name), new FormDefinition(Component.empty(), Component.empty(), owner, level, source, id("type" + level),
                 List.of(id("a"), id("b"), id("c")), 0.20, inheritable, 5, FormDefinition.Curve.DEFAULT));
     }
 

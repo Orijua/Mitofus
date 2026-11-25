@@ -98,4 +98,74 @@ public final class FusionService {
         player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0f, 0.6f);
         return true;
     }
+
+    /** What an absorption costs: the cheapest fusion the absorbed class takes part in. Empty when it takes part in none. */
+    public static Optional<Long> absorbCost(Player player, ResourceLocation classId) {
+        return Definitions.all(player.level(), ModDatapackRegistries.FUSION).stream()
+                .filter(entry -> entry.value().parents().contains(classId))
+                .map(entry -> costInIron(entry.value())).min(Long::compare);
+    }
+
+    private static FusionRules.Parent parentOf(Player player, Map<ResourceLocation, TalentDefinition> talents, Optional<ClassSlot> slot) {
+        boolean legendary = slot.flatMap(s -> Definitions.get(player.level(), ModDatapackRegistries.PLAYER_CLASS, s.classId()))
+                .map(PlayerClassDefinition::legendary).orElse(false);
+        return new FusionRules.Parent(slot, legendary, slot.map(s -> FusionRules.treeComplete(talents, s)).orElse(false));
+    }
+
+    private static Optional<ClassSlot> slotOf(PlayerClasses classes, int slot) {
+        return classes.slots().stream().filter(s -> s.slot() == slot).findFirst();
+    }
+
+    private static Optional<ClassSlot> classSlot(PlayerClasses classes, ResourceLocation classId) {
+        return classes.slots().stream().filter(s -> s.classId().equals(classId) && !s.isHybrid()).findFirst();
+    }
+
+    /** What the player still needs for the hybrid in {@code hybridSlot} to absorb {@code classId}; empty when it can be done now. */
+    public static Set<FusionRules.Missing> missingAbsorb(Player player, int hybridSlot, ResourceLocation classId) {
+        PlayerClasses classes = player.getData(ModAttachments.PLAYER_CLASSES);
+        Map<ResourceLocation, TalentDefinition> talents = TalentService.all(player.level());
+        Optional<Long> cost = absorbCost(player, classId);
+        Set<FusionRules.Missing> missing = EnumSet.noneOf(FusionRules.Missing.class);
+        missing.addAll(FusionRules.missingAbsorb(parentOf(player, talents, slotOf(classes, hybridSlot)),
+                parentOf(player, talents, classSlot(classes, classId)), cost.isPresent() && Wallet.canAfford(player, cost.get())));
+        if (cost.isEmpty()) {
+            missing.add(FusionRules.Missing.CLASS);
+        }
+        return missing;
+    }
+
+    /**
+     * A hybrid absorbs a normal class it was not made of, so no class is ever left without a fusion. The hybrid keeps its identity and
+     * gains the class's tree and forms. @return true if it happened; otherwise nothing changed and the player is told what is missing.
+     */
+    public static boolean absorb(ServerPlayer player, int hybridSlot, ResourceLocation classId) {
+        if (!MitofusWorld.is(player.level())) {
+            return false;
+        }
+        Set<FusionRules.Missing> missing = missingAbsorb(player, hybridSlot, classId);
+        if (!missing.isEmpty()) {
+            player.displayClientMessage(Component.translatable("message.mitofus.fusion_missing",
+                    Component.translatable("screen.mitofus.fusion_missing." + missing.iterator().next().name().toLowerCase())), false);
+            return false;
+        }
+        PlayerClasses classes = ClassService.classes(player);
+        ClassSlot hybrid = slotOf(classes, hybridSlot).orElseThrow();
+        ClassSlot lone = classSlot(classes, classId).orElseThrow();
+        if (hybrid.origin().contains(classId) || !Wallet.pay(player, absorbCost(player, classId).orElseThrow())) {
+            return false;
+        }
+        Map<ResourceLocation, TalentDefinition> talents = TalentService.all(player.level());
+        ClassSlot merged = FusionRules.absorb(hybrid, lone, hybrid.paidPoints() + TalentRules.pointsSpent(talents, lone));
+        List<ClassSlot> slots = new ArrayList<>(classes.slots());
+        slots.removeIf(s -> s.slot() == hybrid.slot() || s.slot() == lone.slot());
+        slots.add(merged);
+        slots.sort(java.util.Comparator.comparingInt(ClassSlot::slot));
+        player.setData(ModAttachments.PLAYER_CLASSES, new PlayerClasses(List.copyOf(slots), classes.job()));
+        ProgressionService.refreshEffects(player);
+        com.orijua.mitofus.feature.form.FormService.sync(player);
+        player.displayClientMessage(Component.translatable("message.mitofus.absorb_done",
+                Definitions.get(player.level(), ModDatapackRegistries.PLAYER_CLASS, classId).map(PlayerClassDefinition::name).orElse(Component.empty())), false);
+        player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0f, 0.6f);
+        return true;
+    }
 }

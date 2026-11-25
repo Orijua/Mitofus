@@ -40,7 +40,7 @@ public final class FormRows {
     }
 
     private static Row row(FormCatalogue.Visible visible, PlayerForms forms) {
-        int xp = forms.xpOf(visible.id());
+        int xp = visible.xp();
         if (!visible.unlocked()) {
             Lock lock = visible.blockedBy().isPresent() ? Lock.PREVIOUS_FORM
                     : visible.classLevel() < visible.form().unlockLevel() ? Lock.CLASS_LEVEL : Lock.GRADE_QUEST;

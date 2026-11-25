@@ -9,6 +9,7 @@ import com.orijua.mitofus.core.client.UiStyle;
 import com.orijua.mitofus.core.registry.Definitions;
 import com.orijua.mitofus.core.registry.ModDatapackRegistries;
 import com.orijua.mitofus.feature.economy.MoneyText;
+import com.orijua.mitofus.feature.fusion.AbsorbClassPayload;
 import com.orijua.mitofus.feature.fusion.FuseClassesPayload;
 import com.orijua.mitofus.feature.fusion.FusionDefinition;
 import com.orijua.mitofus.feature.fusion.FusionRules;
@@ -34,7 +35,12 @@ public class FusionScreen extends Screen implements MitofusStyledScreen {
     private static final int ROW = 34;
 
     private final Screen parent;
-    private List<Definitions.Entry<FusionDefinition>> fusions = List.of();
+    /** One line of the list: a fusion of two classes, or a hybrid absorbing a lone class. */
+    private record Item(Component name, java.util.function.Supplier<Set<FusionRules.Missing>> missing, long cost, Component title,
+                        Component message, Runnable send) {
+    }
+
+    private List<Item> fusions = List.of();
     /** The class the list is filtered by (only the fusions it takes part in are shown), or null for every fusion. */
     private net.minecraft.resources.ResourceLocation selected;
     private int left;
@@ -58,8 +64,39 @@ public class FusionScreen extends Screen implements MitofusStyledScreen {
         if (selected != null && !placed.contains(selected)) {
             selected = null;
         }
-        fusions = Definitions.all(level, ModDatapackRegistries.FUSION).stream()
-                .filter(entry -> selected == null || entry.value().parents().contains(selected)).toList();
+        List<Item> items = new java.util.ArrayList<>();
+        for (Definitions.Entry<FusionDefinition> entry : Definitions.all(level, ModDatapackRegistries.FUSION)) {
+            FusionDefinition fusion = entry.value();
+            if (selected != null && !fusion.parents().contains(selected)) {
+                continue;
+            }
+            Component name = Component.translatable("screen.mitofus.hybrid_name", FusionText.className(level, fusion.resultClass()),
+                    FusionText.className(level, fusion.parents().get(0)), FusionText.className(level, fusion.parents().get(1)));
+            Component message = Component.translatable("screen.mitofus.fusion_confirm", FusionText.className(level, fusion.parents().get(0)),
+                    FusionText.className(level, fusion.parents().get(1)), FusionText.className(level, fusion.resultClass()),
+                    MoneyText.iron(FusionService.costInIron(fusion)));
+            items.add(new Item(name, () -> FusionService.missing(minecraft.player, fusion), FusionService.costInIron(fusion),
+                    Component.translatable("screen.mitofus.fusion_confirm_title"), message,
+                    () -> PacketDistributor.sendToServer(new FuseClassesPayload(entry.id()))));
+        }
+        var classes = minecraft.player.getData(com.orijua.mitofus.core.registry.ModAttachments.PLAYER_CLASSES);
+        for (var hybrid : classes.slots().stream().filter(com.orijua.mitofus.feature.progression.ClassSlot::isHybrid).toList()) {
+            for (var lone : placed) {
+                var cost = FusionService.absorbCost(minecraft.player, lone);
+                if (cost.isEmpty() || (selected != null && !selected.equals(lone)) || hybrid.origin().contains(lone)) {
+                    continue;
+                }
+                Component name = Component.translatable("screen.mitofus.absorb_name", FusionText.className(level, hybrid.classId()),
+                        FusionText.className(level, lone));
+                Component message = Component.translatable("screen.mitofus.absorb_confirm", FusionText.className(level, lone),
+                        FusionText.className(level, hybrid.classId()), MoneyText.iron(cost.get()));
+                int slot = hybrid.slot();
+                items.add(new Item(name, () -> FusionService.missingAbsorb(minecraft.player, slot, lone), cost.get(),
+                        Component.translatable("screen.mitofus.absorb_title"), message,
+                        () -> PacketDistributor.sendToServer(new AbsorbClassPayload(slot, lone))));
+            }
+        }
+        fusions = items;
         buttons.clear();
         int fitting = PanelFit.rows(height - 2 * PanelFit.MARGIN - CHROME, ROW);
         int shown = Math.max(1, Math.min(fusions.size(), fitting));
@@ -85,12 +122,9 @@ public class FusionScreen extends Screen implements MitofusStyledScreen {
         }
         int y = filterY + 22;
         for (int i = scroll.first(); i < scroll.end(fusions.size()); i++) {
-            Definitions.Entry<FusionDefinition> entry = fusions.get(i);
-            FusionDefinition fusion = entry.value();
-            Component name = Component.translatable("screen.mitofus.hybrid_name", FusionText.className(level, fusion.resultClass()),
-                    FusionText.className(level, fusion.parents().get(0)), FusionText.className(level, fusion.parents().get(1)));
-            boolean available = FusionService.missing(minecraft.player, fusion).isEmpty();
-            Button button = Button.builder(name, b -> confirm(entry.id(), fusion))
+            Item item = fusions.get(i);
+            boolean available = item.missing().get().isEmpty();
+            Button button = Button.builder(item.name(), b -> confirm(item))
                     .bounds(left + PADDING, y, WIDTH - 2 * PADDING, 18).build(MitofusButton::new);
             button.active = available;
             addRenderableWidget(button);
@@ -101,13 +135,8 @@ public class FusionScreen extends Screen implements MitofusStyledScreen {
                 .bounds(left + WIDTH / 2 - 40, top + panelHeight - PADDING - 18, 80, 18).build(MitofusButton::new));
     }
 
-    private void confirm(net.minecraft.resources.ResourceLocation id, FusionDefinition fusion) {
-        var level = minecraft.level;
-        Component message = Component.translatable("screen.mitofus.fusion_confirm", FusionText.className(level, fusion.parents().get(0)),
-                FusionText.className(level, fusion.parents().get(1)), FusionText.className(level, fusion.resultClass()),
-                MoneyText.iron(FusionService.costInIron(fusion)));
-        Minecraft.getInstance().setScreen(new MitofusConfirmScreen(this, Component.translatable("screen.mitofus.fusion_confirm_title"), message,
-                () -> PacketDistributor.sendToServer(new FuseClassesPayload(id))));
+    private void confirm(Item item) {
+        Minecraft.getInstance().setScreen(new MitofusConfirmScreen(this, item.title(), item.message(), item.send()));
     }
 
     @Override
@@ -126,10 +155,10 @@ public class FusionScreen extends Screen implements MitofusStyledScreen {
         }
         int y = top + PADDING + UiStyle.LINE + 4 + 22 + 20;
         for (int i = scroll.first(); i < scroll.end(fusions.size()); i++) {
-            Definitions.Entry<FusionDefinition> entry = fusions.get(i);
-            Set<FusionRules.Missing> missing = FusionService.missing(minecraft.player, entry.value());
+            Item item = fusions.get(i);
+            Set<FusionRules.Missing> missing = item.missing().get();
             Component status = missing.isEmpty()
-                    ? Component.translatable("screen.mitofus.fusion_ready").append(" · ").append(Component.translatable("screen.mitofus.fusion_cost", MoneyText.iron(FusionService.costInIron(entry.value()))))
+                    ? Component.translatable("screen.mitofus.fusion_ready").append(" · ").append(Component.translatable("screen.mitofus.fusion_cost", MoneyText.iron(item.cost())))
                     : Component.translatable("screen.mitofus.fusion_missing." + missing.iterator().next().name().toLowerCase());
             graphics.drawString(font, font.plainSubstrByWidth(status.getString(), WIDTH - 2 * PADDING), left + PADDING, y, missing.isEmpty() ? UiStyle.GOOD : UiStyle.MUTED);
             y += ROW;
@@ -149,7 +178,7 @@ public class FusionScreen extends Screen implements MitofusStyledScreen {
     @Override
     public void tick() {
         for (int i = 0; i < buttons.size(); i++) {
-            buttons.get(i).active = FusionService.missing(minecraft.player, fusions.get(scroll.first() + i).value()).isEmpty();
+            buttons.get(i).active = fusions.get(scroll.first() + i).missing().get().isEmpty();
         }
     }
 
