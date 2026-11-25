@@ -95,8 +95,8 @@ class FormRowsTest {
 
     @Test
     void aFormHeldBackByAMissingQuestFormSaysWhichOne() {
-        var q100 = new Definitions.Entry<>(id("q_100"), form("q_100", SWORD, 100, FormSource.GRADE_QUEST, false));
-        var l150 = new Definitions.Entry<>(id("l_150"), form("l_150", SWORD, 150, FormSource.LEVEL, false));
+        var q100 = form("q_100", SWORD, 100, FormSource.GRADE_QUEST, false);
+        var l150 = form("l_150", SWORD, 150, FormSource.LEVEL, false);
         var rows = FormRows.rows(List.of(q100, l150), List.of(slot(SWORD, 300)), PlayerForms.EMPTY);
         var held = rows.stream().filter(r -> r.id().equals(id("l_150"))).findFirst().orElseThrow();
         assertEquals(FormRows.State.LOCKED, held.state());
