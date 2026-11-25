@@ -167,7 +167,8 @@ public final class SkillService {
             player.getMainHandItem().hurtAndBreak(wear, player, EquipmentSlot.MAINHAND);
         }
         player.setData(ModAttachments.MANA, mana - manaCost);
-        player.setData(ModAttachments.PLAYER_SKILLS, skills.withCooldown(id, now + tuning.cooldownTicks(skill.cooldownTicks())));
+        player.setData(ModAttachments.PLAYER_SKILLS, skills.withCooldown(id, now + Math.round(tuning.cooldownTicks(skill.cooldownTicks())
+                * (1 - Math.min(0.9, ActiveTraits.total(player, com.orijua.mitofus.feature.effect.BonusType.COOLDOWN_REDUCTION))))));
         player.displayClientMessage(skill.name(), true);
         NeoForge.EVENT_BUS.post(new SkillUsedEvent(player, id));
         return Result.SUCCESS;

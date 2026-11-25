@@ -26,15 +26,18 @@ import java.util.Set;
  * passive definitions are synced). The real world has none: Mitofus-only, like every class bonus.
  */
 public final class ActiveTraits {
-    private record AttributePassive(BonusType type, Holder<Attribute> attribute) {
+    private record AttributePassive(BonusType type, Holder<Attribute> attribute, AttributeModifier.Operation operation) {
         ResourceLocation id() {
             return Mitofus.id("passive_" + type.getSerializedName());
         }
     }
 
     private static final List<AttributePassive> ATTRIBUTES = List.of(
-            new AttributePassive(BonusType.ARMOR, Attributes.ARMOR),
-            new AttributePassive(BonusType.KNOCKBACK_RESISTANCE, Attributes.KNOCKBACK_RESISTANCE));
+            new AttributePassive(BonusType.ARMOR, Attributes.ARMOR, AttributeModifier.Operation.ADD_VALUE),
+            new AttributePassive(BonusType.KNOCKBACK_RESISTANCE, Attributes.KNOCKBACK_RESISTANCE, AttributeModifier.Operation.ADD_VALUE),
+            new AttributePassive(BonusType.MAX_HEALTH, Attributes.MAX_HEALTH, AttributeModifier.Operation.ADD_VALUE),
+            new AttributePassive(BonusType.ATTACK_SPEED, Attributes.ATTACK_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_BASE),
+            new AttributePassive(BonusType.MOVE_SPEED, Attributes.MOVEMENT_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
 
     /** The index of the third class slot, where a class's {@code third_slot_passive} works. */
     private static final int THIRD_SLOT_INDEX = 2;
@@ -90,15 +93,25 @@ public final class ActiveTraits {
         return result;
     }
 
-    /** The unconditional total of {@code type}, e.g. the extra maximum mana. */
+    /** The unconditional total of {@code type}, e.g. the extra maximum mana, under the global cap of its kind. */
     public static double total(Player player, BonusType type) {
-        return TraitRules.sum(bonuses(player), type, ProgressionService.get(player).level());
+        return BonusLimits.capped(type, TraitRules.sum(bonuses(player), type, ProgressionService.get(player).level()));
+    }
+
+    /** The "apply a status on a hit" bonuses that count right now (the weapon in hand and the time of day are checked). */
+    public static List<Bonus> onHitStatuses(Player player) {
+        return bonuses(player).stream()
+                .filter(bonus -> bonus.type() == BonusType.APPLY_STATUS && bonus.status().isPresent()
+                        && bonus.withItem().map(player.getMainHandItem()::is).orElse(true)
+                        && (!bonus.atNight() || player.level().isNight()))
+                .toList();
     }
 
     /** Fraction of extra damage the player deals with {@code weapon} in hand right now (0.1 = +10 %). */
     public static double damageBonus(Player player) {
-        return com.orijua.mitofus.feature.form.FormService.typeBonus(player) + TraitRules.damage(bonuses(player), ProgressionService.get(player).level(),
-                bonus -> bonus.withItem().map(player.getMainHandItem()::is).orElse(true), player.level().isNight());
+        return BonusLimits.capped(BonusType.DAMAGE, com.orijua.mitofus.feature.form.FormService.typeBonus(player)
+                + TraitRules.damage(bonuses(player), ProgressionService.get(player).level(),
+                bonus -> bonus.withItem().map(player.getMainHandItem()::is).orElse(true), player.level().isNight()));
     }
 
     /** Idempotent: puts the attribute passives on the player, or takes them off when there are none. */
@@ -110,11 +123,11 @@ public final class ActiveTraits {
             if (instance == null) {
                 continue;
             }
-            double value = TraitRules.sum(bonuses, passive.type(), level);
+            double value = BonusLimits.capped(passive.type(), TraitRules.sum(bonuses, passive.type(), level));
             if (value <= 0) {
                 instance.removeModifier(passive.id());
             } else {
-                instance.addOrReplacePermanentModifier(new AttributeModifier(passive.id(), value, AttributeModifier.Operation.ADD_VALUE));
+                instance.addOrReplacePermanentModifier(new AttributeModifier(passive.id(), value, passive.operation()));
             }
         }
     }

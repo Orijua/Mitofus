@@ -1,0 +1,11 @@
+{
+  "name": {
+    "translate": "status.mitofus.bleed"
+  },
+  "effect": "mitofus:bleeding",
+  "duration_ticks": 120,
+  "max_duration_ticks": 600,
+  "intensity": 1,
+  "max_intensity": 3,
+  "max_chance": 0.75
+}

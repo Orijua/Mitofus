@@ -1,0 +1,12 @@
+{
+  "name": {
+    "translate": "status.mitofus.shock"
+  },
+  "effect": "mitofus:stunned",
+  "duration_ticks": 20,
+  "max_duration_ticks": 60,
+  "intensity": 1,
+  "max_intensity": 1,
+  "max_chance": 0.25,
+  "immunity_ticks": 100
+}

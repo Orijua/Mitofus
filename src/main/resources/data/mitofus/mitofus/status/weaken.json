@@ -1,0 +1,11 @@
+{
+  "name": {
+    "translate": "status.mitofus.weaken"
+  },
+  "effect": "minecraft:weakness",
+  "duration_ticks": 100,
+  "max_duration_ticks": 300,
+  "intensity": 1,
+  "max_intensity": 2,
+  "max_chance": 0.75
+}

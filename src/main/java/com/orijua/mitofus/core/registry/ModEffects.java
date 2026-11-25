@@ -25,6 +25,12 @@ public final class ModEffects {
     /** Stun: a blow worth 40% of the victim's life. Given by {@code StunService}. */
     public static final DeferredHolder<MobEffect, StunnedEffect> STUNNED = EFFECTS.register("stunned", StunnedEffect::new);
 
+    /** Burning and cursed: given by the statuses of the same name (see effect.status). */
+    public static final DeferredHolder<MobEffect, com.orijua.mitofus.feature.effect.status.BurningEffect> BURNING =
+            EFFECTS.register("burning", com.orijua.mitofus.feature.effect.status.BurningEffect::new);
+    public static final DeferredHolder<MobEffect, com.orijua.mitofus.feature.effect.status.CursedEffect> CURSED =
+            EFFECTS.register("cursed", com.orijua.mitofus.feature.effect.status.CursedEffect::new);
+
     /** data/mitofus/damage_type/bleeding.json; tagged minecraft:bypasses_armor. */
     public static final ResourceKey<DamageType> BLEEDING_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, Mitofus.id("bleeding"));
 

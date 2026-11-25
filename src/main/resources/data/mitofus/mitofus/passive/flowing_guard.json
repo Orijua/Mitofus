@@ -8,8 +8,8 @@
   "icon": "minecraft:nautilus_shell",
   "bonuses": [
     {
-      "type": "armor",
-      "amount": 3.0
+      "type": "health_regen",
+      "amount": 0.5
     },
     {
       "type": "mana_regen",

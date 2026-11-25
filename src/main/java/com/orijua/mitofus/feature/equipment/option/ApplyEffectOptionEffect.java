@@ -35,7 +35,7 @@ public record ApplyEffectOptionEffect(Holder<MobEffect> effect, int duration, in
     @Override
     public void onHit(ServerPlayer attacker, LivingEntity target, float damageDealt, float value) {
         if (target.isAlive() && attacker.getRandom().nextFloat() < value) {
-            target.addEffect(new MobEffectInstance(effect, duration, amplifier), attacker);
+            com.orijua.mitofus.feature.effect.status.StatusService.refresh(target, new MobEffectInstance(effect, duration, amplifier), attacker);
         }
     }
 }
