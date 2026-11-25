@@ -8,6 +8,8 @@ import java.util.List;
 /** Pure rules of forms: their level by use, their skills and their type bonus. Numbers come from the form's JSON. */
 public final class FormRules {
     public static final int MAX_LEVEL = 100;
+    /** A step is never larger than this, so a steep curve cannot overflow the uses counters. */
+    public static final int MAX_STEP = 10_000_000;
     /** The form levels that give the attack, the passive and the ultimate. */
     public static final List<Integer> SKILL_LEVELS = List.of(1, 30, 60);
     public static final String SKILL_LEVELS_TEXT = "1, 30 and 60";
@@ -17,22 +19,23 @@ public final class FormRules {
 
     /** Uses needed to go from {@code level} to the next one. */
     public static int usesToAdvance(FormDefinition.Curve curve, int level) {
-        return (int) Math.max(1, Math.round(curve.firstStep() * Math.pow(curve.growth(), Math.max(1, level) - 1)));
+        double uses = Math.round(curve.firstStep() * Math.pow(curve.growth(), Math.max(1, level) - 1));
+        return (int) Math.min(MAX_STEP, Math.max(1, uses));
     }
 
     /** Total uses at which a form reaches {@code level} (level 1 needs none). */
     public static int usesToReach(FormDefinition.Curve curve, int level) {
-        int total = 0;
+        long total = 0;
         for (int l = 1; l < Math.min(level, MAX_LEVEL); l++) {
             total += usesToAdvance(curve, l);
         }
-        return total;
+        return (int) Math.min(Integer.MAX_VALUE, total);
     }
 
     /** The level (1 to {@link #MAX_LEVEL}) of a form with {@code xp} uses. */
     public static int level(FormDefinition.Curve curve, int xp) {
         int level = 1;
-        int remaining = Math.max(0, xp);
+        long remaining = Math.max(0, xp);
         while (level < MAX_LEVEL && remaining >= usesToAdvance(curve, level)) {
             remaining -= usesToAdvance(curve, level);
             level++;

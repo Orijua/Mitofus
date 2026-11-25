@@ -171,4 +171,33 @@ class FormRulesTest {
         assertTrue(problems.stream().anyMatch(p -> p.contains("unknown class mitofus:mage")), problems.toString());
         assertEquals(1, problems.stream().filter(p -> p.contains("already has a form at level 50")).count(), problems.toString());
     }
+
+    @Test
+    void aSteepCurveNeverOverflowsTheUseCounters() {
+        var steep = new FormDefinition.Curve(1_000_000, 3.0, 25, 2.0);
+        assertEquals(FormRules.MAX_STEP, FormRules.usesToAdvance(steep, 99));
+        assertTrue(FormRules.usesToReach(steep, 100) > 0);
+        assertEquals(1, FormRules.level(steep, 0));
+        assertTrue(FormRules.level(steep, Integer.MAX_VALUE) <= FormRules.MAX_LEVEL);
+        var common = new FormDefinition.Curve(100, 1.25, 25, 2.0);
+        assertTrue(FormRules.usesToAdvance(common, 99) > 0);
+        assertTrue(FormRules.level(common, 5_000) < FormRules.MAX_LEVEL);
+    }
+
+    @Test
+    void aFormGivenByTwoSlotsIsOwnedIfEitherUnlocksIt() {
+        var ember = new Definitions.Entry<>(id("ember"), form(SWORD, 50, FormSource.LEVEL, true));
+        var all = List.of(ember);
+        // the hybrid slot comes first but is below the level; the plain swordsman slot unlocks it
+        var slots = List.of(slot(SPELLSWORD, 40, SWORD, MAGE), slot(SWORD, 200));
+        var visible = FormCatalogue.visible(all, slots, PlayerForms.EMPTY);
+        assertEquals(1, visible.size());
+        assertTrue(visible.get(0).unlocked());
+        assertTrue(FormCatalogue.ownedForm(id("ember"), ember.value(), slots, PlayerForms.EMPTY).isPresent());
+        assertEquals(1, FormCatalogue.owned(all, slots, PlayerForms.EMPTY).size());
+        // with no slot that unlocks it, the form is listed locked and not owned
+        var locked = FormCatalogue.visible(all, List.of(slot(SPELLSWORD, 40, SWORD, MAGE)), PlayerForms.EMPTY);
+        assertFalse(locked.get(0).unlocked());
+        assertTrue(FormCatalogue.owned(all, List.of(slot(SPELLSWORD, 40, SWORD, MAGE)), PlayerForms.EMPTY).isEmpty());
+    }
 }

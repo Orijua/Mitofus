@@ -72,6 +72,8 @@ public final class FormTests {
         helper.assertTrue(stored.isGranted(SOME_FORM) && stored.xpOf(SOME_FORM) == 300 && stored.equipped().equals(Optional.of(SOME_FORM)),
                 "stored: " + stored);
         helper.assertTrue(FormService.equipped(player).isEmpty(), "a form the classes do not give is not worn");
+        helper.assertTrue(FormService.forms(player).equipped().isEmpty(), "a form that is no longer owned is taken off by itself");
+        helper.assertTrue(FormService.forms(player).xpOf(SOME_FORM) == 300, "its uses are kept");
         ModAttachments.resetAll(player);
         helper.assertTrue(FormService.forms(player).equals(PlayerForms.EMPTY), "reset all clears the forms");
         helper.succeed();

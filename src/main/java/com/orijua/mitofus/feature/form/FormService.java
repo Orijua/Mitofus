@@ -28,9 +28,23 @@ public final class FormService {
         return FormCatalogue.owned(Definitions.all(player.level(), ModDatapackRegistries.FORM), classes.slots(), forms(player));
     }
 
-    /** The equipped form if the player still owns it. */
+    /**
+     * The equipped form if the player still owns it. A form the player lost (the class level dropped or the class was
+     * replaced) is taken off here, so nothing keeps working from a form that is no longer theirs.
+     */
     public static Optional<FormCatalogue.Owned> equipped(ServerPlayer player) {
-        return forms(player).equipped().flatMap(id -> FormCatalogue.find(owned(player), id));
+        PlayerForms forms = forms(player);
+        if (forms.equipped().isEmpty()) {
+            return Optional.empty();
+        }
+        ResourceLocation id = forms.equipped().get();
+        PlayerClasses classes = player.getData(ModAttachments.PLAYER_CLASSES);
+        Optional<FormCatalogue.Owned> found = Definitions.get(player.level(), ModDatapackRegistries.FORM, id)
+                .flatMap(form -> FormCatalogue.ownedForm(id, form, classes.slots(), forms));
+        if (found.isEmpty()) {
+            player.setData(ModAttachments.PLAYER_FORMS, forms.withEquipped(Optional.empty()));
+        }
+        return found;
     }
 
     /** In combat for a form: it dealt or took damage less than the form's {@code switch_delay_seconds} ago. */

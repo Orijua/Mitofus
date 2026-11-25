@@ -4,7 +4,10 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.Optional;
 
-/** Pure rules of how elemental types hit each other. */
+/**
+ * Pure rules of how elemental types hit each other. Not used in play yet: it waits for mobs with a type (design:
+ * mob types). Until then a form only adds its own type bonus.
+ */
 public final class ElementRules {
     private ElementRules() {
     }
