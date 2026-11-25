@@ -569,4 +569,14 @@ public final class CharacterTests {
         });
         helper.succeed();
     }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void respawningRefillsTheMana(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        player.setData(com.orijua.mitofus.core.registry.ModAttachments.MANA, 0f);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerRespawnEvent(player, false));
+        helper.assertTrue(player.getData(com.orijua.mitofus.core.registry.ModAttachments.MANA)
+                == com.orijua.mitofus.feature.progression.ProgressionService.maxMana(player), "full mana after respawning");
+        helper.succeed();
+    }
 }
