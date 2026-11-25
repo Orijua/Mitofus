@@ -27,8 +27,9 @@ public final class CombinationText {
             return Component.empty();
         }
         Map<List<ResourceLocation>, Component> written = new HashMap<>();
-        Definitions.all(level, ModDatapackRegistries.COMBINATION).forEach(entry ->
-                written.put(CombinationRules.key(entry.value().branches()), entry.value().name()));
+        // Sorted by id and first one wins, so two files naming the same set never flip between reloads.
+        Definitions.all(level, ModDatapackRegistries.COMBINATION).stream().sorted(java.util.Comparator.comparing(entry -> entry.id().toString()))
+                .forEach(entry -> written.putIfAbsent(CombinationRules.key(entry.value().branches()), entry.value().name()));
         return CombinationRules.find(written, held).orElseGet(() -> generated(level, held));
     }
 

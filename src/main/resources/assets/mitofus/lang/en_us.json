@@ -1537,6 +1537,7 @@
   "message.mitofus.branch_bad_slot": "That slot does not exist.",
   "message.mitofus.branch_locked": "That slot is not open yet.",
   "message.mitofus.branch_empty": "That slot is empty: choose the branch in your Profile.",
+  "message.mitofus.branch_quest_only": "That branch only comes from a quest: it cannot be changed from here.",
   "message.mitofus.branch_same": "You already have that branch in this slot.",
   "message.mitofus.branch_duplicate": "You already have that branch in another slot.",
   "screen.mitofus.trade.balance_label": "Purse:",

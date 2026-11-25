@@ -84,6 +84,13 @@ public final class ClassService {
             return false;
         }
         PlayerClasses before = classes(player);
+        boolean leavingIsSelectable = before.slot(slot).flatMap(held -> Definitions.get(player.level(), ModDatapackRegistries.PLAYER_CLASS, held.classId()))
+                .map(PlayerClassDefinition::selectable).orElse(true);
+        if (!leavingIsSelectable) {
+            // A branch only a quest can give could never be put back from the window: it stays where it is.
+            player.displayClientMessage(Component.translatable("message.mitofus.branch_quest_only"), false);
+            return false;
+        }
         ClassSlotRules.Swap check = ClassSlotRules.checkSwap(before, slot, branch, ProgressionService.get(player).level());
         if (check != ClassSlotRules.Swap.OK) {
             player.displayClientMessage(Component.translatable("message.mitofus.branch_" + check.name().toLowerCase()), false);

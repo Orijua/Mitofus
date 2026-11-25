@@ -47,6 +47,8 @@ public class BranchChangeScreen extends Screen implements MitofusStyledScreen {
         this.npc = npc;
     }
 
+    private List<Definitions.Entry<PlayerClassDefinition>> options = List.of();
+
     private PlayerClasses classes() {
         return minecraft.player.getData(ModAttachments.PLAYER_CLASSES);
     }
@@ -58,7 +60,7 @@ public class BranchChangeScreen extends Screen implements MitofusStyledScreen {
         panelHeight = PADDING + UiStyle.LINE + 8 + Math.max(1, held.size()) * BLOCK + 22 + PADDING;
         left = (width - WIDTH) / 2;
         top = (height - panelHeight) / 2;
-        List<Definitions.Entry<PlayerClassDefinition>> options = Definitions.all(minecraft.level, ModDatapackRegistries.PLAYER_CLASS).stream()
+        options = Definitions.all(minecraft.level, ModDatapackRegistries.PLAYER_CLASS).stream()
                 .filter(entry -> entry.value().selectable() && !classes.hasClass(entry.id())).toList();
         int y = top + PADDING + UiStyle.LINE + 8;
         for (ClassSlot slot : held) {
@@ -110,7 +112,8 @@ public class BranchChangeScreen extends Screen implements MitofusStyledScreen {
             Component name = SynergyText.className(minecraft.level, slot.classId());
             graphics.drawString(font, Component.translatable("screen.mitofus.branch_slot", slot.slot() + 1, name, slot.classLevel()),
                     left + PADDING, y, UiStyle.TEXT);
-            int cost = ClassSlotRules.swapCost(classes, slot.slot(), PlayerClassDefinition.DEFAULT_CHANGE_COST);
+            int cheapest = options.stream().mapToInt(o -> o.value().changeCost()).min().orElse(PlayerClassDefinition.DEFAULT_CHANGE_COST);
+            int cost = ClassSlotRules.swapCost(classes, slot.slot(), cheapest);
             graphics.drawString(font, cost == 0 ? Component.translatable("screen.mitofus.branch_first_free")
                     : Component.translatable("screen.mitofus.branch_costs", MoneyText.iron(Money.iron(cost))), left + PADDING, y + 11, UiStyle.MUTED);
             y += BLOCK;

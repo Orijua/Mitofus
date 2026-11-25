@@ -337,7 +337,7 @@ public final class ProgressionDebugCommands {
         return 1;
     }
 
-    /** Debug: puts a placed class at grade 1 (Apprentice) to 5 (Grand Master) with no requirements, so two classes can share a grade to fuse. */
+    /** Debug: puts a placed class at grade 1 (Apprentice) to 5 (Grand Master) with no requirements, to test grades and their quests. */
     private static int setGrade(CommandContext<CommandSourceStack> ctx, String name, int grade) throws CommandSyntaxException {
         ServerPlayer player = DebugSupport.mitofusPlayer(ctx);
         var slot = ClassService.slotOf(player, com.orijua.mitofus.Mitofus.id(name));
