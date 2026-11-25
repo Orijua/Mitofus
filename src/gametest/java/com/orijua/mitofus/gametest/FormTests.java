@@ -191,6 +191,24 @@ public final class FormTests {
     }
 
     @GameTest(template = TestSupport.EMPTY)
+    public static void theFormsTabClickEquipsAndTakesOffAndRefusesWithAMessage(GameTestHelper helper) {
+        ServerPlayer player = swordsman(helper, 100);
+        FormService.handle(player, Optional.of(TIDEBREAKER));
+        helper.assertTrue(FormService.forms(player).equipped().isEmpty(), "a form the player does not have is refused");
+        FormService.handle(player, Optional.of(EMBER_BLADE));
+        helper.assertTrue(FormService.forms(player).equipped().equals(Optional.of(EMBER_BLADE)), "worn");
+        com.orijua.mitofus.feature.vrhelmet.CombatClock.mark(player, player.server.getTickCount());
+        FormService.handle(player, Optional.empty());
+        helper.assertTrue(FormService.forms(player).equipped().equals(Optional.of(EMBER_BLADE)), "not taken off in combat");
+        com.orijua.mitofus.feature.vrhelmet.CombatClock.forget(player);
+        FormService.handle(player, Optional.empty());
+        helper.assertTrue(FormService.forms(player).equipped().isEmpty(), "taken off");
+        helper.assertTrue(FormService.messageKey(FormService.Result.OK).isEmpty(), "no message when it works");
+        helper.assertTrue(FormService.messageKey(FormService.Result.IN_COMBAT).equals(Optional.of("message.mitofus.form_in_combat")), "combat message");
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
     public static void takingAFormOffAndOnAgainDoesNotSkipTheCooldownOfItsSkills(GameTestHelper helper) {
         ServerPlayer player = swordsman(helper, 50);
         FormService.equip(player, EMBER_BLADE);

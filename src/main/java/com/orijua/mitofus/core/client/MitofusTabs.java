@@ -1,6 +1,7 @@
 package com.orijua.mitofus.core.client;
 
 import com.orijua.mitofus.feature.economy.client.TradeTab;
+import com.orijua.mitofus.feature.form.client.FormsTab;
 import com.orijua.mitofus.feature.npc.client.WorkshopTab;
 import com.orijua.mitofus.feature.progression.client.ProfileTab;
 import com.orijua.mitofus.feature.progression.client.StatusTab;
@@ -17,6 +18,7 @@ public final class MitofusTabs {
     private static final List<Supplier<MitofusTab>> TABS = List.of(
             StatusTab::new,
             SkillsTab::new,
+            FormsTab::new,
             TalentsTab::new,
             ProfileTab::new,
             QuestsTab::new,

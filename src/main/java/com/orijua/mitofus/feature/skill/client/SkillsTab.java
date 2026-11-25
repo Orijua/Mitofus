@@ -19,6 +19,7 @@ import com.orijua.mitofus.feature.skill.PlayerSkills;
 import com.orijua.mitofus.feature.skill.SlotRules;
 import com.orijua.mitofus.feature.skill.SkillDefinition;
 import org.lwjgl.glfw.GLFW;
+import com.orijua.mitofus.feature.form.FormDefinition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -114,8 +115,18 @@ public class SkillsTab extends MitofusTab {
         return result;
     }
 
+    /** The form each form skill comes from, built when the tab is laid out. */
+    private java.util.Map<net.minecraft.resources.ResourceLocation, FormDefinition> formSkills = java.util.Map.of();
+
+    private Optional<FormDefinition> fromForm(net.minecraft.resources.ResourceLocation skill) {
+        return Optional.ofNullable(formSkills.get(skill));
+    }
+
     @Override
     protected void addWidgets(Consumer<AbstractWidget> addWidget) {
+        formSkills = new java.util.HashMap<>();
+        com.orijua.mitofus.core.registry.Definitions.all(player().level(), com.orijua.mitofus.core.registry.ModDatapackRegistries.FORM)
+                .forEach(form -> form.value().activeSkills().forEach(skill -> formSkills.put(skill, form.value())));
         rows.clear();
         dirty = false;
         visibleRows = PanelFit.rows(height - LIST_TOP, ROW);
@@ -195,7 +206,11 @@ public class SkillsTab extends MitofusTab {
             int y = rowY(i);
             boolean over = mouseX >= left && mouseX < left + cardWidth && mouseY >= y - 2 && mouseY < y + ROW - 4;
             // Active skills get a blue stripe and passives a green one: no text tag needed.
-            MitofusCard.draw(graphics, left, y - 2, cardWidth, ROW - 2, entry.passive() ? UiStyle.GOOD : UiStyle.MANA,
+            // A skill that comes from the worn form takes the color of the form's type instead.
+            int stripe = fromForm(entry.id()).flatMap(form -> com.orijua.mitofus.core.registry.Definitions.get(player().level(),
+                    com.orijua.mitofus.core.registry.ModDatapackRegistries.ELEMENT_TYPE, form.type()))
+                    .map(type -> 0xFF000000 | type.color()).orElse(entry.passive() ? UiStyle.GOOD : UiStyle.MANA);
+            MitofusCard.draw(graphics, left, y - 2, cardWidth, ROW - 2, stripe,
                     MitofusCard.state(over, false, false));
             graphics.renderItem(entry.icon(), left + 4, y + 1);
             int textLeft = left + 24;
@@ -218,7 +233,12 @@ public class SkillsTab extends MitofusTab {
             // The full description, then the cost and mastery that used to crowd the row.
             // The kind (active or passive) is also written there, so the stripe color is never the only cue.
             Component kind = Component.translatable(hovered.entry().passive() ? "screen.mitofus.skill_tag_passive" : "screen.mitofus.skill_tag_active");
-            Component tooltip = kind.copy().append("\n").append(hovered.entry().description()).append("\n").append(hovered.entry().detail());
+            Component tooltip = kind.copy();
+            Optional<FormDefinition> form = fromForm(hovered.entry().id());
+            if (form.isPresent()) {
+                tooltip = tooltip.copy().append(" · ").append(Component.translatable("screen.mitofus.skill_from_form", form.get().name()));
+            }
+            tooltip = tooltip.copy().append("\n").append(hovered.entry().description()).append("\n").append(hovered.entry().detail());
             graphics.renderTooltip(font(), font().split(tooltip, 200), mouseX, mouseY);
         }
     }

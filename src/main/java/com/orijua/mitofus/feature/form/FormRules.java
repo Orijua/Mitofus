@@ -43,6 +43,15 @@ public final class FormRules {
         return level;
     }
 
+    /** How far a form with {@code xp} uses is from its next level, 0 to 1 (1 at the top level). */
+    public static float progress(FormDefinition.Curve curve, int xp) {
+        int level = level(curve, xp);
+        if (level >= MAX_LEVEL) {
+            return 1f;
+        }
+        return (xp - usesToReach(curve, level)) / (float) usesToAdvance(curve, level);
+    }
+
     /** What one use is worth for a form at {@code level}: the boost below {@code boost_below}, 1 otherwise. */
     public static double useValue(FormDefinition.Curve curve, int level) {
         return level < curve.boostBelow() ? curve.boost() : 1.0;
