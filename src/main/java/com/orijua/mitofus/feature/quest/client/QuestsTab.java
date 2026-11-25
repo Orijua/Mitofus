@@ -629,7 +629,7 @@ public class QuestsTab extends MitofusTab {
             Optional<GradeQuestRules.Check> blocked = QuestService.gradeCheck(player(), quest)
                     .filter(check -> check == GradeQuestRules.Check.LEVEL_TOO_LOW || check == GradeQuestRules.Check.TREE_INCOMPLETE);
             if (blocked.isPresent()) {
-                y = drawWrapped(graphics, Component.translatable("screen.mitofus.quest_grade_" + blocked.get().name().toLowerCase()), x, y, detailWidth, UiStyle.BAD);
+                y = drawWrapped(graphics, gradeBlockedText(quest, blocked.get()), x, y, detailWidth, UiStyle.BAD);
             }
         }
 
@@ -705,6 +705,17 @@ public class QuestsTab extends MitofusTab {
     private boolean isDone(ResourceLocation id, QuestDefinition quest) {
         Integer stored = QuestService.get(player()).active().get(id);
         return stored != null && QuestService.progress(player(), quest, stored) >= quest.goal().target();
+    }
+
+    /** What exactly a grade quest still needs: the class level to reach (with the player's own) or the talents to buy. */
+    private static Component gradeBlockedText(QuestDefinition quest, GradeQuestRules.Check check) {
+        if (check == GradeQuestRules.Check.LEVEL_TOO_LOW && quest.gradeQuest().isPresent() && quest.requiredClass().isPresent()) {
+            int needed = quest.gradeQuest().get().from().levelToRankUp();
+            int has = player().getData(ModAttachments.PLAYER_CLASSES).slots().stream()
+                    .filter(slot -> slot.classId().equals(quest.requiredClass().get())).mapToInt(slot -> slot.classLevel()).max().orElse(0);
+            return Component.translatable("screen.mitofus.quest_grade_level_too_low", needed, has, className(quest.requiredClass().get()).orElse(Component.empty()));
+        }
+        return Component.translatable("screen.mitofus.quest_grade_" + check.name().toLowerCase());
     }
 
     private static boolean classAllows(QuestDefinition quest) {
