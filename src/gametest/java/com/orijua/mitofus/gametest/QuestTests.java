@@ -335,6 +335,10 @@ public final class QuestTests {
         helper.assertTrue(QuestService.claim(player, sovereign, chief) == QuestService.Result.SUCCESS, "both parts complete it");
         helper.assertTrue(ClassService.classes(player).slot(0).orElseThrow().grade() == ClassGrade.GRAND_MASTER, "there is no grade above");
         helper.assertTrue(com.orijua.mitofus.feature.form.FormService.forms(player).isGranted(Mitofus.id("dusk_sovereign")), "the form is granted");
+        // The forms are cumulative: the earlier grade-quest forms must be owned for the last one to count.
+        for (String earlier : new String[] {"tidebreaker", "thunder_edge", "blazing_vanguard", "mountain_heart"}) {
+            com.orijua.mitofus.feature.form.FormService.grant(player, Mitofus.id(earlier));
+        }
         helper.assertTrue(com.orijua.mitofus.feature.form.FormService.owned(player).stream().anyMatch(o -> o.id().equals(Mitofus.id("dusk_sovereign"))), "and owned");
         helper.succeed();
     }
