@@ -17,6 +17,7 @@ import com.orijua.mitofus.feature.form.FormRows;
 import com.orijua.mitofus.feature.form.FormRules;
 import com.orijua.mitofus.feature.form.PlayerForms;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -46,6 +47,16 @@ public class FormsTab extends MitofusTab {
     private PlayerForms shownForms = PlayerForms.EMPTY;
     private List<com.orijua.mitofus.feature.progression.ClassSlot> shownSlots = List.of();
     private int visibleRows = 1;
+
+    /** The refusal of the last click, shown for a few seconds at the bottom of the tab. */
+    private static Component message;
+    private static long messageUntil;
+    private static final long MESSAGE_MILLIS = 4000;
+
+    public static void showMessage(String key) {
+        message = Component.translatable(key);
+        messageUntil = Util.getMillis() + MESSAGE_MILLIS;
+    }
 
     public FormsTab() {
         super(Component.translatable("tab.mitofus.forms"));
@@ -121,9 +132,12 @@ public class FormsTab extends MitofusTab {
         Component typeName = type(row.form()).map(ElementTypeDefinition::name).orElse(Component.empty());
         MutableComponent text;
         if (row.state() == FormRows.State.LOCKED) {
-            text = row.lock() == FormRows.Lock.GRADE_QUEST
-                    ? Component.translatable("screen.mitofus.form_lock_quest", row.form().unlockLevel())
-                    : Component.translatable("screen.mitofus.form_lock_level", row.form().unlockLevel());
+            text = switch (row.lock()) {
+                case PREVIOUS_FORM -> Component.translatable("screen.mitofus.form_lock_previous", row.blockedBy()
+                        .flatMap(id -> Definitions.get(player().level(), ModDatapackRegistries.FORM, id)).map(FormDefinition::name).orElse(Component.empty()));
+                case GRADE_QUEST -> Component.translatable("screen.mitofus.form_lock_quest", row.form().unlockLevel());
+                default -> Component.translatable("screen.mitofus.form_lock_level", row.form().unlockLevel());
+            };
         } else {
             text = Component.translatable("screen.mitofus.form_summary", typeName, row.level(),
                     String.format("%.1f", FormRules.typeBonus(row.form(), row.level()) * 100));
@@ -183,6 +197,9 @@ public class FormsTab extends MitofusTab {
             if (over) {
                 hovered = row;
             }
+        }
+        if (message != null && Util.getMillis() < messageUntil) {
+            graphics.drawString(font(), message, left, top + height - 10, UiStyle.BAD);
         }
         scroll.renderBar(graphics, left + width + 3, top + LIST_TOP - 2, visibleRows * ROW - 4, all.size());
         if (hovered != null) {

@@ -11,12 +11,13 @@ import java.util.Optional;
 /** Pure: the rows of the Forms tab, from the player's classes and forms. Owned forms and the ones still locked. */
 public final class FormRows {
     /** Why a form is not owned yet. */
-    public enum Lock { NONE, CLASS_LEVEL, GRADE_QUEST }
+    public enum Lock { NONE, CLASS_LEVEL, GRADE_QUEST, PREVIOUS_FORM }
 
     public enum State { EQUIPPED, OWNED, LOCKED }
 
     /** One row: {@code level} is the form level (1 if never worn) and {@code xp} its uses; {@code lock} why it is locked, if it is. */
-    public record Row(ResourceLocation id, FormDefinition form, State state, Lock lock, int level, int xp, boolean inherited) {
+    public record Row(ResourceLocation id, FormDefinition form, State state, Lock lock, int level, int xp, boolean inherited,
+                  Optional<ResourceLocation> blockedBy) {
     }
 
     private FormRows() {
@@ -41,10 +42,11 @@ public final class FormRows {
     private static Row row(FormCatalogue.Visible visible, PlayerForms forms) {
         int xp = forms.xpOf(visible.id());
         if (!visible.unlocked()) {
-            Lock lock = visible.classLevel() < visible.form().unlockLevel() ? Lock.CLASS_LEVEL : Lock.GRADE_QUEST;
-            return new Row(visible.id(), visible.form(), State.LOCKED, lock, visible.level(), xp, visible.inherited());
+            Lock lock = visible.blockedBy().isPresent() ? Lock.PREVIOUS_FORM
+                    : visible.classLevel() < visible.form().unlockLevel() ? Lock.CLASS_LEVEL : Lock.GRADE_QUEST;
+            return new Row(visible.id(), visible.form(), State.LOCKED, lock, visible.level(), xp, visible.inherited(), visible.blockedBy());
         }
         State state = forms.equipped().equals(Optional.of(visible.id())) ? State.EQUIPPED : State.OWNED;
-        return new Row(visible.id(), visible.form(), state, Lock.NONE, visible.level(), xp, visible.inherited());
+        return new Row(visible.id(), visible.form(), state, Lock.NONE, visible.level(), xp, visible.inherited(), Optional.empty());
     }
 }

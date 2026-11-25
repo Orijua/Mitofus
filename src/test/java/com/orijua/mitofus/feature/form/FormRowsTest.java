@@ -92,4 +92,17 @@ class FormRowsTest {
         assertEquals(0.5f, FormRules.progress(curve, curve.firstStep() / 2), 1e-2);
         assertEquals(1f, FormRules.progress(curve, Integer.MAX_VALUE), 1e-6);
     }
+
+    @Test
+    void aFormHeldBackByAMissingQuestFormSaysWhichOne() {
+        var q100 = form("q_100", SWORD, 100, FormSource.GRADE_QUEST, false);
+        var l150 = form("l_150", SWORD, 150, FormSource.LEVEL, false);
+        var rows = FormRows.rows(List.of(q100, l150), List.of(slot(SWORD, 300)), PlayerForms.EMPTY);
+        var held = rows.stream().filter(r -> r.id().equals(id("l_150"))).findFirst().orElseThrow();
+        assertEquals(FormRows.State.LOCKED, held.state());
+        assertEquals(FormRows.Lock.PREVIOUS_FORM, held.lock());
+        assertEquals(java.util.Optional.of(id("q_100")), held.blockedBy());
+        var quest = rows.stream().filter(r -> r.id().equals(id("q_100"))).findFirst().orElseThrow();
+        assertEquals(FormRows.Lock.GRADE_QUEST, quest.lock());
+    }
 }
