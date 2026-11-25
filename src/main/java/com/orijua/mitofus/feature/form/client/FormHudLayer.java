@@ -52,7 +52,7 @@ public final class FormHudLayer implements LayeredDraw.Layer {
         gui.rightHeight += ROW_HEIGHT;
 
         UiStyle.text(graphics, minecraft.font, shown.label(minecraft.font), left, top - 8, color);
-        ElementIcons.draw(graphics, form.get().type(), left + WIDTH - ElementIcons.SIZE, top - ElementIcons.SIZE + 3);
+        ElementIcons.draw(graphics, form.get().type(), left + WIDTH - ElementIcons.SIZE, top - ElementIcons.SIZE - 1);
         UiStyle.bar(graphics, left, top + 1, WIDTH, BAR_HEIGHT, fraction, color);
     }
 
