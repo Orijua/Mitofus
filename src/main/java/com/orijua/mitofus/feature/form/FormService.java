@@ -35,9 +35,28 @@ public final class FormService {
         return FormCatalogue.owned(Definitions.all(player.level(), ModDatapackRegistries.FORM), classes.slots(), forms(player));
     }
 
-    /** The equipped form if the player still owns it. */
+    /**
+     * The equipped form if the player still owns it. On the server, a form the player lost (the class level dropped or
+     * the class was replaced) is taken off here, so nothing keeps working from a form that is no longer theirs.
+     */
     public static Optional<FormCatalogue.Owned> equipped(Player player) {
-        return forms(player).equipped().flatMap(id -> FormCatalogue.find(owned(player), id));
+        Optional<FormCatalogue.Owned> found = ownedEquipped(player);
+        if (found.isEmpty() && forms(player).equipped().isPresent() && player instanceof ServerPlayer server) {
+            setEquipped(server, Optional.empty());
+        }
+        return found;
+    }
+
+    /** The equipped form if owned, with no side effect: looks up just that form, not the whole catalogue. */
+    private static Optional<FormCatalogue.Owned> ownedEquipped(Player player) {
+        PlayerForms forms = forms(player);
+        if (forms.equipped().isEmpty()) {
+            return Optional.empty();
+        }
+        ResourceLocation id = forms.equipped().get();
+        PlayerClasses classes = player.getData(ModAttachments.PLAYER_CLASSES);
+        return Definitions.get(player.level(), ModDatapackRegistries.FORM, id)
+                .flatMap(form -> FormCatalogue.ownedForm(id, form, classes.slots(), forms));
     }
 
     /** The equipped form's passive once its form level reaches it (also counts for the Mitofus world only). */
@@ -45,9 +64,7 @@ public final class FormService {
         if (!MitofusWorld.is(player.level())) {
             return Optional.empty();
         }
-        PlayerForms forms = forms(player);
-        return forms.equipped().flatMap(id -> Definitions.get(player.level(), ModDatapackRegistries.FORM, id)
-                .flatMap(form -> FormRules.unlockedPassive(form, FormRules.level(form.curve(), forms.xpOf(id)))));
+        return equipped(player).flatMap(owned -> FormRules.unlockedPassive(owned.form(), owned.level()));
     }
 
     /** The damage bonus of the equipped form's type (0.1 = +10 %), 0 with no form or outside Mitofus. */
@@ -55,9 +72,7 @@ public final class FormService {
         if (!MitofusWorld.is(player.level())) {
             return 0;
         }
-        PlayerForms forms = forms(player);
-        return forms.equipped().flatMap(id -> Definitions.get(player.level(), ModDatapackRegistries.FORM, id)
-                .map(form -> FormRules.typeBonus(form, FormRules.level(form.curve(), forms.xpOf(id))))).orElse(0.0);
+        return equipped(player).map(owned -> FormRules.typeBonus(owned.form(), owned.level())).orElse(0.0);
     }
 
     /** In combat for a form: it dealt or took damage less than the form's {@code switch_delay_seconds} ago. */
@@ -92,9 +107,11 @@ public final class FormService {
         return Result.OK;
     }
 
-    /** Operator: equips any defined form, ignoring unlocks and combat. */
+    /** Operator: equips a form the player owns, ignoring combat. A form the classes do not give cannot be worn. */
     public static boolean forceEquip(ServerPlayer player, ResourceLocation id) {
-        if (Definitions.get(player.level(), ModDatapackRegistries.FORM, id).isEmpty()) {
+        Optional<FormDefinition> form = Definitions.get(player.level(), ModDatapackRegistries.FORM, id);
+        if (form.isEmpty() || FormCatalogue.ownedForm(id, form.get(),
+                player.getData(ModAttachments.PLAYER_CLASSES).slots(), forms(player)).isEmpty()) {
             return false;
         }
         setEquipped(player, Optional.of(id));
@@ -155,9 +172,7 @@ public final class FormService {
         Set<ResourceLocation> every = new HashSet<>();
         all.forEach(entry -> every.addAll(entry.value().activeSkills()));
         Set<ResourceLocation> wanted = new HashSet<>();
-        PlayerForms forms = forms(player);
-        forms.equipped().flatMap(id -> Definitions.get(player.level(), ModDatapackRegistries.FORM, id)).ifPresent(form ->
-                wanted.addAll(FormRules.unlockedActiveSkills(form, FormRules.level(form.curve(), forms.xpOf(forms.equipped().get())))));
+        ownedEquipped(player).ifPresent(owned -> wanted.addAll(FormRules.unlockedActiveSkills(owned.form(), owned.level())));
 
         for (ResourceLocation skill : every) {
             PlayerSkills skills = SkillService.get(player);
