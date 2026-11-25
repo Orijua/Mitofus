@@ -12,9 +12,19 @@
     "job": "mitofus:farmer"
   },
   "goal": {
-    "type": "milestone",
-    "milestone": "mitofus:crops_harvested",
-    "count": 150
+    "type": "all",
+    "goals": [
+      {
+        "type": "milestone",
+        "milestone": "mitofus:crops_harvested",
+        "count": 50
+      },
+      {
+        "type": "milestone",
+        "milestone": "mitofus:bread_baked",
+        "count": 6
+      }
+    ]
   },
   "xp_reward": 4000,
   "item_rewards": [

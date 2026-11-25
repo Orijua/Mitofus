@@ -330,10 +330,9 @@ public final class QuestTests {
         helper.assertTrue(QuestService.accept(player, generic, chief) == QuestService.Result.NOT_AVAILABLE, "a fisher gets the fisher variant");
         helper.assertTrue(QuestService.accept(player, farmer, chief) == QuestService.Result.NOT_AVAILABLE, "not the farmer one");
         helper.assertTrue(QuestService.accept(player, fisher, chief) == QuestService.Result.SUCCESS, "the fisher variant opens");
-        for (int i = 0; i < 10; i++) {
-            GoalTracker.milestone(player, JobActivity.FISH_CAUGHT);
-        }
-        helper.assertTrue(QuestService.claim(player, fisher, chief) == QuestService.Result.SUCCESS, "10 fish complete it");
+        player.getInventory().add(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.COD, 5));
+        helper.assertTrue(QuestService.deliver(player, fisher, chief) == QuestService.Result.SUCCESS, "the fish are handed over");
+        helper.assertTrue(QuestService.claim(player, fisher, chief) == QuestService.Result.SUCCESS, "5 fish complete it");
         helper.assertTrue(ClassService.classes(player).slot(0).orElseThrow().grade() == ClassGrade.EXPERT, "the grade went up");
         helper.succeed();
     }

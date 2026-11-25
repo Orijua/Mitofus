@@ -12,9 +12,19 @@
     "job": "mitofus:fisher"
   },
   "goal": {
-    "type": "milestone",
-    "milestone": "mitofus:fish_caught",
-    "count": 30
+    "type": "all",
+    "goals": [
+      {
+        "type": "milestone",
+        "milestone": "mitofus:fish_caught",
+        "count": 12
+      },
+      {
+        "type": "milestone",
+        "milestone": "mitofus:items_cooked",
+        "count": 8
+      }
+    ]
   },
   "xp_reward": 4000,
   "item_rewards": [

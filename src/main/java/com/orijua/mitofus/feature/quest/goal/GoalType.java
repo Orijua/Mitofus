@@ -11,7 +11,8 @@ public enum GoalType implements StringRepresentable {
     FORGE("forge", () -> ForgeGoal.CODEC),
     LEVEL("level", () -> LevelGoal.CODEC),
     DELIVER("deliver", () -> DeliverGoal.CODEC),
-    MILESTONE("milestone", () -> MilestoneGoal.CODEC);
+    MILESTONE("milestone", () -> MilestoneGoal.CODEC),
+    ALL("all", () -> AllGoal.CODEC);
 
     public static final Codec<GoalType> CODEC = StringRepresentable.fromEnum(GoalType::values);
 

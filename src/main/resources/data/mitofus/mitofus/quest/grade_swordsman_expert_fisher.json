@@ -12,9 +12,9 @@
     "job": "mitofus:fisher"
   },
   "goal": {
-    "type": "milestone",
-    "milestone": "mitofus:fish_caught",
-    "count": 10
+    "type": "deliver",
+    "items": "#minecraft:fishes",
+    "count": 5
   },
   "xp_reward": 1500,
   "item_rewards": [
