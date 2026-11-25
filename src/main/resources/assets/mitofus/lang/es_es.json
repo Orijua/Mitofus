@@ -1656,5 +1656,19 @@
   "goal.mitofus.milestone.waterside_time": "Pasar %s × 10 segundos junto a un río o el mar",
   "goal.mitofus.milestone.forest_time": "Pasar %s × 10 segundos en un bosque",
   "tag.item.minecraft.fishes": "Pescado",
-  "tag.item.c.crops": "Cultivos"
+  "tag.item.c.crops": "Cultivos",
+  "message.mitofus.debug_forms_reset": "Formas a cero",
+  "message.mitofus.debug_form_unknown": "No existe la forma %s",
+  "message.mitofus.debug_form_equipped": "Forma %s equipada",
+  "message.mitofus.debug_form_level": "Forma %s a nivel %s",
+  "message.mitofus.debug_form_granted": "Forma %s concedida",
+  "message.mitofus.debug_form_removed": "Forma quitada",
+  "message.mitofus.debug_form_none": "No tienes formas desbloqueadas",
+  "message.mitofus.debug_form_line": "%1$s (tipo %2$s) nivel %3$s %4$s",
+  "element.mitofus.fire": "Fuego",
+  "element.mitofus.water": "Agua",
+  "element.mitofus.earth": "Tierra",
+  "element.mitofus.lightning": "Rayo",
+  "element.mitofus.light": "Luz",
+  "element.mitofus.shadow": "Sombra"
 }

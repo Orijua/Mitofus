@@ -9,6 +9,7 @@ import com.orijua.mitofus.feature.storage.Storage;
 import com.orijua.mitofus.feature.vrhelmet.VrHelmetTier;
 import com.orijua.mitofus.feature.vrhelmet.MitofusDeaths;
 import com.orijua.mitofus.feature.equipment.RarityPity;
+import com.orijua.mitofus.feature.form.PlayerForms;
 import net.minecraft.nbt.CompoundTag;
 import com.orijua.mitofus.feature.economy.OfferBought;
 import com.orijua.mitofus.feature.economy.Purse;
@@ -99,6 +100,10 @@ public final class ModAttachments {
     /** The classes in the player's slots (each with its level and grade) and their job. Synced to its owner, kept on death, cleared by {@link #resetAll}. */
     public static final Supplier<AttachmentType<PlayerClasses>> PLAYER_CLASSES =
             playerData("player_classes", () -> PlayerClasses.DEFAULT, PlayerClasses.CODEC, PlayerClasses.STREAM_CODEC, true);
+
+    /** The uses of each form, the grade-quest forms granted and the one equipped form (see form.FormService). Synced to its owner, kept on death, cleared by {@link #resetAll}. */
+    public static final Supplier<AttachmentType<PlayerForms>> PLAYER_FORMS =
+            playerData("player_forms", () -> PlayerForms.EMPTY, PlayerForms.CODEC, PlayerForms.STREAM_CODEC, true);
 
     public static final Supplier<AttachmentType<PlayerCounters>> PLAYER_COUNTERS =
             playerData("player_counters", () -> PlayerCounters.EMPTY, PlayerCounters.CODEC, PlayerCounters.STREAM_CODEC, true);

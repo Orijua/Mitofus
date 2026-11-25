@@ -2,6 +2,8 @@ package com.orijua.mitofus.core.registry;
 
 import com.orijua.mitofus.Mitofus;
 import com.orijua.mitofus.feature.equipment.option.ItemOptionDefinition;
+import com.orijua.mitofus.feature.form.ElementTypeDefinition;
+import com.orijua.mitofus.feature.form.FormDefinition;
 import com.orijua.mitofus.feature.effect.PassiveDefinition;
 import com.orijua.mitofus.feature.progression.JobDefinition;
 import com.orijua.mitofus.feature.progression.PlayerClassDefinition;
@@ -32,6 +34,8 @@ public final class ModDatapackRegistries {
     public static final ResourceKey<Registry<TalentDefinition>> TALENT = key("talent");
     public static final ResourceKey<Registry<FusionDefinition>> FUSION = key("fusion");
     public static final ResourceKey<Registry<SynergyDefinition>> SYNERGY = key("synergy");
+    public static final ResourceKey<Registry<ElementTypeDefinition>> ELEMENT_TYPE = key("element_type");
+    public static final ResourceKey<Registry<FormDefinition>> FORM = key("form");
 
     private ModDatapackRegistries() {
     }
@@ -48,6 +52,8 @@ public final class ModDatapackRegistries {
         event.dataPackRegistry(TALENT, TalentDefinition.CODEC, TalentDefinition.CODEC);
         event.dataPackRegistry(FUSION, FusionDefinition.CODEC, FusionDefinition.CODEC);
         event.dataPackRegistry(SYNERGY, SynergyDefinition.CODEC, SynergyDefinition.CODEC);
+        event.dataPackRegistry(ELEMENT_TYPE, ElementTypeDefinition.CODEC, ElementTypeDefinition.CODEC);
+        event.dataPackRegistry(FORM, FormDefinition.CODEC, FormDefinition.CODEC);
     }
 
     private static <T> ResourceKey<Registry<T>> key(String name) {

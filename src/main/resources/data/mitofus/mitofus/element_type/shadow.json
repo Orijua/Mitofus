@@ -1,0 +1,7 @@
+{
+  "name": {
+    "translate": "element.mitofus.shadow"
+  },
+  "color": 6291583,
+  "strong_against": ["mitofus:light"]
+}
