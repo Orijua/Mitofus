@@ -34,7 +34,10 @@ public final class GradeQuestRules {
         if (!forThisPlayer) {
             return Check.WRONG_JOB;
         }
-        if (!quest.from().canRankUp(slot.get().classLevel())) {
+        // The last grade has no next one to rank up to, but its own quest opens at the level the grade ends.
+        boolean levelReached = quest.from().next().isPresent() ? quest.from().canRankUp(slot.get().classLevel())
+                : slot.get().classLevel() >= quest.from().levelToRankUp();
+        if (!levelReached) {
             return Check.LEVEL_TOO_LOW;
         }
         return treeComplete ? Check.OK : Check.TREE_INCOMPLETE;

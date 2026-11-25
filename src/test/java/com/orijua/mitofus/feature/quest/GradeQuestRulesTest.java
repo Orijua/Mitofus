@@ -53,4 +53,11 @@ class GradeQuestRulesTest {
         assertFalse(GradeQuestRules.isForPlayer(GradeQuestRules.Check.WRONG_GRADE));
         assertFalse(GradeQuestRules.isForPlayer(GradeQuestRules.Check.NO_CLASS));
     }
+
+    @Test
+    void theQuestOfTheLastGradeOpensAtItsEndLevel() {
+        GradeQuest sovereign = new GradeQuest(ClassGrade.GRAND_MASTER, Optional.empty());
+        assertEquals(GradeQuestRules.Check.OK, GradeQuestRules.check(sovereign, slot(500, ClassGrade.GRAND_MASTER), true, Optional.empty(), false));
+        assertEquals(GradeQuestRules.Check.LEVEL_TOO_LOW, GradeQuestRules.check(sovereign, slot(499, ClassGrade.GRAND_MASTER), true, Optional.empty(), false));
+    }
 }

@@ -318,6 +318,32 @@ public final class QuestTests {
     }
 
     @GameTest(template = TestSupport.EMPTY)
+    public static void theSovereignQuestOpensAtLevel500AndGivesTheLastForm(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        VillageChiefNpc chief = TestSupport.chief(helper);
+        ResourceLocation sovereign = Mitofus.id("grade_swordsman_sovereign");
+        swordsmanWithFullTree(player, 499, ClassGrade.GRAND_MASTER);
+        helper.assertTrue(QuestService.accept(player, sovereign, chief) == QuestService.Result.NOT_AVAILABLE, "level 499 is too low");
+        swordsmanWithFullTree(player, 500, ClassGrade.GRAND_MASTER);
+        helper.assertTrue(QuestService.accept(player, sovereign, chief) == QuestService.Result.SUCCESS, "level 500 opens it");
+        helper.assertTrue(QuestService.claim(player, sovereign, chief) == QuestService.Result.NOT_DONE, "nothing done yet");
+        var counters = player.getData(ModAttachments.PLAYER_COUNTERS).increment("kill/mitofus:bone_lord");
+        for (int i = 0; i < 100; i++) {
+            counters = counters.increment("kill_night");
+        }
+        player.setData(ModAttachments.PLAYER_COUNTERS, counters);
+        helper.assertTrue(QuestService.claim(player, sovereign, chief) == QuestService.Result.SUCCESS, "both parts complete it");
+        helper.assertTrue(ClassService.classes(player).slot(0).orElseThrow().grade() == ClassGrade.GRAND_MASTER, "there is no grade above");
+        helper.assertTrue(com.orijua.mitofus.feature.form.FormService.forms(player).isGranted(Mitofus.id("dusk_sovereign")), "the form is granted");
+        // The forms are cumulative: the earlier grade-quest forms must be owned for the last one to count.
+        for (String earlier : new String[] {"tidebreaker", "thunder_edge", "blazing_vanguard", "mountain_heart"}) {
+            com.orijua.mitofus.feature.form.FormService.grant(player, Mitofus.id(earlier));
+        }
+        helper.assertTrue(com.orijua.mitofus.feature.form.FormService.owned(player).stream().anyMatch(o -> o.id().equals(Mitofus.id("dusk_sovereign"))), "and owned");
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
     public static void aGradeQuestVariantFollowsTheJobAndNoJobBlocksAGrade(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
         VillageChiefNpc chief = TestSupport.chief(helper);

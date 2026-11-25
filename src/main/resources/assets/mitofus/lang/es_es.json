@@ -1750,5 +1750,7 @@
   "form.mitofus.skysplitter": "Partecielos",
   "form.mitofus.skysplitter.desc": "Forma del espadachín de rayo. Se desbloquea al llegar al nivel de clase 450.",
   "form.mitofus.dusk_sovereign": "Soberano del Ocaso",
-  "form.mitofus.dusk_sovereign.desc": "Forma del espadachín de sombra. Se desbloquea al llegar al nivel de clase 500."
+  "form.mitofus.dusk_sovereign.desc": "Forma del espadachín de sombra. Se desbloquea al llegar al nivel de clase 500 y terminar la misión de grado.",
+  "quest.mitofus.grade_swordsman_sovereign": "Prueba del Soberano",
+  "quest.mitofus.grade_swordsman_sovereign.desc": "El jefe pide una última prueba a un espadachín gran maestro: derrota al Señor de los Huesos y abate a 100 enemigos de noche."
 }
