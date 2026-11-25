@@ -127,6 +127,8 @@ public final class ProgressionEvents {
         if (event.getEntity() instanceof ServerPlayer player) {
             ProgressionService.refreshEffects(player);
             player.setHealth(player.getMaxHealth());
+            // Coming back from death is a fresh start: the mana is full too, not what was left at the moment of dying.
+            player.setData(ModAttachments.MANA, ProgressionService.maxMana(player));
         }
     }
 
