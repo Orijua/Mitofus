@@ -11,8 +11,6 @@ public final class FormRules {
     /** The form levels that give the attack, the passive and the ultimate. */
     public static final List<Integer> SKILL_LEVELS = List.of(1, 30, 60);
     public static final String SKILL_LEVELS_TEXT = "1, 30 and 60";
-    /** Seconds without dealing or taking damage before a form can be changed. */
-    public static final int OUT_OF_COMBAT_SECONDS = 5;
 
     private FormRules() {
     }

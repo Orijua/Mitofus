@@ -33,9 +33,10 @@ public final class FormService {
         return forms(player).equipped().flatMap(id -> FormCatalogue.find(owned(player), id));
     }
 
-    public static boolean inCombat(ServerPlayer player) {
+    /** In combat for a form: it dealt or took damage less than the form's {@code switch_delay_seconds} ago. */
+    public static boolean inCombat(ServerPlayer player, int delaySeconds) {
         var last = CombatClock.last(player);
-        return last.isPresent() && player.server.getTickCount() - last.getAsLong() < FormRules.OUT_OF_COMBAT_SECONDS * 20L;
+        return last.isPresent() && player.server.getTickCount() - last.getAsLong() < delaySeconds * 20L;
     }
 
     /** Equips {@code id}; only out of combat and only a form the player owns. */
@@ -43,10 +44,11 @@ public final class FormService {
         if (Definitions.get(player.level(), ModDatapackRegistries.FORM, id).isEmpty()) {
             return Result.UNKNOWN;
         }
-        if (FormCatalogue.find(owned(player), id).isEmpty()) {
+        var target = FormCatalogue.find(owned(player), id);
+        if (target.isEmpty()) {
             return Result.LOCKED;
         }
-        if (inCombat(player)) {
+        if (inCombat(player, target.get().form().switchDelaySeconds())) {
             return Result.IN_COMBAT;
         }
         player.setData(ModAttachments.PLAYER_FORMS, forms(player).withEquipped(Optional.of(id)));
@@ -55,7 +57,8 @@ public final class FormService {
 
     /** Takes the equipped form off (back to the base form of the class); only out of combat. */
     public static Result unequip(ServerPlayer player) {
-        if (inCombat(player)) {
+        int delay = equipped(player).map(o -> o.form().switchDelaySeconds()).orElse(FormDefinition.DEFAULT_SWITCH_DELAY_SECONDS);
+        if (inCombat(player, delay)) {
             return Result.IN_COMBAT;
         }
         player.setData(ModAttachments.PLAYER_FORMS, forms(player).withEquipped(Optional.empty()));

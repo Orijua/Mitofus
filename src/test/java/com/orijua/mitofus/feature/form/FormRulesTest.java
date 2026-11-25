@@ -35,7 +35,7 @@ class FormRulesTest {
 
     private static FormDefinition form(ResourceLocation owner, int level, FormSource source, boolean inheritable) {
         return new FormDefinition(Component.empty(), Component.empty(), owner, level, source, FIRE,
-                List.of(id("a"), id("b"), id("c")), 0.20, inheritable, FormDefinition.Curve.DEFAULT);
+                List.of(id("a"), id("b"), id("c")), 0.20, inheritable, 5, FormDefinition.Curve.DEFAULT);
     }
 
     private static ClassSlot slot(ResourceLocation classId, int level, ResourceLocation... origin) {
