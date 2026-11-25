@@ -1,0 +1,11 @@
+{
+  "name": {
+    "translate": "status.mitofus.burn"
+  },
+  "effect": "mitofus:burning",
+  "duration_ticks": 100,
+  "max_duration_ticks": 400,
+  "intensity": 1,
+  "max_intensity": 3,
+  "max_chance": 0.75
+}

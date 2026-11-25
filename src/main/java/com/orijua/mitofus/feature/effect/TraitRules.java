@@ -39,4 +39,9 @@ public final class TraitRules {
         }
         return total;
     }
+
+    /** {@code value} held under the global cap of its kind, if the data sets one. */
+    public static double capped(double value, java.util.Optional<Double> cap) {
+        return cap.map(limit -> Math.min(value, limit)).orElse(value);
+    }
 }

@@ -8,8 +8,12 @@
   "icon": "minecraft:golden_apple",
   "bonuses": [
     {
+      "type": "heal_on_kill",
+      "amount": 2
+    },
+    {
       "type": "max_mana",
-      "amount": 20.0
+      "amount": 20
     },
     {
       "type": "mana_regen",

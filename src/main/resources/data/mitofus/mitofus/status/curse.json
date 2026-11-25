@@ -1,0 +1,11 @@
+{
+  "name": {
+    "translate": "status.mitofus.curse"
+  },
+  "effect": "mitofus:cursed",
+  "duration_ticks": 200,
+  "max_duration_ticks": 600,
+  "intensity": 1,
+  "max_intensity": 3,
+  "max_chance": 0.5
+}

@@ -8,8 +8,8 @@
   "icon": "minecraft:amethyst_shard",
   "bonuses": [
     {
-      "type": "damage",
-      "amount": 0.04
+      "type": "attack_speed",
+      "amount": 0.1
     },
     {
       "type": "mana_regen",

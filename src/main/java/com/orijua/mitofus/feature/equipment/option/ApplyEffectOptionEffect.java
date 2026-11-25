@@ -3,8 +3,10 @@ package com.orijua.mitofus.feature.equipment.option;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.orijua.mitofus.feature.effect.status.StatusService;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import com.orijua.mitofus.feature.effect.status.StatusService;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
@@ -35,7 +37,7 @@ public record ApplyEffectOptionEffect(Holder<MobEffect> effect, int duration, in
     @Override
     public void onHit(ServerPlayer attacker, LivingEntity target, float damageDealt, float value) {
         if (target.isAlive() && attacker.getRandom().nextFloat() < value) {
-            target.addEffect(new MobEffectInstance(effect, duration, amplifier), attacker);
+            StatusService.refresh(target, new MobEffectInstance(effect, duration, amplifier), attacker);
         }
     }
 }

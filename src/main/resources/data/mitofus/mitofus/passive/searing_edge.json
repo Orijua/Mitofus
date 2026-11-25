@@ -8,8 +8,9 @@
   "icon": "minecraft:blaze_rod",
   "bonuses": [
     {
-      "type": "damage",
-      "amount": 0.05
+      "type": "apply_status",
+      "amount": 0.25,
+      "status": "mitofus:burn"
     }
   ]
 }

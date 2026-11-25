@@ -8,9 +8,8 @@
   "icon": "minecraft:coal",
   "bonuses": [
     {
-      "type": "damage",
-      "amount": 0.06,
-      "at_night": true
+      "type": "damage_vs_unaware",
+      "amount": 0.15
     }
   ]
 }
