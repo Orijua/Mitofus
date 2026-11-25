@@ -29,10 +29,26 @@ public final class FormService {
         return player.getData(ModAttachments.PLAYER_FORMS);
     }
 
+    private record FormList(Object registries, List<Definitions.Entry<FormDefinition>> forms) {
+    }
+
+    private static volatile FormList cachedForms = new FormList(null, List.of());
+
+    /** Every form definition, sorted once per registry instead of on every hit. */
+    private static List<Definitions.Entry<FormDefinition>> allForms(Player player) {
+        Object registries = player.level().registryAccess();
+        FormList current = cachedForms;
+        if (current.registries() != registries) {
+            current = new FormList(registries, Definitions.all(player.level(), ModDatapackRegistries.FORM));
+            cachedForms = current;
+        }
+        return current.forms();
+    }
+
     /** The forms the player's classes give them, with their levels. Works on both sides. */
     public static List<FormCatalogue.Owned> owned(Player player) {
         PlayerClasses classes = player.getData(ModAttachments.PLAYER_CLASSES);
-        return FormCatalogue.owned(Definitions.all(player.level(), ModDatapackRegistries.FORM), classes.slots(), forms(player));
+        return FormCatalogue.owned(allForms(player), classes.slots(), forms(player));
     }
 
     /**
@@ -56,7 +72,7 @@ public final class FormService {
         ResourceLocation id = forms.equipped().get();
         PlayerClasses classes = player.getData(ModAttachments.PLAYER_CLASSES);
         return Definitions.get(player.level(), ModDatapackRegistries.FORM, id)
-                .flatMap(form -> FormCatalogue.ownedForm(id, form, classes.slots(), forms));
+                .flatMap(form -> FormCatalogue.ownedForm(id, form, allForms(player), classes.slots(), forms));
     }
 
     /** The equipped form's passive once its form level reaches it (also counts for the Mitofus world only). */
@@ -110,7 +126,7 @@ public final class FormService {
     /** Operator: equips a form the player owns, ignoring combat. A form the classes do not give cannot be worn. */
     public static boolean forceEquip(ServerPlayer player, ResourceLocation id) {
         Optional<FormDefinition> form = Definitions.get(player.level(), ModDatapackRegistries.FORM, id);
-        if (form.isEmpty() || FormCatalogue.ownedForm(id, form.get(),
+        if (form.isEmpty() || FormCatalogue.ownedForm(id, form.get(), allForms(player),
                 player.getData(ModAttachments.PLAYER_CLASSES).slots(), forms(player)).isEmpty()) {
             return false;
         }
@@ -198,7 +214,10 @@ public final class FormService {
     /** What the server does with a click on the Forms tab: wears the form or takes it off, and says why when it cannot. */
     public static void handle(ServerPlayer player, Optional<ResourceLocation> form) {
         Result result = form.map(id -> equip(player, id)).orElseGet(() -> unequip(player));
-        messageKey(result).ifPresent(key -> player.displayClientMessage(net.minecraft.network.chat.Component.translatable(key), true));
+        messageKey(result).ifPresent(key -> {
+            player.displayClientMessage(net.minecraft.network.chat.Component.translatable(key), true);
+            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, new FormMessagePayload(key));
+        });
     }
 
     /** The action-bar message of a refusal; nothing when it went through. */

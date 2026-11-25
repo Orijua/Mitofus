@@ -235,4 +235,16 @@ public final class FormTests {
         helper.assertTrue(FormService.forms(player).xpOf(EMBER_BLADE) > 0, "its uses are kept");
         helper.succeed();
     }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void aMissingGradeQuestHoldsBackTheLaterSwordsmanForms(GameTestHelper helper) {
+        ServerPlayer player = swordsman(helper, 300);
+        FormService.grant(player, Mitofus.id("thunder_edge"));
+        helper.assertTrue(FormService.owned(player).size() == 1, "only the level form before the missing quest: " + FormService.owned(player));
+        FormService.grant(player, TIDEBREAKER);
+        helper.assertTrue(FormService.owned(player).size() == 5, "ember, tidebreaker, stonewarden, thunder edge and dawnblade: " + FormService.owned(player));
+        helper.assertFalse(FormService.owned(player).stream().anyMatch(o -> o.id().equals(Mitofus.id("abyss_tide"))),
+                "nothing past the level 300 quest form");
+        helper.succeed();
+    }
 }
