@@ -13,6 +13,7 @@
         slots: [{slot: 0, class: "mitofus:swordsman", class_level: 150, class_xp: 12, grade: "adept"}],
         job: "mitofus:legendary_blacksmith"
     },
+    player_forms: {xp: {"mitofus:ember_blade": 420}, granted: ["mitofus:tidebreaker"], equipped: "mitofus:ember_blade"},
     player_counters: {"kills/minecraft:zombie": 17},
     player_quests: {
         active: {"mitofus:smith_iron": 12},

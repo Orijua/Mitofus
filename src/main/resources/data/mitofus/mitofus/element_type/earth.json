@@ -1,0 +1,7 @@
+{
+  "name": {
+    "translate": "element.mitofus.earth"
+  },
+  "color": 9136404,
+  "strong_against": ["mitofus:lightning"]
+}

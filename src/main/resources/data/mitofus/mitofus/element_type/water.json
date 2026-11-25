@@ -1,0 +1,7 @@
+{
+  "name": {
+    "translate": "element.mitofus.water"
+  },
+  "color": 3447003,
+  "strong_against": ["mitofus:fire"]
+}

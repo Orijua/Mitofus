@@ -100,7 +100,8 @@ class SavedDataCompatibilityTest {
             Map.entry("save_version", Codec.INT),
             Map.entry("from_spawner", Codec.BOOL),
             Map.entry("mob_level", MobLevel.CODEC),
-            Map.entry("passive_overrides", PassiveOverrides.CODEC));
+            Map.entry("passive_overrides", PassiveOverrides.CODEC),
+            Map.entry("player_forms", com.orijua.mitofus.feature.form.PlayerForms.CODEC));
 
     /**
      * Attachments that existed in an older save version and were removed since: their fixtures stay but are not loaded.

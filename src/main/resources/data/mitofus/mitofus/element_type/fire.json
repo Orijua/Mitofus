@@ -1,0 +1,7 @@
+{
+  "name": {
+    "translate": "element.mitofus.fire"
+  },
+  "color": 15158332,
+  "strong_against": ["mitofus:earth"]
+}

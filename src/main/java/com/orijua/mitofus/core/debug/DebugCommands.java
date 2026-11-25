@@ -60,6 +60,7 @@ public final class DebugCommands {
         nodes.addAll(EquipmentDebugCommands.nodes(context));
         nodes.addAll(WorldDebugCommands.nodes(context));
         nodes.addAll(SkillDebugCommands.nodes());
+        nodes.addAll(FormDebugCommands.nodes());
         return nodes;
     }
 

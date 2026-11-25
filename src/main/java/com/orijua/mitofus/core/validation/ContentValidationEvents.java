@@ -25,6 +25,7 @@ public final class ContentValidationEvents {
     private static List<String> problems(net.minecraft.core.RegistryAccess access, net.minecraft.world.item.crafting.RecipeManager recipes) {
         List<String> problems = new java.util.ArrayList<>(ContentValidator.validate(ContentScanner.index(access, recipes)));
         problems.addAll(FusionScanner.problems(access));
+        problems.addAll(com.orijua.mitofus.feature.form.FormValidator.problems(access));
         problems.sort(null);
         return problems;
     }

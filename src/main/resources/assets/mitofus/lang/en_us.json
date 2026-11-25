@@ -1656,5 +1656,19 @@
   "goal.mitofus.milestone.waterside_time": "Spend %s × 10 seconds by a river or the sea",
   "goal.mitofus.milestone.forest_time": "Spend %s × 10 seconds in a forest",
   "tag.item.minecraft.fishes": "Fish",
-  "tag.item.c.crops": "Crops"
+  "tag.item.c.crops": "Crops",
+  "message.mitofus.debug_forms_reset": "Forms back to nothing",
+  "message.mitofus.debug_form_unknown": "No form %s",
+  "message.mitofus.debug_form_equipped": "Form %s equipped",
+  "message.mitofus.debug_form_level": "Form %s set to level %s",
+  "message.mitofus.debug_form_granted": "Form %s granted",
+  "message.mitofus.debug_form_removed": "Form taken off",
+  "message.mitofus.debug_form_none": "No forms unlocked",
+  "message.mitofus.debug_form_line": "%1$s (type %2$s) level %3$s %4$s",
+  "element.mitofus.fire": "Fire",
+  "element.mitofus.water": "Water",
+  "element.mitofus.earth": "Earth",
+  "element.mitofus.lightning": "Lightning",
+  "element.mitofus.light": "Light",
+  "element.mitofus.shadow": "Shadow"
 }
