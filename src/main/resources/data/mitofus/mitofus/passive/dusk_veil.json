@@ -1,0 +1,16 @@
+{
+  "name": {
+    "translate": "passive.mitofus.dusk_veil"
+  },
+  "description": {
+    "translate": "passive.mitofus.dusk_veil.desc"
+  },
+  "icon": "minecraft:coal",
+  "bonuses": [
+    {
+      "type": "damage",
+      "amount": 0.06,
+      "at_night": true
+    }
+  ]
+}

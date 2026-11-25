@@ -1,0 +1,32 @@
+{
+  "name": {
+    "translate": "skill.mitofus.sky_dash"
+  },
+  "description": {
+    "translate": "skill.mitofus.sky_dash.desc"
+  },
+  "icon": "minecraft:lightning_rod",
+  "mana_cost": 8,
+  "cooldown_ticks": 60,
+  "required_item": "minecraft:swords",
+  "weapon_wear": 1,
+  "effects": [
+    {
+      "type": "area_damage",
+      "range": 3.0,
+      "cone_degrees": 30,
+      "damage_multiplier": 1.82,
+      "strength_scaling": 0.03
+    },
+    {
+      "type": "self_buff",
+      "effects": [
+        {
+          "id": "minecraft:speed",
+          "amplifier": 1,
+          "duration": 30
+        }
+      ]
+    }
+  ]
+}

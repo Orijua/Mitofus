@@ -1,0 +1,18 @@
+{
+  "name": {
+    "translate": "form.mitofus.thunder_edge"
+  },
+  "description": {
+    "translate": "form.mitofus.thunder_edge.desc"
+  },
+  "class": "mitofus:swordsman",
+  "unlock_level": 200,
+  "source": "grade_quest",
+  "type": "mitofus:lightning",
+  "skills": [
+    "mitofus:thunder_dash",
+    "mitofus:static_charge",
+    "mitofus:storm_strike"
+  ],
+  "inheritable": false
+}

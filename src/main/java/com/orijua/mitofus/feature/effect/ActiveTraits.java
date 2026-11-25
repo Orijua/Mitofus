@@ -64,6 +64,7 @@ public final class ActiveTraits {
                 }
             });
         }
+        com.orijua.mitofus.feature.form.FormService.equippedPassive(player).ifPresent(fromClass::add);
         return player.getData(ModAttachments.PASSIVE_OVERRIDES).resolve(fromClass);
     }
 
@@ -96,7 +97,7 @@ public final class ActiveTraits {
 
     /** Fraction of extra damage the player deals with {@code weapon} in hand right now (0.1 = +10 %). */
     public static double damageBonus(Player player) {
-        return TraitRules.damage(bonuses(player), ProgressionService.get(player).level(),
+        return com.orijua.mitofus.feature.form.FormService.typeBonus(player) + TraitRules.damage(bonuses(player), ProgressionService.get(player).level(),
                 bonus -> bonus.withItem().map(player.getMainHandItem()::is).orElse(true), player.level().isNight());
     }
 

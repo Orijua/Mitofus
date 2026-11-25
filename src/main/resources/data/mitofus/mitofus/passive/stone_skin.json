@@ -1,0 +1,19 @@
+{
+  "name": {
+    "translate": "passive.mitofus.stone_skin"
+  },
+  "description": {
+    "translate": "passive.mitofus.stone_skin.desc"
+  },
+  "icon": "minecraft:stone",
+  "bonuses": [
+    {
+      "type": "armor",
+      "amount": 3.0
+    },
+    {
+      "type": "knockback_resistance",
+      "amount": 0.25
+    }
+  ]
+}

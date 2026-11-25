@@ -53,7 +53,7 @@ public final class FormRules {
         return form.maxTypeBonus() * Math.min(Math.max(level, 0), MAX_LEVEL) / MAX_LEVEL;
     }
 
-    /** The form's skills the player has at {@code level}: attack at 1, passive at 30, ultimate at 60. */
+    /** The form's skills (and passive) the player has at {@code level}: attack at 1, passive at 30, ultimate at 60. */
     public static List<ResourceLocation> unlockedSkills(FormDefinition form, int level) {
         List<ResourceLocation> result = new ArrayList<>();
         for (int i = 0; i < form.skills().size() && i < SKILL_LEVELS.size(); i++) {
@@ -73,5 +73,21 @@ public final class FormRules {
             return false;
         }
         return inherited || form.source() == FormSource.LEVEL || granted;
+    }
+
+    /** The skills to learn (attack and ultimate, not the passive) at {@code level}. */
+    public static List<ResourceLocation> unlockedActiveSkills(FormDefinition form, int level) {
+        List<ResourceLocation> result = new ArrayList<>();
+        for (int i = 0; i < form.skills().size() && i < SKILL_LEVELS.size(); i++) {
+            if (i != FormDefinition.PASSIVE_INDEX && level >= SKILL_LEVELS.get(i)) {
+                result.add(form.skills().get(i));
+            }
+        }
+        return result;
+    }
+
+    /** The passive of the form at {@code level}, once it reaches the passive's level. */
+    public static java.util.Optional<ResourceLocation> unlockedPassive(FormDefinition form, int level) {
+        return level >= SKILL_LEVELS.get(FormDefinition.PASSIVE_INDEX) ? form.passive() : java.util.Optional.empty();
     }
 }

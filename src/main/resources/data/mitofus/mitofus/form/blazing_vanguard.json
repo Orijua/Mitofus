@@ -1,0 +1,18 @@
+{
+  "name": {
+    "translate": "form.mitofus.blazing_vanguard"
+  },
+  "description": {
+    "translate": "form.mitofus.blazing_vanguard.desc"
+  },
+  "class": "mitofus:swordsman",
+  "unlock_level": 300,
+  "source": "grade_quest",
+  "type": "mitofus:fire",
+  "skills": [
+    "mitofus:blazing_cut",
+    "mitofus:scorching_edge",
+    "mitofus:firestorm_burst"
+  ],
+  "inheritable": false
+}

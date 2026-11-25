@@ -397,6 +397,7 @@ public final class QuestService {
         giveRewards(player, quest);
         quest.classReward().ifPresent(classId -> ClassService.grantClass(player, classId));
         quest.jobReward().ifPresent(jobId -> ClassService.grantJob(player, jobId));
+        quest.formReward().ifPresent(formId -> com.orijua.mitofus.feature.form.FormService.grant(player, formId));
         quest.gradeQuest().ifPresent(grade -> quest.requiredClass().ifPresent(classId -> raiseGrade(player, classId)));
         player.displayClientMessage(Component.translatable("message.mitofus.quest_completed", quest.name()), false);
         player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8f, 1.5f);

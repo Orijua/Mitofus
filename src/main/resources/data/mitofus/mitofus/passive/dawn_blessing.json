@@ -1,0 +1,19 @@
+{
+  "name": {
+    "translate": "passive.mitofus.dawn_blessing"
+  },
+  "description": {
+    "translate": "passive.mitofus.dawn_blessing.desc"
+  },
+  "icon": "minecraft:golden_apple",
+  "bonuses": [
+    {
+      "type": "max_mana",
+      "amount": 20.0
+    },
+    {
+      "type": "mana_regen",
+      "amount": 0.2
+    }
+  ]
+}

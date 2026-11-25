@@ -1,0 +1,29 @@
+{
+  "name": {
+    "translate": "skill.mitofus.shadow_slash"
+  },
+  "description": {
+    "translate": "skill.mitofus.shadow_slash.desc"
+  },
+  "icon": "minecraft:echo_shard",
+  "mana_cost": 8,
+  "cooldown_ticks": 60,
+  "required_item": "minecraft:swords",
+  "weapon_wear": 1,
+  "effects": [
+    {
+      "type": "area_damage",
+      "range": 3.5,
+      "cone_degrees": 60,
+      "damage_multiplier": 1.7,
+      "strength_scaling": 0.03,
+      "target_effects": [
+        {
+          "id": "minecraft:weakness",
+          "amplifier": 0,
+          "duration": 80
+        }
+      ]
+    }
+  ]
+}

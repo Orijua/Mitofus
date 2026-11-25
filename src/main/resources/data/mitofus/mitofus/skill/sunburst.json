@@ -1,0 +1,32 @@
+{
+  "name": {
+    "translate": "skill.mitofus.sunburst"
+  },
+  "description": {
+    "translate": "skill.mitofus.sunburst.desc"
+  },
+  "icon": "minecraft:sunflower",
+  "mana_cost": 30,
+  "cooldown_ticks": 1200,
+  "required_item": "minecraft:swords",
+  "weapon_wear": 1,
+  "effects": [
+    {
+      "type": "area_damage",
+      "range": 6.0,
+      "cone_degrees": 360,
+      "damage_multiplier": 2.2,
+      "strength_scaling": 0.03
+    },
+    {
+      "type": "self_buff",
+      "effects": [
+        {
+          "id": "minecraft:regeneration",
+          "amplifier": 1,
+          "duration": 100
+        }
+      ]
+    }
+  ]
+}

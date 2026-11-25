@@ -1,0 +1,29 @@
+{
+  "name": {
+    "translate": "skill.mitofus.abyss_cut"
+  },
+  "description": {
+    "translate": "skill.mitofus.abyss_cut.desc"
+  },
+  "icon": "minecraft:prismarine_shard",
+  "mana_cost": 8,
+  "cooldown_ticks": 60,
+  "required_item": "minecraft:swords",
+  "weapon_wear": 1,
+  "effects": [
+    {
+      "type": "area_damage",
+      "range": 4.0,
+      "cone_degrees": 140,
+      "damage_multiplier": 1.68,
+      "strength_scaling": 0.03,
+      "target_effects": [
+        {
+          "id": "minecraft:slowness",
+          "amplifier": 1,
+          "duration": 100
+        }
+      ]
+    }
+  ]
+}

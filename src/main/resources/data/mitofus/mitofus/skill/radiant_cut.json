@@ -1,0 +1,29 @@
+{
+  "name": {
+    "translate": "skill.mitofus.radiant_cut"
+  },
+  "description": {
+    "translate": "skill.mitofus.radiant_cut.desc"
+  },
+  "icon": "minecraft:glowstone_dust",
+  "mana_cost": 8,
+  "cooldown_ticks": 60,
+  "required_item": "minecraft:swords",
+  "weapon_wear": 1,
+  "effects": [
+    {
+      "type": "area_damage",
+      "range": 3.5,
+      "cone_degrees": 60,
+      "damage_multiplier": 1.4,
+      "strength_scaling": 0.03,
+      "target_effects": [
+        {
+          "id": "minecraft:glowing",
+          "amplifier": 0,
+          "duration": 100
+        }
+      ]
+    }
+  ]
+}

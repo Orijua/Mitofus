@@ -17,6 +17,7 @@ import java.util.Set;
 
 /**
  * A quest from data/<namespace>/mitofus/quest/<id>.json: accept it, meet its goal, claim the rewards.
+ * {@code form_reward} gives the player that form (see form.FormService) when claimed.
  * {@code required_class} limits who can accept it; {@code class_reward} changes the player's class and {@code job_reward} their job when claimed.
  * {@code requires_quest} chains quests: this one unlocks once that one has been completed.
  * {@code discover_when} makes it a hidden quest: invisible until the player meets that secret goal
@@ -47,7 +48,8 @@ public record QuestDefinition(
         Optional<Integer> timeLimitDays,
         Optional<ResourceLocation> acceptSkill,
         int failLevelPenalty,
-        Optional<GradeQuest> gradeQuest) {
+        Optional<GradeQuest> gradeQuest,
+        Optional<ResourceLocation> formReward) {
 
     /** One Minecraft day, in ticks of day time. */
     public static final long DAY_TICKS = 24_000L;
@@ -67,18 +69,20 @@ public record QuestDefinition(
             BuiltInRegistries.ENTITY_TYPE.byNameCodec().optionalFieldOf("giver").forGetter(QuestDefinition::giver),
             ItemStack.CODEC.listOf().optionalFieldOf("loaned_items", List.of()).forGetter(QuestDefinition::loanedItems),
             Codec.intRange(1, 365).optionalFieldOf("time_limit_days").forGetter(QuestDefinition::timeLimitDays),
-            Extras.CODEC.forGetter(quest -> new Extras(quest.acceptSkill(), quest.failLevelPenalty(), quest.gradeQuest()))
+            Extras.CODEC.forGetter(quest -> new Extras(quest.acceptSkill(), quest.failLevelPenalty(), quest.gradeQuest(), quest.formReward()))
     ).apply(instance, (name, description, goal, requiredClass, requiresQuest, discoverWhen, xpReward, itemRewards, classReward,
                        jobReward, repeatable, giver, loanedItems, timeLimitDays, extras) -> new QuestDefinition(name, description, goal,
             requiredClass, requiresQuest, discoverWhen, xpReward, itemRewards, classReward, jobReward, repeatable, giver, loanedItems,
-            timeLimitDays, extras.acceptSkill(), extras.failLevelPenalty(), extras.gradeQuest())));
+            timeLimitDays, extras.acceptSkill(), extras.failLevelPenalty(), extras.gradeQuest(), extras.formReward())));
 
     /** The last fields of the JSON, grouped only because a codec takes at most 16 fields; they stay flat in the file. */
-    private record Extras(Optional<ResourceLocation> acceptSkill, int failLevelPenalty, Optional<GradeQuest> gradeQuest) {
+    private record Extras(Optional<ResourceLocation> acceptSkill, int failLevelPenalty, Optional<GradeQuest> gradeQuest,
+                          Optional<ResourceLocation> formReward) {
         static final MapCodec<Extras> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 ResourceLocation.CODEC.optionalFieldOf("accept_skill").forGetter(Extras::acceptSkill),
                 Codec.intRange(0, 100).optionalFieldOf("fail_level_penalty", 0).forGetter(Extras::failLevelPenalty),
-                GradeQuest.CODEC.optionalFieldOf("grade_quest").forGetter(Extras::gradeQuest)
+                GradeQuest.CODEC.optionalFieldOf("grade_quest").forGetter(Extras::gradeQuest),
+                ResourceLocation.CODEC.optionalFieldOf("form_reward").forGetter(Extras::formReward)
         ).apply(instance, Extras::new));
     }
 
