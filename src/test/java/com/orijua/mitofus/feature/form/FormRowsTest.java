@@ -75,4 +75,21 @@ class FormRowsTest {
     void noClassesNoRows() {
         assertTrue(FormRows.rows(ALL, List.of(), PlayerForms.EMPTY).isEmpty());
     }
+
+    @Test
+    void aFormTwoSlotsGiveIsOwnedIfEitherSlotUnlocksIt() {
+        // the fusion (level 40) comes first and does not unlock the level 50 form; the swordsman slot does
+        var rows = FormRows.rows(ALL, List.of(slot(HYBRID, 40, SWORD, MAGE), slot(SWORD, 200)), PlayerForms.EMPTY);
+        var sword50 = rows.stream().filter(r -> r.id().equals(id("sword_50"))).toList();
+        assertEquals(1, sword50.size());
+        assertEquals(FormRows.State.OWNED, sword50.get(0).state());
+    }
+
+    @Test
+    void theProgressToTheNextLevelGoesFromZeroToOne() {
+        var curve = FormDefinition.Curve.DEFAULT;
+        assertEquals(0f, FormRules.progress(curve, 0), 1e-6);
+        assertEquals(0.5f, FormRules.progress(curve, curve.firstStep() / 2), 1e-2);
+        assertEquals(1f, FormRules.progress(curve, Integer.MAX_VALUE), 1e-6);
+    }
 }
