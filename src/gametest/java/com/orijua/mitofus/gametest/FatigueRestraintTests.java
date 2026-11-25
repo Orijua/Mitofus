@@ -266,6 +266,8 @@ public final class FatigueRestraintTests {
         player.setData(ModAttachments.MANA, 1000f);
         Zombie zombie = helper.spawn(EntityType.ZOMBIE, new Vec3(0.5, 1, 2.5));
         zombie.setNoAi(true);
+        // The pause between skills would refuse the casts that follow each other in one tick.
+        com.orijua.mitofus.core.config.SkillBalance.withOverride(new com.orijua.mitofus.core.config.SkillBalance(0), () ->
         in(helper, true, () -> {
             enterGrace(player);
             helper.assertTrue(SkillService.use(player, 0) == SkillService.Result.RESTRAINED, "held: sancho_link is refused");
@@ -276,7 +278,7 @@ public final class FatigueRestraintTests {
             rest(player);
             helper.assertTrue(SkillService.use(player, 0) == SkillService.Result.SUCCESS, "free again: sancho_link casts");
             helper.assertTrue(zombie.getHealth() < zombie.getMaxHealth(), "free: sancho_link hits the zombie (so the untouched check above proves something)");
-        });
+        }));
         helper.succeed();
     }
 
