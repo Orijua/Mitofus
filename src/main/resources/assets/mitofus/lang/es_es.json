@@ -1658,7 +1658,7 @@
   "tag.item.minecraft.fishes": "Pescado",
   "tag.item.c.crops": "Cultivos",
   "message.mitofus.debug_forms_reset": "Formas a cero",
-  "message.mitofus.debug_form_unknown": "No existe la forma %s",
+  "message.mitofus.debug_form_unknown": "La forma %s no existe o no es tuya (sube antes el nivel de clase)",
   "message.mitofus.debug_form_equipped": "Forma %s equipada",
   "message.mitofus.debug_form_level": "Forma %s a nivel %s",
   "message.mitofus.debug_form_granted": "Forma %s concedida",
