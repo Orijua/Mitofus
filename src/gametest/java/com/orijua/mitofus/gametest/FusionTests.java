@@ -59,30 +59,6 @@ public final class FusionTests {
         helper.succeed();
     }
 
-    /** A class left on its own can always join a hybrid: the hybrid keeps its identity and gains the class and its forms. */
-    @GameTest(template = TestSupport.EMPTY)
-    public static void aHybridAbsorbsALoneClass(GameTestHelper helper) {
-        ServerPlayer player = TestSupport.fakePlayer(helper);
-        ResourceLocation spearman = Mitofus.id("spearman");
-        ClassService.forceClass(player, 0, ARCHER);
-        ClassService.forceClass(player, 1, MAGE);
-        Wallet.add(player, Money.iron(10));
-        helper.assertTrue(FusionService.fuse(player, FUSION), "first the fusion");
-        ClassService.forceClass(player, 2, spearman);
-        helper.assertFalse(FusionService.missingAbsorb(player, 0, spearman).isEmpty(), "no coins left: it cannot absorb yet");
-        helper.assertFalse(FusionService.absorb(player, 0, spearman), "and nothing happens");
-        helper.assertTrue(classes(player).slots().size() == 2, "both slots are still there");
-        Wallet.add(player, Money.iron(10));
-        helper.assertTrue(FusionService.absorb(player, 0, spearman), "with the coins it works, missing " + FusionService.missingAbsorb(player, 0, spearman));
-        PlayerClasses after = classes(player);
-        helper.assertTrue(after.slots().size() == 1, "the lone class's slot is freed: " + after.slots());
-        ClassSlot hybrid = after.slot(0).orElseThrow();
-        helper.assertTrue(hybrid.classId().equals(MARKSMAN), "the hybrid keeps its identity");
-        helper.assertTrue(hybrid.origin().equals(java.util.List.of(ARCHER, MAGE, spearman)), "and gains the class: " + hybrid.origin());
-        helper.assertFalse(FusionService.absorb(player, 0, spearman), "a class cannot be absorbed twice");
-        helper.succeed();
-    }
-
     /** The hybrid gives more than the two classes did together. */
     @GameTest(template = TestSupport.EMPTY)
     public static void theHybridIsWorthMoreThanItsParents(GameTestHelper helper) {

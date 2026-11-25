@@ -60,43 +60,6 @@ public final class FusionRules {
         return missing;
     }
 
-    /**
-     * What stops a hybrid from absorbing a lone class: the hybrid must be a hybrid and the other a normal placed class, both
-     * of the same rank, the lone class's tree complete (the hybrid's own tree is not asked, so it is never stuck), and the coins there. The grade does not matter: the higher one stays.
-     */
-    public static Set<Missing> missingAbsorb(Parent hybrid, Parent lone, boolean canPay) {
-        Set<Missing> missing = EnumSet.noneOf(Missing.class);
-        if (hybrid.slot().isEmpty() || !hybrid.slot().get().isHybrid() || lone.slot().isEmpty() || lone.slot().get().isHybrid()) {
-            missing.add(Missing.CLASS);
-        } else {
-            if (hybrid.legendary() != lone.legendary()) {
-                missing.add(Missing.RANK);
-            }
-            if (!lone.treeComplete()) {
-                missing.add(Missing.TREE);
-            }
-        }
-        if (!canPay) {
-            missing.add(Missing.COINS);
-        }
-        return missing;
-    }
-
-    /**
-     * The hybrid after absorbing {@code lone}: it keeps its slot, class and identity, takes the higher level (and that XP) and
-     * grade, every node either had bought, and adds the absorbed class to its origin, so it gets that class's tree and forms.
-     */
-    public static ClassSlot absorb(ClassSlot hybrid, ClassSlot lone, int paidPoints) {
-        boolean loneHigher = lone.classLevel() > hybrid.classLevel() || (lone.classLevel() == hybrid.classLevel() && lone.classXp() > hybrid.classXp());
-        ClassSlot higher = loneHigher ? lone : hybrid;
-        List<ResourceLocation> talents = new ArrayList<>(hybrid.talents());
-        lone.talents().stream().filter(node -> !talents.contains(node)).forEach(talents::add);
-        List<ResourceLocation> origin = new ArrayList<>(hybrid.origin());
-        origin.add(lone.classId());
-        return new ClassSlot(hybrid.slot(), hybrid.classId(), higher.classLevel(), higher.classXp(),
-                hybrid.grade().ordinal() >= lone.grade().ordinal() ? hybrid.grade() : lone.grade(), List.copyOf(talents), List.copyOf(origin), paidPoints);
-    }
-
     /** Whether every node of the slot's own class tree is owned. A class with no tree has nothing left to buy, so it counts as complete. */
     public static boolean treeComplete(Map<ResourceLocation, ? extends TalentNode> all, ClassSlot slot) {
         Set<ResourceLocation> owned = TalentRules.owned(all, slot);
