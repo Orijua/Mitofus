@@ -36,6 +36,13 @@ public final class Definitions {
                 .map(holder -> holder.value());
     }
 
+    /** Every entry of a registry by id, for the content checks that work on a whole registry. */
+    public static <T> java.util.Map<ResourceLocation, T> entries(net.minecraft.core.RegistryAccess access, ResourceKey<Registry<T>> registry) {
+        java.util.Map<ResourceLocation, T> result = new java.util.HashMap<>();
+        access.registry(registry).ifPresent(r -> r.entrySet().forEach(e -> result.put(e.getKey().location(), e.getValue())));
+        return result;
+    }
+
     /** All entries sorted by id, so lists in the UI have a stable order. */
     public static <T> List<Entry<T>> all(Level level, ResourceKey<Registry<T>> registry) {
         return level.registryAccess().registry(registry)

@@ -13,6 +13,8 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
+import java.util.List;
+
 /**
  * Where the passive bonuses that act on events are applied: the damage the attacker deals (damage bonus, critical hits,
  * damage against the unaware), the damage the victim takes (reduction), what a hit gives back (life steal, statuses), what a
@@ -47,15 +49,18 @@ public final class TraitEvents {
         if (!(event.getSource().getEntity() instanceof ServerPlayer attacker)) {
             return;
         }
-        double bonus = ActiveTraits.damageBonus(attacker);
+        // The bonuses are gathered once for the whole hit.
+        List<Bonus> bonuses = ActiveTraits.snapshot(attacker);
+        int level = ProgressionService.get(attacker).level();
+        double bonus = ActiveTraits.damageBonus(attacker, bonuses, level);
         LivingEntity target = event.getEntity();
         if (target instanceof Mob mob && mob.getTarget() != attacker) {
-            bonus += ActiveTraits.total(attacker, BonusType.DAMAGE_VS_UNAWARE);
+            bonus += ActiveTraits.total(bonuses, level, BonusType.DAMAGE_VS_UNAWARE);
         }
         double multiplier = 1 + bonus;
-        double critChance = ActiveTraits.total(attacker, BonusType.CRIT_CHANCE);
+        double critChance = ActiveTraits.total(bonuses, level, BonusType.CRIT_CHANCE);
         if (critChance > 0 && attacker.getRandom().nextDouble() < critChance) {
-            multiplier *= BASE_CRIT_MULTIPLIER + ActiveTraits.total(attacker, BonusType.CRIT_DAMAGE);
+            multiplier *= BASE_CRIT_MULTIPLIER + ActiveTraits.total(bonuses, level, BonusType.CRIT_DAMAGE);
         }
         if (multiplier != 1) {
             event.setAmount((float) (event.getAmount() * multiplier));
@@ -68,12 +73,13 @@ public final class TraitEvents {
         if (!(event.getSource().getEntity() instanceof ServerPlayer attacker) || event.getNewDamage() <= 0) {
             return;
         }
-        double steal = ActiveTraits.total(attacker, BonusType.LIFE_STEAL);
+        List<Bonus> bonuses = ActiveTraits.snapshot(attacker);
+        int level = ProgressionService.get(attacker).level();
+        double steal = ActiveTraits.total(bonuses, level, BonusType.LIFE_STEAL);
         if (steal > 0) {
             attacker.heal((float) (event.getNewDamage() * steal));
         }
-        int level = ProgressionService.get(attacker).level();
-        for (Bonus bonus : ActiveTraits.onHitStatuses(attacker)) {
+        for (Bonus bonus : ActiveTraits.onHitStatuses(attacker, bonuses)) {
             StatusService.apply(attacker, event.getEntity(), bonus.status().get(), bonus.valueAt(level), bonus.intensity(), bonus.duration());
         }
     }
@@ -83,11 +89,13 @@ public final class TraitEvents {
         if (!(event.getSource().getEntity() instanceof ServerPlayer killer)) {
             return;
         }
-        double health = ActiveTraits.total(killer, BonusType.HEAL_ON_KILL);
+        List<Bonus> bonuses = ActiveTraits.snapshot(killer);
+        int level = ProgressionService.get(killer).level();
+        double health = ActiveTraits.total(bonuses, level, BonusType.HEAL_ON_KILL);
         if (health > 0) {
             killer.heal((float) health);
         }
-        double mana = ActiveTraits.total(killer, BonusType.MANA_ON_KILL);
+        double mana = ActiveTraits.total(bonuses, level, BonusType.MANA_ON_KILL);
         if (mana > 0) {
             float max = ProgressionService.maxMana(killer);
             killer.setData(ModAttachments.MANA, (float) Math.min(max, killer.getData(ModAttachments.MANA) + mana));

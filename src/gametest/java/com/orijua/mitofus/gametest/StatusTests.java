@@ -42,6 +42,9 @@ public final class StatusTests {
     @GameTest(template = TestSupport.EMPTY)
     public static void everyKindOfBonusHasAGlobalCapAndTheStatusesLoad(GameTestHelper helper) {
         for (BonusType type : BonusType.values()) {
+            if (type == BonusType.APPLY_STATUS) {
+                continue; // its limit is the status's own maximum chance, in the status file
+            }
             helper.assertTrue(BonusLimits.cap(type).isPresent(), "a cap in data for " + type.getSerializedName());
         }
         helper.assertTrue(Definitions.all(helper.getLevel(), ModDatapackRegistries.STATUS).size() == 6, "six statuses");
@@ -66,13 +69,13 @@ public final class StatusTests {
     @GameTest(template = TestSupport.EMPTY)
     public static void givingTheSameStatusAgainRenewsItAndNeverStacksIntensity(GameTestHelper helper) {
         Zombie target = zombie(helper);
-        target.addEffect(new MobEffectInstance(ModEffects.BURNING, 20, 1));
+        target.addEffect(new MobEffectInstance(ModEffects.BURNING, 20, 0));
         boolean landed = false;
         for (int i = 0; i < 200 && !landed; i++) {
             landed = StatusService.apply(null, target, BURN, 1.0, Optional.of(1), Optional.of(300));
         }
         MobEffectInstance burning = target.getEffect(ModEffects.BURNING);
-        helper.assertTrue(burning.getDuration() > 200 && burning.getAmplifier() == 0, "renewed to the new duration and intensity: " + burning);
+        helper.assertTrue(burning.getDuration() > 200 && burning.getAmplifier() == 0, "renewed to the new duration at the same intensity: " + burning);
         landed = false;
         for (int i = 0; i < 200 && !landed; i++) {
             landed = StatusService.apply(null, target, BURN, 1.0, Optional.of(10), Optional.of(100000));
@@ -104,6 +107,8 @@ public final class StatusTests {
         ServerPlayer player = TestSupport.fakePlayer(helper);
         ClassService.chooseClass(player, 0, SWORD);
         ClassService.setClassLevel(player, 0, 500);
+        FormService.grant(player, Mitofus.id("tidebreaker"));
+        FormService.grant(player, Mitofus.id("thunder_edge"));
         FormService.forceEquip(player, Mitofus.id("tidebreaker"));
         FormService.setLevel(player, Mitofus.id("tidebreaker"), 30);
         helper.assertTrue(ActiveTraits.total(player, BonusType.HEALTH_REGEN) == 0.5, "health regeneration of Flowing Guard");
@@ -132,6 +137,17 @@ public final class StatusTests {
             burning = target.hasEffect(ModEffects.BURNING);
         }
         helper.assertTrue(burning, "a hit with the form's passive burns the target");
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void aWeakEffectNeverCancelsAStrongerOneTheTargetAlreadyHas(GameTestHelper helper) {
+        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 1, 2, 1);
+        StatusService.refresh(zombie, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 300, 2), null);
+        helper.assertFalse(StatusService.refresh(zombie, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0), null), "the weak one is not applied");
+        helper.assertTrue(zombie.getEffect(MobEffects.MOVEMENT_SLOWDOWN).getAmplifier() == 2, "Slowness III stays");
+        helper.assertTrue(StatusService.refresh(zombie, new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 3), null), "a stronger one replaces it");
+        helper.assertTrue(zombie.getEffect(MobEffects.MOVEMENT_SLOWDOWN).getAmplifier() == 3, "Slowness IV");
         helper.succeed();
     }
 }

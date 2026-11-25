@@ -49,13 +49,15 @@ final class FormDebugCommands {
                 Commands.literal("list")
                         .then(Commands.literal("forms").executes(FormDebugCommands::listForms)),
                 Commands.literal("reset")
-                        .then(Commands.literal("forms").executes(ctx -> {
-                            ServerPlayer player = ctx.getSource().getPlayerOrException();
-                            FormService.forceUnequip(player);
-                            player.setData(ModAttachments.PLAYER_FORMS, PlayerForms.EMPTY);
-                            ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_forms_reset"), false);
-                            return 1;
-                        })));
+                        .then(Commands.literal("forms").executes(FormDebugCommands::resetForms)));
+    }
+
+    private static int resetForms(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = DebugSupport.mitofusPlayer(ctx);
+        FormService.forceUnequip(player);
+        player.setData(ModAttachments.PLAYER_FORMS, PlayerForms.EMPTY);
+        ctx.getSource().sendSuccess(() -> Component.translatable("message.mitofus.debug_forms_reset"), false);
+        return 1;
     }
 
     private static int setForm(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

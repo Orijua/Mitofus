@@ -47,4 +47,13 @@ class StatusRulesTest {
         assertEquals(0.5, TraitRules.capped(0.9, Optional.of(0.5)));
         assertEquals(0.9, TraitRules.capped(0.9, Optional.empty()), "no cap in data, no cut");
     }
+
+    @Test
+    void aStrongerStatusIsKeptAndAtTheSameStrengthTheLongerOne() {
+        assertTrue(StatusRules.keepsExisting(2, 40, 0, 300), "Slowness III is not cancelled by Slowness I");
+        assertFalse(StatusRules.keepsExisting(0, 300, 2, 40), "a stronger one replaces a weaker one");
+        assertTrue(StatusRules.keepsExisting(1, 200, 1, 100), "same strength, the longer lasts");
+        assertFalse(StatusRules.keepsExisting(1, 100, 1, 200), "same strength, a longer one renews it");
+        assertFalse(StatusRules.keepsExisting(1, 100, 1, 100), "equal ones renew");
+    }
 }

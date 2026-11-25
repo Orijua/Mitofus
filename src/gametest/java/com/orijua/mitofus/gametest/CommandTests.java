@@ -780,4 +780,25 @@ public final class CommandTests {
         }
         helper.succeed();
     }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void formCommandsGiveEquipLevelListAndReset(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        var ember = Mitofus.id("ember_blade");
+        helper.assertTrue(execute(helper, player, "mitofus set form mitofus:ember_blade") == 0, "a form the classes do not give is refused");
+        com.orijua.mitofus.feature.progression.ClassService.chooseClass(player, 0, Mitofus.id("swordsman"));
+        com.orijua.mitofus.feature.progression.ClassService.setClassLevel(player, 0, 50);
+        execute(helper, player, "mitofus list forms");
+        helper.assertTrue(execute(helper, player, "mitofus set form mitofus:ember_blade") == 1, "equipped");
+        helper.assertTrue(com.orijua.mitofus.feature.form.FormService.forms(player).equipped().equals(java.util.Optional.of(ember)), "worn");
+        execute(helper, player, "mitofus set formlevel mitofus:ember_blade 30");
+        helper.assertTrue(com.orijua.mitofus.feature.form.FormService.equipped(player).orElseThrow().level() == 30, "level 30");
+        execute(helper, player, "mitofus give form mitofus:tidebreaker");
+        helper.assertTrue(com.orijua.mitofus.feature.form.FormService.forms(player).isGranted(Mitofus.id("tidebreaker")), "granted");
+        execute(helper, player, "mitofus remove form");
+        helper.assertTrue(com.orijua.mitofus.feature.form.FormService.forms(player).equipped().isEmpty(), "taken off");
+        execute(helper, player, "mitofus reset forms");
+        helper.assertTrue(com.orijua.mitofus.feature.form.FormService.forms(player).equals(com.orijua.mitofus.feature.form.PlayerForms.EMPTY), "reset");
+        helper.succeed();
+    }
 }

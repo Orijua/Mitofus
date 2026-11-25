@@ -26,9 +26,9 @@ import java.util.Set;
  * passive definitions are synced). The real world has none: Mitofus-only, like every class bonus.
  */
 public final class ActiveTraits {
-    private record AttributePassive(BonusType type, Holder<Attribute> attribute, AttributeModifier.Operation operation) {
-        ResourceLocation id() {
-            return Mitofus.id("passive_" + type.getSerializedName());
+    private record AttributePassive(BonusType type, Holder<Attribute> attribute, AttributeModifier.Operation operation, ResourceLocation id) {
+        AttributePassive(BonusType type, Holder<Attribute> attribute, AttributeModifier.Operation operation) {
+            this(type, attribute, operation, Mitofus.id("passive_" + type.getSerializedName()));
         }
     }
 
@@ -85,7 +85,11 @@ public final class ActiveTraits {
         return result;
     }
 
-    private static List<Bonus> bonuses(Player player) {
+    /**
+     * Every bonus the player has right now. Build it once per event and pass it to the overloads that take it: building it
+     * walks the classes, passives, talents and skills.
+     */
+    public static List<Bonus> snapshot(Player player) {
         List<Bonus> result = new ArrayList<>();
         active(player).forEach(passive -> result.addAll(passive.trait().bonuses()));
         result.addAll(TalentEffects.passiveBonuses(player, Set.copyOf(activeIds(player))));
@@ -95,12 +99,21 @@ public final class ActiveTraits {
 
     /** The unconditional total of {@code type}, e.g. the extra maximum mana, under the global cap of its kind. */
     public static double total(Player player, BonusType type) {
-        return BonusLimits.capped(type, TraitRules.sum(bonuses(player), type, ProgressionService.get(player).level()));
+        return total(snapshot(player), ProgressionService.get(player).level(), type);
+    }
+
+    /** Same as {@link #total(Player, BonusType)} over a {@link #snapshot} taken for the player at {@code level}. */
+    public static double total(List<Bonus> bonuses, int level, BonusType type) {
+        return BonusLimits.capped(type, TraitRules.sum(bonuses, type, level));
     }
 
     /** The "apply a status on a hit" bonuses that count right now (the weapon in hand and the time of day are checked). */
     public static List<Bonus> onHitStatuses(Player player) {
-        return bonuses(player).stream()
+        return onHitStatuses(player, snapshot(player));
+    }
+
+    public static List<Bonus> onHitStatuses(Player player, List<Bonus> bonuses) {
+        return bonuses.stream()
                 .filter(bonus -> bonus.type() == BonusType.APPLY_STATUS && bonus.status().isPresent()
                         && bonus.withItem().map(player.getMainHandItem()::is).orElse(true)
                         && (!bonus.atNight() || player.level().isNight()))
@@ -109,14 +122,18 @@ public final class ActiveTraits {
 
     /** Fraction of extra damage the player deals with {@code weapon} in hand right now (0.1 = +10 %). */
     public static double damageBonus(Player player) {
+        return damageBonus(player, snapshot(player), ProgressionService.get(player).level());
+    }
+
+    public static double damageBonus(Player player, List<Bonus> bonuses, int level) {
         return BonusLimits.capped(BonusType.DAMAGE, com.orijua.mitofus.feature.form.FormService.typeBonus(player)
-                + TraitRules.damage(bonuses(player), ProgressionService.get(player).level(),
+                + TraitRules.damage(bonuses, level,
                 bonus -> bonus.withItem().map(player.getMainHandItem()::is).orElse(true), player.level().isNight()));
     }
 
     /** Idempotent: puts the attribute passives on the player, or takes them off when there are none. */
     public static void apply(Player player) {
-        List<Bonus> bonuses = bonuses(player);
+        List<Bonus> bonuses = snapshot(player);
         int level = ProgressionService.get(player).level();
         for (AttributePassive passive : ATTRIBUTES) {
             AttributeInstance instance = player.getAttribute(passive.attribute());
@@ -127,7 +144,10 @@ public final class ActiveTraits {
             if (value <= 0) {
                 instance.removeModifier(passive.id());
             } else {
-                instance.addOrReplacePermanentModifier(new AttributeModifier(passive.id(), value, passive.operation()));
+                AttributeModifier current = instance.getModifier(passive.id());
+                if (current == null || current.amount() != value || current.operation() != passive.operation()) {
+                    instance.addOrReplacePermanentModifier(new AttributeModifier(passive.id(), value, passive.operation()));
+                }
             }
         }
     }

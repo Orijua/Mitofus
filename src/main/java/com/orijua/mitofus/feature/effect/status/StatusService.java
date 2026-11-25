@@ -45,7 +45,9 @@ public final class StatusService {
         }
         int ticks = StatusRules.duration(duration, status.limits());
         int level = StatusRules.intensity(intensity, status.limits());
-        refresh(target, new MobEffectInstance(status.effect(), ticks, level - 1, false, true, true), source);
+        if (!refresh(target, new MobEffectInstance(status.effect(), ticks, level - 1, false, true, true), source)) {
+            return false;
+        }
         long until = StatusRules.immuneUntil(now, ticks, status.limits());
         if (until > 0) {
             target.getPersistentData().putLong(tag, until);
@@ -57,9 +59,18 @@ public final class StatusService {
         return true;
     }
 
-    /** Gives a game effect that renews its duration if the target already has it, and never stacks its intensity. */
-    public static void refresh(LivingEntity target, MobEffectInstance effect, @Nullable LivingEntity source) {
+    /**
+     * Gives a game effect that renews its duration if the target already has it, and never stacks its intensity. A
+     * stronger instance the target already has is kept (see {@link StatusRules#keepsExisting}).
+     *
+     * @return whether the target now has the new instance
+     */
+    public static boolean refresh(LivingEntity target, MobEffectInstance effect, @Nullable LivingEntity source) {
+        MobEffectInstance current = target.getEffect(effect.getEffect());
+        if (current != null && StatusRules.keepsExisting(current.getAmplifier(), current.getDuration(), effect.getAmplifier(), effect.getDuration())) {
+            return false;
+        }
         target.removeEffect(effect.getEffect());
-        target.addEffect(effect, source);
+        return target.addEffect(effect, source);
     }
 }
