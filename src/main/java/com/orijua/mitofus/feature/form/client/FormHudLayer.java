@@ -23,7 +23,7 @@ import net.minecraft.network.chat.Component;
 public final class FormHudLayer implements LayeredDraw.Layer {
     private static final int WIDTH = 81;
     private static final int BAR_HEIGHT = 2;
-    private static final int ROW_HEIGHT = 13;
+    private static final int ROW_HEIGHT = 17;
 
     @Override
     public void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
@@ -54,7 +54,8 @@ public final class FormHudLayer implements LayeredDraw.Layer {
         gui.rightHeight += ROW_HEIGHT;
 
         Component label = Component.translatable("hud.mitofus.form", form.get().name(), level);
-        UiStyle.text(graphics, minecraft.font, UiStyle.ellipsize(minecraft.font, label, WIDTH), left, top - 8, color);
+        UiStyle.text(graphics, minecraft.font, UiStyle.ellipsize(minecraft.font, label, WIDTH - ElementIcons.SIZE - 2), left, top - 8, color);
+        ElementIcons.draw(graphics, form.get().type(), left + WIDTH - ElementIcons.SIZE, top - ElementIcons.SIZE + 3);
         UiStyle.bar(graphics, left, top + 1, WIDTH, BAR_HEIGHT, fraction, color);
     }
 }

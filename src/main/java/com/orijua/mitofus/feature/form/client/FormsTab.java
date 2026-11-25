@@ -177,7 +177,8 @@ public class FormsTab extends MitofusTab {
             Component title = row.state() == FormRows.State.EQUIPPED
                     ? row.form().name().copy().append(" · ").append(Component.translatable("screen.mitofus.form_worn")) : row.form().name();
             boolean over = MitofusRow.draw(graphics, font(), left, rowY(i), cardWidth, accent, title, summary(row),
-                    row.state() == FormRows.State.LOCKED, row.state() == FormRows.State.EQUIPPED, mouseX, mouseY);
+                    row.state() == FormRows.State.LOCKED, row.state() == FormRows.State.EQUIPPED, mouseX, mouseY, ElementIcons.SIZE + 2);
+            ElementIcons.draw(graphics, row.form().type(), left + cardWidth - ElementIcons.SIZE - 3, rowY(i) + (MitofusRow.height() - ElementIcons.SIZE) / 2);
             if (over) {
                 hovered = row;
             }

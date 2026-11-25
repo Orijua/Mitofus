@@ -27,9 +27,15 @@ public final class MitofusRow {
     /** Draws the row and returns whether the mouse is over it. */
     public static boolean draw(GuiGraphics graphics, Font font, int x, int y, int width, int accent, Component title,
                                Component summary, boolean dim, boolean selected, int mouseX, int mouseY) {
+        return draw(graphics, font, x, y, width, accent, title, summary, dim, selected, mouseX, mouseY, 0);
+    }
+
+    /** Same, leaving {@code reservedRight} pixels free at the right end of the card for an icon the caller draws. */
+    public static boolean draw(GuiGraphics graphics, Font font, int x, int y, int width, int accent, Component title,
+                               Component summary, boolean dim, boolean selected, int mouseX, int mouseY, int reservedRight) {
         boolean hovered = contains(x, y, width, mouseX, mouseY);
         MitofusCard.draw(graphics, x, y, width, height(), accent, MitofusCard.state(hovered, dim, selected));
-        int textWidth = width - TEXT_OFFSET - PADDING;
+        int textWidth = width - TEXT_OFFSET - PADDING - reservedRight;
         UiStyle.text(graphics, font, UiStyle.ellipsize(font, title, textWidth), x + TEXT_OFFSET, y + PADDING, UiStyle.TEXT);
         UiStyle.text(graphics, font, UiStyle.ellipsize(font, summary, textWidth), x + TEXT_OFFSET,
                 y + PADDING + UiStyle.LINE - 2, UiStyle.MUTED);
