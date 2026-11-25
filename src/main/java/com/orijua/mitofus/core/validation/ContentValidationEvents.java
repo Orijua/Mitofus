@@ -26,6 +26,7 @@ public final class ContentValidationEvents {
         List<String> problems = new java.util.ArrayList<>(ContentValidator.validate(ContentScanner.index(access, recipes)));
         problems.addAll(FusionScanner.problems(access));
         problems.addAll(com.orijua.mitofus.feature.form.FormValidator.problems(access));
+        problems.addAll(com.orijua.mitofus.feature.effect.status.StatusValidator.problems(access));
         problems.sort(null);
         return problems;
     }

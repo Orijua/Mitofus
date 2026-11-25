@@ -5,10 +5,8 @@ import com.orijua.mitofus.feature.progression.ClassSlot;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /** Pure: which forms a player owns, from the class slots and what they were granted. */
 public final class FormCatalogue {
@@ -19,25 +17,63 @@ public final class FormCatalogue {
     private FormCatalogue() {
     }
 
+    /** One form of the player's classes: {@code unlocked} says whether it is owned; a locked one still has its level. */
+    public record Visible(ResourceLocation id, FormDefinition form, int level, boolean inherited, boolean unlocked, int classLevel, int slotIndex) {
+    }
+
     /**
-     * The forms unlocked by the player's classes. A class owns the forms written for it; a hybrid class also gets the
-     * {@code inheritable} forms of its two parents, but only once it reaches the level that unlocks them.
+     * Every form the player's classes can give, owned or not, once per form. A class owns the forms written for it; a
+     * hybrid class also gets the {@code inheritable} forms of its two parents. When two slots give the same form, the
+     * one that unlocks it wins, so the tab and the server never disagree.
      */
-    public static List<Owned> owned(List<Definitions.Entry<FormDefinition>> all, List<ClassSlot> slots, PlayerForms forms) {
-        List<Owned> result = new ArrayList<>();
-        Set<ResourceLocation> seen = new HashSet<>();
-        for (ClassSlot slot : slots) {
+    public static List<Visible> visible(List<Definitions.Entry<FormDefinition>> all, List<ClassSlot> slots, PlayerForms forms) {
+        List<Visible> result = new ArrayList<>();
+        java.util.Map<ResourceLocation, Integer> index = new java.util.HashMap<>();
+        for (int slotIndex = 0; slotIndex < slots.size(); slotIndex++) {
+            ClassSlot slot = slots.get(slotIndex);
             for (Definitions.Entry<FormDefinition> entry : all) {
-                FormDefinition form = entry.value();
-                boolean own = form.playerClass().equals(slot.classId());
-                boolean inherited = !own && slot.isHybrid() && form.inheritable() && slot.origin().contains(form.playerClass());
-                if ((own || inherited) && FormRules.unlocked(form, slot.classLevel(), forms.isGranted(entry.id()), inherited)
-                        && seen.add(entry.id())) {
-                    result.add(new Owned(entry.id(), form, FormRules.level(form.curve(), forms.xpOf(entry.id())), inherited));
+                Visible found = visibleIn(entry.id(), entry.value(), slot, slotIndex, forms);
+                if (found == null) {
+                    continue;
+                }
+                Integer at = index.get(entry.id());
+                if (at == null) {
+                    index.put(entry.id(), result.size());
+                    result.add(found);
+                } else if (found.unlocked() && !result.get(at).unlocked()) {
+                    result.set(at, found);
                 }
             }
         }
         return result;
+    }
+
+    /** {@code form} as the slot sees it, or null when the slot's class does not give it. */
+    private static Visible visibleIn(ResourceLocation id, FormDefinition form, ClassSlot slot, int slotIndex, PlayerForms forms) {
+        boolean own = form.playerClass().equals(slot.classId());
+        boolean inherited = !own && slot.isHybrid() && form.inheritable() && slot.origin().contains(form.playerClass());
+        if (!own && !inherited) {
+            return null;
+        }
+        boolean unlocked = FormRules.unlocked(form, slot.classLevel(), forms.isGranted(id), inherited);
+        return new Visible(id, form, FormRules.level(form.curve(), forms.xpOf(id)), inherited, unlocked, slot.classLevel(), slotIndex);
+    }
+
+    /** The forms unlocked by the player's classes. */
+    public static List<Owned> owned(List<Definitions.Entry<FormDefinition>> all, List<ClassSlot> slots, PlayerForms forms) {
+        return visible(all, slots, forms).stream().filter(Visible::unlocked)
+                .map(v -> new Owned(v.id(), v.form(), v.level(), v.inherited())).toList();
+    }
+
+    /** Whether the player owns this one form, without building the whole catalogue. */
+    public static Optional<Owned> ownedForm(ResourceLocation id, FormDefinition form, List<ClassSlot> slots, PlayerForms forms) {
+        for (int i = 0; i < slots.size(); i++) {
+            Visible found = visibleIn(id, form, slots.get(i), i, forms);
+            if (found != null && found.unlocked()) {
+                return Optional.of(new Owned(id, form, found.level(), found.inherited()));
+            }
+        }
+        return Optional.empty();
     }
 
     public static Optional<Owned> find(List<Owned> owned, ResourceLocation id) {

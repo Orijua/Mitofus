@@ -76,6 +76,8 @@ public final class FormTests {
         helper.assertTrue(stored.isGranted(SOME_FORM) && stored.xpOf(SOME_FORM) == 300 && stored.equipped().equals(Optional.of(SOME_FORM)),
                 "stored: " + stored);
         helper.assertTrue(FormService.equipped(player).isEmpty(), "a form the classes do not give is not worn");
+        helper.assertTrue(FormService.forms(player).equipped().isEmpty(), "a form that is no longer owned is taken off by itself");
+        helper.assertTrue(FormService.forms(player).xpOf(SOME_FORM) == 300, "its uses are kept");
         ModAttachments.resetAll(player);
         helper.assertTrue(FormService.forms(player).equals(PlayerForms.EMPTY), "reset all clears the forms");
         helper.succeed();
@@ -203,6 +205,34 @@ public final class FormTests {
         helper.assertTrue(FormService.forms(player).equipped().isEmpty(), "taken off");
         helper.assertTrue(FormService.messageKey(FormService.Result.OK).isEmpty(), "no message when it works");
         helper.assertTrue(FormService.messageKey(FormService.Result.IN_COMBAT).equals(Optional.of("message.mitofus.form_in_combat")), "combat message");
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void takingAFormOffAndOnAgainDoesNotSkipTheCooldownOfItsSkills(GameTestHelper helper) {
+        ServerPlayer player = swordsman(helper, 50);
+        FormService.equip(player, EMBER_BLADE);
+        long until = helper.getLevel().getGameTime() + 1200;
+        player.setData(ModAttachments.PLAYER_SKILLS, SkillService.get(player).withCooldown(FLAME_SLASH, until));
+        FormService.forceUnequip(player);
+        FormService.forceEquip(player, EMBER_BLADE);
+        helper.assertTrue(SkillService.get(player).knows(FLAME_SLASH), "learned again");
+        helper.assertTrue(SkillService.get(player).cooldownRemaining(FLAME_SLASH, helper.getLevel().getGameTime()) > 1000,
+                "the cooldown kept running");
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void aFormThePlayerLosesStopsGivingItsBonusAndSkills(GameTestHelper helper) {
+        ServerPlayer player = swordsman(helper, 50);
+        FormService.equip(player, EMBER_BLADE);
+        FormService.setLevel(player, EMBER_BLADE, 60);
+        helper.assertTrue(FormService.typeBonus(player) > 0, "bonus while owned");
+        ClassService.setClassLevel(player, 0, 40);
+        helper.assertTrue(FormService.typeBonus(player) == 0.0, "no bonus once the form is lost");
+        helper.assertTrue(FormService.forms(player).equipped().isEmpty(), "taken off by itself");
+        helper.assertFalse(SkillService.get(player).knows(FLAME_SLASH), "its skills are gone");
+        helper.assertTrue(FormService.forms(player).xpOf(EMBER_BLADE) > 0, "its uses are kept");
         helper.succeed();
     }
 }

@@ -6,6 +6,7 @@ import com.orijua.mitofus.core.registry.ModAttachments;
 import com.orijua.mitofus.core.registry.ModDataComponents;
 import com.orijua.mitofus.core.registry.ModDatapackRegistries;
 import com.orijua.mitofus.feature.effect.ActiveTraits;
+import com.orijua.mitofus.feature.effect.BonusType;
 import com.orijua.mitofus.feature.effect.EffectContext;
 import com.orijua.mitofus.feature.effect.EffectEngine;
 import com.orijua.mitofus.feature.effect.EffectSource;
@@ -168,7 +169,7 @@ public final class SkillService {
         }
         player.setData(ModAttachments.MANA, mana - manaCost);
         player.setData(ModAttachments.PLAYER_SKILLS, skills.withCooldown(id, now + Math.round(tuning.cooldownTicks(skill.cooldownTicks())
-                * (1 - Math.min(0.9, ActiveTraits.total(player, com.orijua.mitofus.feature.effect.BonusType.COOLDOWN_REDUCTION))))));
+                * Math.max(0, 1 - ActiveTraits.total(player, BonusType.COOLDOWN_REDUCTION)))));
         player.displayClientMessage(skill.name(), true);
         NeoForge.EVENT_BUS.post(new SkillUsedEvent(player, id));
         return Result.SUCCESS;

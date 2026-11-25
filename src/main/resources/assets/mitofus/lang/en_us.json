@@ -1658,7 +1658,7 @@
   "tag.item.minecraft.fishes": "Fish",
   "tag.item.c.crops": "Crops",
   "message.mitofus.debug_forms_reset": "Forms back to nothing",
-  "message.mitofus.debug_form_unknown": "No form %s",
+  "message.mitofus.debug_form_unknown": "Form %s does not exist or you do not own it (raise the class level first)",
   "message.mitofus.debug_form_equipped": "Form %s equipped",
   "message.mitofus.debug_form_level": "Form %s set to level %s",
   "message.mitofus.debug_form_granted": "Form %s granted",

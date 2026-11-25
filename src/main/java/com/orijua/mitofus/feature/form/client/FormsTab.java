@@ -44,7 +44,7 @@ public class FormsTab extends MitofusTab {
     private final ScrollList scroll = new ScrollList(1);
     private List<FormRows.Row> all = List.of();
     private PlayerForms shownForms = PlayerForms.EMPTY;
-    private int shownClassHash;
+    private List<com.orijua.mitofus.feature.progression.ClassSlot> shownSlots = List.of();
     private int visibleRows = 1;
 
     public FormsTab() {
@@ -57,11 +57,11 @@ public class FormsTab extends MitofusTab {
 
     private static List<FormRows.Row> compute() {
         return FormRows.rows(Definitions.all(player().level(), ModDatapackRegistries.FORM),
-                player().getData(ModAttachments.PLAYER_CLASSES).slots(), forms());
+                slots(), forms());
     }
 
-    private static int classHash() {
-        return player().getData(ModAttachments.PLAYER_CLASSES).slots().stream().mapToInt(slot -> slot.classId().hashCode() * 31 + slot.classLevel()).sum();
+    private static List<com.orijua.mitofus.feature.progression.ClassSlot> slots() {
+        return player().getData(ModAttachments.PLAYER_CLASSES).slots();
     }
 
     @Override
@@ -69,7 +69,7 @@ public class FormsTab extends MitofusTab {
         visible.clear();
         all = compute();
         shownForms = forms();
-        shownClassHash = classHash();
+        shownSlots = slots();
         visibleRows = PanelFit.rows(height - LIST_TOP, ROW);
         scroll.setVisibleRows(visibleRows);
         scroll.clamp(all.size());
@@ -93,7 +93,8 @@ public class FormsTab extends MitofusTab {
 
     @Override
     public boolean needsRebuild() {
-        return !forms().equals(shownForms) || classHash() != shownClassHash;
+        // Attachments are replaced when they change, so the same object means nothing changed.
+        return forms() != shownForms || slots() != shownSlots;
     }
 
     @Override

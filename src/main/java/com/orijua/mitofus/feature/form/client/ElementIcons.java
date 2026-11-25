@@ -10,8 +10,12 @@ public final class ElementIcons {
     private ElementIcons() {
     }
 
+    /** The six types are few and drawn every frame, so each texture id is built once. */
+    private static final java.util.Map<ResourceLocation, ResourceLocation> TEXTURES = new java.util.concurrent.ConcurrentHashMap<>();
+
     public static ResourceLocation texture(ResourceLocation type) {
-        return ResourceLocation.fromNamespaceAndPath(type.getNamespace(), "textures/gui/element/" + type.getPath() + ".png");
+        return TEXTURES.computeIfAbsent(type,
+                t -> ResourceLocation.fromNamespaceAndPath(t.getNamespace(), "textures/gui/element/" + t.getPath() + ".png"));
     }
 
     public static void draw(GuiGraphics graphics, ResourceLocation type, int x, int y) {
