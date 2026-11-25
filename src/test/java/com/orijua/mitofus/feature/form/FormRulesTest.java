@@ -193,11 +193,35 @@ class FormRulesTest {
         var visible = FormCatalogue.visible(all, slots, PlayerForms.EMPTY);
         assertEquals(1, visible.size());
         assertTrue(visible.get(0).unlocked());
-        assertTrue(FormCatalogue.ownedForm(id("ember"), ember.value(), slots, PlayerForms.EMPTY).isPresent());
+        assertTrue(FormCatalogue.ownedForm(id("ember"), ember.value(), all, slots, PlayerForms.EMPTY).isPresent());
         assertEquals(1, FormCatalogue.owned(all, slots, PlayerForms.EMPTY).size());
         // with no slot that unlocks it, the form is listed locked and not owned
         var locked = FormCatalogue.visible(all, List.of(slot(SPELLSWORD, 40, SWORD, MAGE)), PlayerForms.EMPTY);
         assertFalse(locked.get(0).unlocked());
         assertTrue(FormCatalogue.owned(all, List.of(slot(SPELLSWORD, 40, SWORD, MAGE)), PlayerForms.EMPTY).isEmpty());
+    }
+
+    @Test
+    void aMissingGradeQuestFormHoldsBackEveryLaterFormOfTheClass() {
+        var f50 = new Definitions.Entry<>(id("sword_50"), form(SWORD, 50, FormSource.LEVEL, true));
+        var f100 = new Definitions.Entry<>(id("sword_100"), form(SWORD, 100, FormSource.GRADE_QUEST, true));
+        var f150 = new Definitions.Entry<>(id("sword_150"), form(SWORD, 150, FormSource.LEVEL, true));
+        var f200 = new Definitions.Entry<>(id("sword_200"), form(SWORD, 200, FormSource.GRADE_QUEST, true));
+        var f250 = new Definitions.Entry<>(id("sword_250"), form(SWORD, 250, FormSource.LEVEL, true));
+        var all = List.of(f50, f100, f150, f200, f250);
+        var slots = List.of(slot(SWORD, 300));
+        // level 300 but no quest: only the level 50 form, none of the later ones (not even the plain level forms)
+        assertEquals(List.of(id("sword_50")), FormCatalogue.owned(all, slots, PlayerForms.EMPTY).stream().map(FormCatalogue.Owned::id).toList());
+        var blocked = FormCatalogue.visible(all, slots, PlayerForms.EMPTY).stream().filter(v -> v.id().equals(id("sword_150"))).findFirst().orElseThrow();
+        assertEquals(java.util.Optional.of(id("sword_100")), blocked.blockedBy());
+        // the level 200 quest alone does not open the level 150 and 250 forms either
+        var onlySecond = PlayerForms.EMPTY.withGranted(id("sword_200"));
+        assertEquals(List.of(id("sword_50")), FormCatalogue.owned(all, slots, onlySecond).stream().map(FormCatalogue.Owned::id).toList());
+        // with the first quest: 100 and 150 open, 200 and 250 wait for their own quest
+        var first = PlayerForms.EMPTY.withGranted(id("sword_100"));
+        assertEquals(List.of(id("sword_50"), id("sword_100"), id("sword_150")),
+                FormCatalogue.owned(all, slots, first).stream().map(FormCatalogue.Owned::id).toList());
+        // with both quests, everything
+        assertEquals(5, FormCatalogue.owned(all, slots, first.withGranted(id("sword_200"))).size());
     }
 }

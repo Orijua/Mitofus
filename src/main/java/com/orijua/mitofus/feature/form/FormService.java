@@ -22,10 +22,26 @@ public final class FormService {
         return player.getData(ModAttachments.PLAYER_FORMS);
     }
 
+    private record FormList(Object registries, List<Definitions.Entry<FormDefinition>> forms) {
+    }
+
+    private static volatile FormList cachedForms = new FormList(null, List.of());
+
+    /** Every form definition, sorted once per registry instead of on every hit. */
+    private static List<Definitions.Entry<FormDefinition>> allForms(ServerPlayer player) {
+        Object registries = player.level().registryAccess();
+        FormList current = cachedForms;
+        if (current.registries() != registries) {
+            current = new FormList(registries, Definitions.all(player.level(), ModDatapackRegistries.FORM));
+            cachedForms = current;
+        }
+        return current.forms();
+    }
+
     /** The forms the player's classes give them, with their levels. */
     public static List<FormCatalogue.Owned> owned(ServerPlayer player) {
         PlayerClasses classes = player.getData(ModAttachments.PLAYER_CLASSES);
-        return FormCatalogue.owned(Definitions.all(player.level(), ModDatapackRegistries.FORM), classes.slots(), forms(player));
+        return FormCatalogue.owned(allForms(player), classes.slots(), forms(player));
     }
 
     /**
@@ -40,7 +56,7 @@ public final class FormService {
         ResourceLocation id = forms.equipped().get();
         PlayerClasses classes = player.getData(ModAttachments.PLAYER_CLASSES);
         Optional<FormCatalogue.Owned> found = Definitions.get(player.level(), ModDatapackRegistries.FORM, id)
-                .flatMap(form -> FormCatalogue.ownedForm(id, form, classes.slots(), forms));
+                .flatMap(form -> FormCatalogue.ownedForm(id, form, allForms(player), classes.slots(), forms));
         if (found.isEmpty()) {
             player.setData(ModAttachments.PLAYER_FORMS, forms.withEquipped(Optional.empty()));
         }
