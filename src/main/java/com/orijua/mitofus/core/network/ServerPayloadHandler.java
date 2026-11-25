@@ -81,6 +81,12 @@ final class ServerPayloadHandler {
         }
     }
 
+    static void equipForm(com.orijua.mitofus.feature.form.EquipFormPayload payload, IPayloadContext context) {
+        if (context.player() instanceof ServerPlayer player && MitofusWorld.is(player.level())) {
+            com.orijua.mitofus.feature.form.FormService.handle(player, payload.form());
+        }
+    }
+
     static void allocateStat(AllocateStatPayload payload, IPayloadContext context) {
         if (context.player() instanceof ServerPlayer player && MitofusWorld.is(player.level())) {
             ProgressionService.allocatePoints(player, payload.stat(), payload.amount());

@@ -179,4 +179,20 @@ public final class FormService {
         }
         ActiveTraits.apply(player);
     }
+
+    /** What the server does with a click on the Forms tab: wears the form or takes it off, and says why when it cannot. */
+    public static void handle(ServerPlayer player, Optional<ResourceLocation> form) {
+        Result result = form.map(id -> equip(player, id)).orElseGet(() -> unequip(player));
+        messageKey(result).ifPresent(key -> player.displayClientMessage(net.minecraft.network.chat.Component.translatable(key), true));
+    }
+
+    /** The action-bar message of a refusal; nothing when it went through. */
+    public static Optional<String> messageKey(Result result) {
+        return switch (result) {
+            case OK -> Optional.empty();
+            case UNKNOWN -> Optional.of("message.mitofus.form_unknown");
+            case LOCKED -> Optional.of("message.mitofus.form_locked");
+            case IN_COMBAT -> Optional.of("message.mitofus.form_in_combat");
+        };
+    }
 }

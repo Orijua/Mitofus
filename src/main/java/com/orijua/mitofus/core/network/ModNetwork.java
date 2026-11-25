@@ -30,6 +30,7 @@ import com.orijua.mitofus.feature.storage.StorageInfoPayload;
 import com.orijua.mitofus.feature.storage.StoragePayload;
 import com.orijua.mitofus.feature.coach.CoachInfoPayload;
 import com.orijua.mitofus.feature.quest.QuestsSeenPayload;
+import com.orijua.mitofus.feature.form.EquipFormPayload;
 import com.orijua.mitofus.feature.skill.AssignSkillPayload;
 import com.orijua.mitofus.feature.skill.UseSkillPayload;
 import com.orijua.mitofus.feature.smelting.ManualSmeltPayload;
@@ -54,6 +55,7 @@ public final class ModNetwork {
         PayloadRegistrar registrar = event.registrar(PROTOCOL_VERSION);
         registrar.playToServer(UseSkillPayload.TYPE, UseSkillPayload.STREAM_CODEC, ServerPayloadHandler::useSkill);
         registrar.playToServer(AssignSkillPayload.TYPE, AssignSkillPayload.STREAM_CODEC, ServerPayloadHandler::assignSkill);
+        registrar.playToServer(EquipFormPayload.TYPE, EquipFormPayload.STREAM_CODEC, ServerPayloadHandler::equipForm);
         registrar.playToServer(AllocateStatPayload.TYPE, AllocateStatPayload.STREAM_CODEC, ServerPayloadHandler::allocateStat);
         registrar.playToServer(ChooseClassPayload.TYPE, ChooseClassPayload.STREAM_CODEC, ServerPayloadHandler::chooseClass);
         registrar.playToServer(BuyTalentPayload.TYPE, BuyTalentPayload.STREAM_CODEC, ServerPayloadHandler::buyTalent);

@@ -31,6 +31,7 @@ import com.orijua.mitofus.feature.quest.client.QuestTrackerHudLayer;
 import com.orijua.mitofus.feature.skill.PlayerSkills;
 import com.orijua.mitofus.feature.skill.SkillService;
 import com.orijua.mitofus.feature.skill.UseSkillPayload;
+import com.orijua.mitofus.feature.form.client.FormHudLayer;
 import com.orijua.mitofus.feature.skill.client.ManaHudLayer;
 import com.orijua.mitofus.feature.skill.client.SkillSlotsHudLayer;
 import com.orijua.mitofus.feature.smelting.client.SmelterScreen;
@@ -161,7 +162,8 @@ public class MitofusClient {
         // The energy bar also shows in the real world, where it refills.
         event.registerAbove(Mitofus.id("mana"), Mitofus.id("fatigue"), new FatigueHudLayer());
         event.registerAbove(Mitofus.id("fatigue"), Mitofus.id("xp"), mitofusOnly(new XpHudLayer()));
-        event.registerAbove(Mitofus.id("xp"), Mitofus.id("fatigue_rested"), FatigueHudLayer::renderRestedLayer);
+        event.registerAbove(Mitofus.id("xp"), Mitofus.id("form"), mitofusOnly(new FormHudLayer()));
+        event.registerAbove(Mitofus.id("form"), Mitofus.id("fatigue_rested"), FatigueHudLayer::renderRestedLayer);
         event.registerAboveAll(Mitofus.id("fatigue_debug"), new FatigueDebugLayer());
         event.registerAbove(VanillaGuiLayers.HOTBAR, Mitofus.id("skill_slots"), mitofusOnly(new SkillSlotsHudLayer()));
         event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, Mitofus.id("quest_tracker"), mitofusOnly(new QuestTrackerHudLayer()));

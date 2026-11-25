@@ -1760,5 +1760,22 @@
   "status.mitofus.slow": "Ralentización",
   "status.mitofus.weaken": "Debilidad",
   "effect.mitofus.burning": "En llamas",
-  "effect.mitofus.cursed": "Maldito"
+  "effect.mitofus.cursed": "Maldito",
+  "tab.mitofus.forms": "Formas",
+  "screen.mitofus.forms_header": "Formas",
+  "screen.mitofus.no_forms": "Aún no tienes formas. Tus clases las dan al subir de nivel.",
+  "screen.mitofus.form_equip": "Ponerse",
+  "screen.mitofus.form_unequip": "Quitar",
+  "screen.mitofus.form_worn": "Puesta",
+  "screen.mitofus.form_summary": "%1$s · Nv %2$s · +%3$s%% de daño",
+  "screen.mitofus.form_inherited": "heredada",
+  "screen.mitofus.form_lock_level": "Requiere nivel de clase %s",
+  "screen.mitofus.form_lock_quest": "Requiere la misión de grado del nivel %s",
+  "screen.mitofus.form_skill_line": "Nivel de forma %1$s: %2$s",
+  "screen.mitofus.form_next": "Usos para el siguiente nivel: %1$s / %2$s",
+  "screen.mitofus.form_max": "Nivel máximo de forma",
+  "message.mitofus.form_unknown": "Esa forma no existe",
+  "message.mitofus.form_locked": "Aún no tienes esa forma",
+  "message.mitofus.form_in_combat": "No puedes cambiar de forma en combate",
+  "hud.mitofus.form": "%1$s · Nv %2$s"
 }

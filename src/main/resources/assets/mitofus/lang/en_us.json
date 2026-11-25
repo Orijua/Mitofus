@@ -1760,5 +1760,22 @@
   "status.mitofus.slow": "Slowness",
   "status.mitofus.weaken": "Weakness",
   "effect.mitofus.burning": "Burning",
-  "effect.mitofus.cursed": "Cursed"
+  "effect.mitofus.cursed": "Cursed",
+  "tab.mitofus.forms": "Forms",
+  "screen.mitofus.forms_header": "Forms",
+  "screen.mitofus.no_forms": "No forms yet. Your classes give forms as they level up.",
+  "screen.mitofus.form_equip": "Wear",
+  "screen.mitofus.form_unequip": "Take off",
+  "screen.mitofus.form_worn": "Worn",
+  "screen.mitofus.form_summary": "%1$s · Lv %2$s · +%3$s%% damage",
+  "screen.mitofus.form_inherited": "inherited",
+  "screen.mitofus.form_lock_level": "Needs class level %s",
+  "screen.mitofus.form_lock_quest": "Needs the grade quest of level %s",
+  "screen.mitofus.form_skill_line": "Form level %1$s: %2$s",
+  "screen.mitofus.form_next": "Uses to the next level: %1$s / %2$s",
+  "screen.mitofus.form_max": "Maximum form level",
+  "message.mitofus.form_unknown": "That form does not exist",
+  "message.mitofus.form_locked": "You do not have that form yet",
+  "message.mitofus.form_in_combat": "You cannot change form in combat",
+  "hud.mitofus.form": "%1$s · Lv %2$s"
 }
