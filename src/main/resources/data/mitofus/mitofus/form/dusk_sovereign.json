@@ -7,7 +7,7 @@
   },
   "class": "mitofus:swordsman",
   "unlock_level": 500,
-  "source": "level",
+  "source": "grade_quest",
   "type": "mitofus:shadow",
   "skills": [
     "mitofus:shadow_slash",

@@ -1,0 +1,36 @@
+{
+  "name": {
+    "translate": "quest.mitofus.grade_swordsman_sovereign"
+  },
+  "description": {
+    "translate": "quest.mitofus.grade_swordsman_sovereign.desc"
+  },
+  "giver": "mitofus:village_chief",
+  "required_class": "mitofus:swordsman",
+  "grade_quest": {
+    "from": "grand_master"
+  },
+  "goal": {
+    "type": "all",
+    "goals": [
+      {
+        "type": "kill",
+        "entity": "mitofus:bone_lord",
+        "count": 1
+      },
+      {
+        "type": "kill",
+        "count": 100,
+        "at_night": true
+      }
+    ]
+  },
+  "xp_reward": 20000,
+  "item_rewards": [
+    {
+      "id": "mitofus:diamond_coin",
+      "count": 5
+    }
+  ],
+  "form_reward": "mitofus:dusk_sovereign"
+}

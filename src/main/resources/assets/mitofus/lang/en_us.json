@@ -1750,5 +1750,7 @@
   "form.mitofus.skysplitter": "Skysplitter",
   "form.mitofus.skysplitter.desc": "Swordsman form of lightning. Unlocked by reaching class level 450.",
   "form.mitofus.dusk_sovereign": "Dusk Sovereign",
-  "form.mitofus.dusk_sovereign.desc": "Swordsman form of shadow. Unlocked by reaching class level 500."
+  "form.mitofus.dusk_sovereign.desc": "Swordsman form of shadow. Unlocked by reaching class level 500 and finishing the grade quest.",
+  "quest.mitofus.grade_swordsman_sovereign": "Trial of the Sovereign",
+  "quest.mitofus.grade_swordsman_sovereign.desc": "The chief asks one last proof of a Grand Master swordsman: defeat the Lord of the Bones and fell 100 foes by night."
 }
