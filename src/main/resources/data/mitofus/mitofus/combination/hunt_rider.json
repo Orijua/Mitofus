@@ -1,0 +1,9 @@
+{
+  "branches": [
+    "mitofus:archer",
+    "mitofus:spearman"
+  ],
+  "name": {
+    "translate": "combination.mitofus.hunt_rider"
+  }
+}

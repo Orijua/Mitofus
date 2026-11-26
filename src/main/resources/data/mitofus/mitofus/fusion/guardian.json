@@ -1,8 +1,0 @@
-{
-  "parents": [
-    "mitofus:spearman",
-    "mitofus:squire"
-  ],
-  "result_class": "mitofus:guardian",
-  "cost": 10
-}

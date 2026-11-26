@@ -54,6 +54,45 @@ public final class ClassSlotRules {
         return check(classes, slot, classId, playerLevel) == Choice.OK;
     }
 
+    /** Why a branch can or cannot replace the one in a slot. */
+    public enum Swap { OK, BAD_SLOT, LOCKED, EMPTY, SAME, DUPLICATE }
+
+    /** The branch in {@code slot} may be replaced by {@code branch}: the slot is open and occupied, and {@code branch} sits in no slot. */
+    public static Swap checkSwap(PlayerClasses classes, int slot, ResourceLocation branch, int playerLevel) {
+        if (slot < 0 || slot >= MAX_SLOTS) {
+            return Swap.BAD_SLOT;
+        }
+        if (slot >= unlockedSlots(playerLevel)) {
+            return Swap.LOCKED;
+        }
+        java.util.Optional<ClassSlot> current = classes.slot(slot);
+        if (current.isEmpty()) {
+            return Swap.EMPTY;
+        }
+        if (current.get().classId().equals(branch)) {
+            return Swap.SAME;
+        }
+        return classes.hasClass(branch) ? Swap.DUPLICATE : Swap.OK;
+    }
+
+    /** What changing the branch of {@code slot} costs in gold coins: nothing the first time for each slot, {@code cost} after that. */
+    public static int swapCost(PlayerClasses classes, int slot, int cost) {
+        return classes.freeChangeUsed(slot) ? cost : 0;
+    }
+
+    /**
+     * Puts {@code branch} in {@code slot} and the branch that was there to sleep, keeping all its progress. A branch that was dormant comes
+     * back exactly as it was; a new one starts at level 1. The slot's free change is marked used. Check with {@link #checkSwap} first.
+     */
+    public static PlayerClasses swap(PlayerClasses classes, int slot, ResourceLocation branch) {
+        ClassSlot leaving = classes.slot(slot).orElseThrow();
+        List<ClassSlot> sleeping = new java.util.ArrayList<>(classes.dormantBranches());
+        sleeping.removeIf(s -> s.classId().equals(leaving.classId()) || s.classId().equals(branch));
+        sleeping.add(leaving);
+        ClassSlot entering = classes.dormant(branch).map(s -> s.inSlot(slot)).orElseGet(() -> ClassSlot.fresh(slot, branch));
+        return classes.withSlot(entering).withDormant(sleeping).withFreeUsed(slot);
+    }
+
     /** The job is chosen once: only while there is none. */
     public static boolean canChooseJob(PlayerClasses classes) {
         return classes.job().isEmpty();

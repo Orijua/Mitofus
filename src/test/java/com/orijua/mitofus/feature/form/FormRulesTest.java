@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class FormRulesTest {
     private static final ResourceLocation SWORD = id("swordsman");
     private static final ResourceLocation MAGE = id("mage");
-    private static final ResourceLocation SPELLSWORD = id("spellsword");
     private static final ResourceLocation FIRE = id("fire");
     private static final ResourceLocation WATER = id("water");
     private static final ResourceLocation EARTH = id("earth");
@@ -33,13 +32,13 @@ class FormRulesTest {
         return new ElementTypeDefinition(Component.empty(), 0, List.of(strong), 0.15, 0.10);
     }
 
-    private static FormDefinition form(ResourceLocation owner, int level, FormSource source, boolean inheritable) {
+    private static FormDefinition form(ResourceLocation owner, int level, FormSource source) {
         return new FormDefinition(Component.empty(), Component.empty(), owner, level, source, FIRE,
-                List.of(id("a"), id("b"), id("c")), 0.20, inheritable, 5, FormDefinition.Curve.DEFAULT);
+                List.of(id("a"), id("b"), id("c")), 0.20, 5, FormDefinition.Curve.DEFAULT);
     }
 
-    private static ClassSlot slot(ResourceLocation classId, int level, ResourceLocation... origin) {
-        return new ClassSlot(0, classId, level, 0, ClassGrade.APPRENTICE, List.of(), List.of(origin), 0);
+    private static ClassSlot slot(ResourceLocation classId, int level) {
+        return new ClassSlot(0, classId, level, 0, ClassGrade.APPRENTICE, List.of());
     }
 
     @Test
@@ -87,7 +86,7 @@ class FormRulesTest {
 
     @Test
     void typeBonusGrowsInAStraightLineUpToTheMaximum() {
-        var form = form(SWORD, 50, FormSource.LEVEL, false);
+        var form = form(SWORD, 50, FormSource.LEVEL);
         assertEquals(0.0, FormRules.typeBonus(form, 0), 1e-9);
         assertEquals(0.10, FormRules.typeBonus(form, 50), 1e-9);
         assertEquals(0.20, FormRules.typeBonus(form, 100), 1e-9);
@@ -96,7 +95,7 @@ class FormRulesTest {
 
     @Test
     void theThreeSkillsComeAtFormLevels1_30And60() {
-        var form = form(SWORD, 50, FormSource.LEVEL, false);
+        var form = form(SWORD, 50, FormSource.LEVEL);
         assertEquals(List.of(id("a")), FormRules.unlockedSkills(form, 1));
         assertEquals(List.of(id("a")), FormRules.unlockedSkills(form, 29));
         assertEquals(List.of(id("a"), id("b")), FormRules.unlockedSkills(form, 30));
@@ -105,20 +104,20 @@ class FormRulesTest {
 
     @Test
     void aLevelFormNeedsOnlyTheClassLevelAndAQuestFormAlsoTheQuest() {
-        var byLevel = form(SWORD, 50, FormSource.LEVEL, false);
-        var byQuest = form(SWORD, 100, FormSource.GRADE_QUEST, false);
-        assertFalse(FormRules.unlocked(byLevel, 49, false, false));
-        assertTrue(FormRules.unlocked(byLevel, 50, false, false));
-        assertFalse(FormRules.unlocked(byQuest, 100, false, false), "level alone is not enough");
-        assertTrue(FormRules.unlocked(byQuest, 100, true, false));
-        assertFalse(FormRules.unlocked(byQuest, 99, true, false), "the quest alone is not enough");
+        var byLevel = form(SWORD, 50, FormSource.LEVEL);
+        var byQuest = form(SWORD, 100, FormSource.GRADE_QUEST);
+        assertFalse(FormRules.unlocked(byLevel, 49, false));
+        assertTrue(FormRules.unlocked(byLevel, 50, false));
+        assertFalse(FormRules.unlocked(byQuest, 100, false), "level alone is not enough");
+        assertTrue(FormRules.unlocked(byQuest, 100, true));
+        assertFalse(FormRules.unlocked(byQuest, 99, true), "the quest alone is not enough");
     }
 
     @Test
     void catalogueOwnsOnlyUnlockedFormsOfThePlayersClasses() {
-        var f50 = new Definitions.Entry<>(id("sword_50"), form(SWORD, 50, FormSource.LEVEL, true));
-        var f100 = new Definitions.Entry<>(id("sword_100"), form(SWORD, 100, FormSource.GRADE_QUEST, true));
-        var mage50 = new Definitions.Entry<>(id("mage_50"), form(MAGE, 50, FormSource.LEVEL, true));
+        var f50 = new Definitions.Entry<>(id("sword_50"), form(SWORD, 50, FormSource.LEVEL));
+        var f100 = new Definitions.Entry<>(id("sword_100"), form(SWORD, 100, FormSource.GRADE_QUEST));
+        var mage50 = new Definitions.Entry<>(id("mage_50"), form(MAGE, 50, FormSource.LEVEL));
         var all = List.of(f50, f100, mage50);
         var owned = FormCatalogue.owned(all, List.of(slot(SWORD, 120)), PlayerForms.EMPTY);
         assertEquals(List.of(id("sword_50")), owned.stream().map(FormCatalogue.Owned::id).toList());
@@ -127,25 +126,14 @@ class FormRulesTest {
     }
 
     @Test
-    void aFusionInheritsTheParentFormsOnlyWhenItReachesTheLevel() {
-        var f50 = new Definitions.Entry<>(id("sword_50"), form(SWORD, 50, FormSource.LEVEL, true));
-        var f100 = new Definitions.Entry<>(id("sword_100"), form(SWORD, 100, FormSource.GRADE_QUEST, true));
-        var f150 = new Definitions.Entry<>(id("sword_150"), form(SWORD, 150, FormSource.LEVEL, false));
-        var all = List.of(f50, f100, f150);
-        assertTrue(FormCatalogue.owned(all, List.of(slot(SPELLSWORD, 49, SWORD, MAGE)), PlayerForms.EMPTY).isEmpty());
-        var at50 = FormCatalogue.owned(all, List.of(slot(SPELLSWORD, 50, SWORD, MAGE)), PlayerForms.EMPTY);
-        assertEquals(1, at50.size());
-        assertTrue(at50.get(0).inherited());
-        var at100 = FormCatalogue.owned(all, List.of(slot(SPELLSWORD, 100, SWORD, MAGE)), PlayerForms.EMPTY);
-        assertEquals(2, at100.size(), "inherited without redoing the grade quest");
-        assertEquals(2, FormCatalogue.owned(all, List.of(slot(SPELLSWORD, 200, SWORD, MAGE)), PlayerForms.EMPTY).size(),
-                "forms that are not inheritable stay with the parent");
-    }
-
-    @Test
-    void aNonHybridClassDoesNotInherit() {
-        var f50 = new Definitions.Entry<>(id("sword_50"), form(SWORD, 50, FormSource.LEVEL, true));
-        assertTrue(FormCatalogue.owned(List.of(f50), List.of(slot(MAGE, 200)), PlayerForms.EMPTY).isEmpty());
+    void everyHeldBranchGivesItsOwnFormsAndABranchNotHeldGivesNone() {
+        var sword50 = new Definitions.Entry<>(id("sword_50"), form(SWORD, 50, FormSource.LEVEL));
+        var mage50 = new Definitions.Entry<>(id("mage_50"), form(MAGE, 50, FormSource.LEVEL));
+        var all = List.of(sword50, mage50);
+        var both = FormCatalogue.owned(all, List.of(slot(SWORD, 60), slot(MAGE, 60)), PlayerForms.EMPTY);
+        assertEquals(List.of(id("sword_50"), id("mage_50")), both.stream().map(FormCatalogue.Owned::id).toList());
+        var onlySword = FormCatalogue.owned(all, List.of(slot(SWORD, 60)), PlayerForms.EMPTY);
+        assertEquals(List.of(id("sword_50")), onlySword.stream().map(FormCatalogue.Owned::id).toList(), "a dormant branch is not in a slot: no forms");
     }
 
     @Test
@@ -162,9 +150,9 @@ class FormRulesTest {
     @Test
     void validatorFindsBrokenReferencesAndRepeatedLevels() {
         var types = Map.of(FIRE, type(WATER, id("nope")), WATER, type());
-        var good = form(SWORD, 50, FormSource.LEVEL, false);
-        var repeated = form(SWORD, 50, FormSource.LEVEL, false);
-        var badClass = form(MAGE, 50, FormSource.LEVEL, false);
+        var good = form(SWORD, 50, FormSource.LEVEL);
+        var repeated = form(SWORD, 50, FormSource.LEVEL);
+        var badClass = form(MAGE, 50, FormSource.LEVEL);
         var problems = FormValidator.validate(Map.of(id("good"), good, id("repeated"), repeated, id("bad_class"), badClass), types,
                 java.util.Set.of(SWORD), java.util.Set.of(id("a"), id("c")), java.util.Set.of(id("b")), Map.of(id("quest"), id("missing_form")));
         assertTrue(problems.stream().anyMatch(p -> p.contains("unknown type mitofus:nope")), problems.toString());
@@ -176,7 +164,7 @@ class FormRulesTest {
 
     @Test
     void theUltimateAndThePassiveAreSplitFromTheSkillsAndKeepTheirLevels() {
-        var form = form(SWORD, 50, FormSource.LEVEL, false);
+        var form = form(SWORD, 50, FormSource.LEVEL);
         assertEquals(List.of(id("a")), FormRules.unlockedActiveSkills(form, 29));
         assertEquals(List.of(id("a")), FormRules.unlockedActiveSkills(form, 59));
         assertEquals(List.of(id("a"), id("c")), FormRules.unlockedActiveSkills(form, 60));
@@ -204,29 +192,23 @@ class FormRulesTest {
     }
 
     @Test
-    void aFormGivenByTwoSlotsIsOwnedIfEitherUnlocksIt() {
-        var ember = new Definitions.Entry<>(id("ember"), form(SWORD, 50, FormSource.LEVEL, true));
+    void aFormBelowTheClassLevelIsListedLockedAndNotOwned() {
+        var ember = new Definitions.Entry<>(id("ember"), form(SWORD, 50, FormSource.LEVEL));
         var all = List.of(ember);
-        // the hybrid slot comes first but is below the level; the plain swordsman slot unlocks it
-        var slots = List.of(slot(SPELLSWORD, 40, SWORD, MAGE), slot(SWORD, 200));
-        var visible = FormCatalogue.visible(all, slots, PlayerForms.EMPTY);
-        assertEquals(1, visible.size());
-        assertTrue(visible.get(0).unlocked());
-        assertTrue(FormCatalogue.ownedForm(id("ember"), ember.value(), all, slots, PlayerForms.EMPTY).isPresent());
-        assertEquals(1, FormCatalogue.owned(all, slots, PlayerForms.EMPTY).size());
-        // with no slot that unlocks it, the form is listed locked and not owned
-        var locked = FormCatalogue.visible(all, List.of(slot(SPELLSWORD, 40, SWORD, MAGE)), PlayerForms.EMPTY);
+        var slots = List.of(slot(SWORD, 40));
+        var locked = FormCatalogue.visible(all, slots, PlayerForms.EMPTY);
         assertFalse(locked.get(0).unlocked());
-        assertTrue(FormCatalogue.owned(all, List.of(slot(SPELLSWORD, 40, SWORD, MAGE)), PlayerForms.EMPTY).isEmpty());
+        assertTrue(FormCatalogue.owned(all, slots, PlayerForms.EMPTY).isEmpty());
+        assertTrue(FormCatalogue.ownedForm(id("ember"), ember.value(), all, List.of(slot(SWORD, 50)), PlayerForms.EMPTY).isPresent());
     }
 
     @Test
     void aMissingGradeQuestFormHoldsBackEveryLaterFormOfTheClass() {
-        var f50 = new Definitions.Entry<>(id("sword_50"), form(SWORD, 50, FormSource.LEVEL, true));
-        var f100 = new Definitions.Entry<>(id("sword_100"), form(SWORD, 100, FormSource.GRADE_QUEST, true));
-        var f150 = new Definitions.Entry<>(id("sword_150"), form(SWORD, 150, FormSource.LEVEL, true));
-        var f200 = new Definitions.Entry<>(id("sword_200"), form(SWORD, 200, FormSource.GRADE_QUEST, true));
-        var f250 = new Definitions.Entry<>(id("sword_250"), form(SWORD, 250, FormSource.LEVEL, true));
+        var f50 = new Definitions.Entry<>(id("sword_50"), form(SWORD, 50, FormSource.LEVEL));
+        var f100 = new Definitions.Entry<>(id("sword_100"), form(SWORD, 100, FormSource.GRADE_QUEST));
+        var f150 = new Definitions.Entry<>(id("sword_150"), form(SWORD, 150, FormSource.LEVEL));
+        var f200 = new Definitions.Entry<>(id("sword_200"), form(SWORD, 200, FormSource.GRADE_QUEST));
+        var f250 = new Definitions.Entry<>(id("sword_250"), form(SWORD, 250, FormSource.LEVEL));
         var all = List.of(f50, f100, f150, f200, f250);
         var slots = List.of(slot(SWORD, 300));
         // level 300 but no quest: only the level 50 form, none of the later ones (not even the plain level forms)

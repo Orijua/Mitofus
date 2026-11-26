@@ -28,7 +28,11 @@ public record PlayerClassDefinition(
         List<ResourceLocation> passives,
         Optional<ResourceLocation> thirdSlotPassive,
         List<GradeRequirement> gradeRequirements,
-        CatchUp catchUp) {
+        CatchUp catchUp,
+        int changeCost) {
+    /** Gold coins asked to put this branch in a slot that already holds another one (the slot's first change is free). */
+    public static final int DEFAULT_CHANGE_COST = 1;
+
 
     /**
      * Extra class XP for a class that sits far below the player's level (a late starter): while the class is at least {@code minGap}
@@ -54,6 +58,7 @@ public record PlayerClassDefinition(
             ResourceLocation.CODEC.listOf().optionalFieldOf("passives", List.of()).forGetter(PlayerClassDefinition::passives),
             ResourceLocation.CODEC.optionalFieldOf("third_slot_passive").forGetter(PlayerClassDefinition::thirdSlotPassive),
             GradeRequirement.CODEC.listOf().optionalFieldOf("grade_requirements", List.of()).forGetter(PlayerClassDefinition::gradeRequirements),
-            CatchUp.CODEC.optionalFieldOf("catch_up", CatchUp.DEFAULT).forGetter(PlayerClassDefinition::catchUp)
+            CatchUp.CODEC.optionalFieldOf("catch_up", CatchUp.DEFAULT).forGetter(PlayerClassDefinition::catchUp),
+            Codec.intRange(0, 100_000).optionalFieldOf("change_cost", DEFAULT_CHANGE_COST).forGetter(PlayerClassDefinition::changeCost)
     ).apply(instance, PlayerClassDefinition::new));
 }

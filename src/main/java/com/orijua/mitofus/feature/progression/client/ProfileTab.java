@@ -8,8 +8,8 @@ import com.orijua.mitofus.core.registry.Definitions;
 import com.orijua.mitofus.core.config.Balance;
 import com.orijua.mitofus.core.registry.ModAttachments;
 import com.orijua.mitofus.core.registry.ModDatapackRegistries;
-import com.orijua.mitofus.feature.fusion.client.FusionScreen;
-import com.orijua.mitofus.feature.fusion.client.FusionText;
+import com.orijua.mitofus.feature.combination.CombinationText;
+import com.orijua.mitofus.feature.synergy.client.SynergyText;
 import com.orijua.mitofus.feature.progression.ChooseClassPayload;
 import com.orijua.mitofus.feature.progression.ChooseJobPayload;
 import com.orijua.mitofus.feature.progression.ClassSlot;
@@ -51,7 +51,6 @@ public class ProfileTab extends MitofusTab {
     /** Space between a title's name and its bonus column. */
     private static final int NAME_GAP = 6;
 
-    private static final int FUSIONS_BUTTON_WIDTH = 70;
     private final ScrollList titleScroll = new ScrollList(9);
 
     public ProfileTab() {
@@ -125,11 +124,6 @@ public class ProfileTab extends MitofusTab {
                         .tooltip(Tooltip.create(classTooltip(entry.id(), entry.value())));
             });
         }
-        if (!Definitions.all(player().level(), ModDatapackRegistries.FUSION).isEmpty()) {
-            addWidget.accept(Button.builder(Component.translatable("screen.mitofus.fusions"),
-                            b -> Minecraft.getInstance().setScreen(new FusionScreen(Minecraft.getInstance().screen)))
-                    .bounds(left + width - FUSIONS_BUTTON_WIDTH, top - 2, FUSIONS_BUTTON_WIDTH, 14).build(MitofusButton::new));
-        }
         if (classes().job().isEmpty()) {
             List<Definitions.Entry<JobDefinition>> jobs = Definitions.all(player().level(), ModDatapackRegistries.JOB).stream()
                     .filter(entry -> entry.value().selectable())
@@ -166,7 +160,7 @@ public class ProfileTab extends MitofusTab {
         if (!definition.bonusStats().isEmpty()) {
             text.append("\n").append(bonusText(definition.bonusStats()));
         }
-        classes().job().ifPresent(job -> text.append(FusionText.synergyLines(player().level(), id, job)));
+        classes().job().ifPresent(job -> text.append(SynergyText.synergyLines(player().level(), id, job)));
         return text;
     }
 
@@ -174,7 +168,7 @@ public class ProfileTab extends MitofusTab {
     private static Component jobTooltip(ResourceLocation id, JobDefinition definition) {
         MutableComponent text = definition.description().copy();
         for (ClassSlot placed : classes().slots()) {
-            text.append(FusionText.synergyLines(player().level(), placed.classId(), id));
+            text.append(SynergyText.synergyLines(player().level(), placed.classId(), id));
         }
         return text;
     }
@@ -257,12 +251,14 @@ public class ProfileTab extends MitofusTab {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY) {
         Layout layout = layout();
-        UiStyle.heading(graphics, font(), Component.translatable("screen.mitofus.class"), left, top);
+        Component heading = Component.translatable("screen.mitofus.class");
+        UiStyle.heading(graphics, font(), heading, left, top);
+        Component combination = CombinationText.name(player().level(), classes().classIds());
+        UiStyle.text(graphics, font(), combination, left + font().width(heading) + 6, top, UiStyle.GOLD);
         int swordBonus = Observation.effectiveView(player()) - Observation.view(player());
         Component view = Component.translatable("screen.mitofus.view", Observation.view(player()))
                 .append(swordBonus > 0 ? Component.literal(" +" + swordBonus).withColor(UiStyle.GOOD) : Component.empty());
-        // Left of the Fusions button, which takes the top right corner.
-        int viewRight = left + width - FUSIONS_BUTTON_WIDTH - 6;
+        int viewRight = left + width - 6;
         int viewX = viewRight - font().width(view);
         UiStyle.text(graphics, font(), view, viewX, top, UiStyle.MUTED);
         if (mouseX >= viewX && mouseX < viewRight && mouseY >= top - 2 && mouseY < top + 10) {
@@ -271,7 +267,7 @@ public class ProfileTab extends MitofusTab {
         }
         int classY = top + layout.classLines();
         for (ClassSlot placed : classes().slots()) {
-            Component name = FusionText.slotName(player().level(), placed);
+            Component name = SynergyText.className(player().level(), placed.classId());
             UiStyle.text(graphics, font(), Component.translatable("screen.mitofus.class_slot_level", placed.slot() + 1, name,
                     placed.classLevel(), placed.grade().displayName()), left, classY, UiStyle.TEXT);
             Component xp = Component.translatable("screen.mitofus.class_xp", placed.classXp(),

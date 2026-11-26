@@ -142,7 +142,7 @@ public class FormsTab extends MitofusTab {
             text = Component.translatable("screen.mitofus.form_summary", typeName, row.level(),
                     String.format("%.1f", FormRules.typeBonus(row.form(), row.level()) * 100));
         }
-        return row.inherited() ? text.append(" · ").append(Component.translatable("screen.mitofus.form_inherited")) : text;
+        return text;
     }
 
     private static Component skillName(FormDefinition form, int index) {
