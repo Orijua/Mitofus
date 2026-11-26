@@ -11,7 +11,9 @@
   },
   "skills": [],
   "passives": [
-    "mitofus:mana_reserve"
+    "mitofus:mana_reserve",
+    "mitofus:apply_curse",
+    "mitofus:exploit_shock"
   ],
   "third_slot_passive": "mitofus:night_eyes"
 }

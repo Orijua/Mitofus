@@ -36,4 +36,14 @@ class StatusValidatorTest {
         var problems = StatusValidator.validate(statuses, bonuses, Set.of(id("nothing")));
         assertEquals(5, problems.size(), problems.toString());
     }
+
+    @Test
+    void aDamageVsStatusBonusMustNameAKnownStatus() {
+        var statuses = Map.of(id("burn"), new StatusRules.Limits(100, 400, 1, 3, 0.5, 0));
+        Bonus ok = new Bonus(BonusType.DAMAGE_VS_STATUS, 0.15, 0, 0, Optional.empty(), false, Optional.of(id("burn")), Optional.empty(), Optional.empty());
+        Bonus none = new Bonus(BonusType.DAMAGE_VS_STATUS, 0.15, 0, 0, Optional.empty(), false);
+        Bonus ghost = new Bonus(BonusType.DAMAGE_VS_STATUS, 0.15, 0, 0, Optional.empty(), false, Optional.of(id("ghost")), Optional.empty(), Optional.empty());
+        var bonuses = Map.of(id("a"), List.of(ok), id("b"), List.of(none), id("c"), List.of(ghost));
+        assertEquals(2, StatusValidator.validate(statuses, bonuses, Set.of()).size());
+    }
 }

@@ -41,6 +41,17 @@ public final class TraitRules {
     }
 
     /** {@code value} held under the global cap of its kind, if the data sets one. */
+    /** The extra damage fraction of the "damage vs status" bonuses whose status {@code targetHas} says the target carries. */
+    public static double damageVsStatus(List<Bonus> bonuses, int level, java.util.function.Predicate<net.minecraft.resources.ResourceLocation> targetHas) {
+        double total = 0;
+        for (Bonus bonus : bonuses) {
+            if (bonus.type() == BonusType.DAMAGE_VS_STATUS && bonus.status().isPresent() && targetHas.test(bonus.status().get())) {
+                total += bonus.valueAt(level);
+            }
+        }
+        return total;
+    }
+
     public static double capped(double value, java.util.Optional<Double> cap) {
         return cap.map(limit -> Math.min(value, limit)).orElse(value);
     }

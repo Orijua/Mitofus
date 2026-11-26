@@ -62,4 +62,23 @@ class TraitRulesTest {
         assertEquals(0.1, TraitRules.damage(bonuses, 1, bonus -> false, true), 1e-9);
         assertEquals(0.2, TraitRules.damage(bonuses, 1, bonus -> true, true), 1e-9);
     }
+
+    private static Bonus vsStatus(double amount, String status) {
+        return new Bonus(BonusType.DAMAGE_VS_STATUS, amount, 0, 0, Optional.empty(), false,
+                Optional.of(ResourceLocation.fromNamespaceAndPath("mitofus", status)), Optional.empty(), Optional.empty());
+    }
+
+    @Test
+    void damageVsStatusCountsOnlyTheStatusesTheTargetHas() {
+        var bonuses = List.of(vsStatus(0.15, "slow"), vsStatus(0.15, "burn"), flat(BonusType.DAMAGE, 0.5));
+        assertEquals(0.15, TraitRules.damageVsStatus(bonuses, 1, status -> status.getPath().equals("slow")), 1e-9);
+        assertEquals(0.30, TraitRules.damageVsStatus(bonuses, 1, status -> true), 1e-9);
+        assertEquals(0.0, TraitRules.damageVsStatus(bonuses, 1, status -> false), 1e-9);
+    }
+
+    @Test
+    void aDamageVsStatusBonusWithNoStatusCountsForNothing() {
+        var broken = new Bonus(BonusType.DAMAGE_VS_STATUS, 0.15, 0, 0, Optional.empty(), false);
+        assertEquals(0.0, TraitRules.damageVsStatus(List.of(broken), 1, status -> true), 1e-9);
+    }
 }

@@ -43,7 +43,9 @@ public enum BonusType implements StringRepresentable {
      * A chance (the {@code amount}) to give the target of a hit the {@code status} (see status.StatusService), with the
      * status's own intensity and duration unless the bonus writes its own.
      */
-    APPLY_STATUS("apply_status");
+    APPLY_STATUS("apply_status"),
+    /** Extra damage, as a fraction (0.15 = +15 %), against a target that has the {@code status} the bonus names. */
+    DAMAGE_VS_STATUS("damage_vs_status");
 
     public static final Codec<BonusType> CODEC = StringRepresentable.fromEnum(BonusType::values);
 

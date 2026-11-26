@@ -17,7 +17,8 @@ import java.util.Optional;
  * @param cap       the most the bonus can reach (0 = no cap)
  * @param withItem  for {@link BonusType#DAMAGE}: only counts while the main hand holds an item of this tag
  * @param atNight   for {@link BonusType#DAMAGE}: only counts at night
- * @param status    for {@link BonusType#APPLY_STATUS}: the status given on a hit ({@code amount} is the chance)
+ * @param status    for {@link BonusType#APPLY_STATUS}: the status given on a hit ({@code amount} is the chance); for
+ *                  {@link BonusType#DAMAGE_VS_STATUS}: the status the target must have
  * @param intensity for {@link BonusType#APPLY_STATUS}: overrides the status's intensity (never above its maximum)
  * @param duration  for {@link BonusType#APPLY_STATUS}: overrides the status's duration in ticks (never above its maximum)
  */

@@ -13,7 +13,9 @@
     "mitofus:mana_shield"
   ],
   "passives": [
-    "mitofus:mana_reserve"
+    "mitofus:mana_reserve",
+    "mitofus:apply_burn",
+    "mitofus:exploit_curse"
   ],
   "third_slot_passive": "mitofus:composure"
 }

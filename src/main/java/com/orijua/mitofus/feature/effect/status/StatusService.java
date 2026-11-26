@@ -59,6 +59,12 @@ public final class StatusService {
         return true;
     }
 
+    /** Whether {@code target} carries the status right now (the game effect that carries it is active). */
+    public static boolean has(LivingEntity target, ResourceLocation statusId) {
+        return Definitions.get(target.level(), ModDatapackRegistries.STATUS, statusId)
+                .map(status -> target.hasEffect(status.effect())).orElse(false);
+    }
+
     /**
      * Gives a game effect that renews its duration if the target already has it, and never stacks its intensity. A
      * stronger instance the target already has is kept (see {@link StatusRules#keepsExisting}).

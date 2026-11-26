@@ -38,11 +38,12 @@ public final class StatusValidator {
                 problems.add("status " + id + ": intensity is above max_intensity");
             }
         });
-        bonuses.forEach((owner, list) -> list.stream().filter(b -> b.type() == BonusType.APPLY_STATUS).forEach(bonus -> {
+        bonuses.forEach((owner, list) -> list.stream().filter(b -> b.type() == BonusType.APPLY_STATUS || b.type() == BonusType.DAMAGE_VS_STATUS).forEach(bonus -> {
+            String kind = bonus.type().getSerializedName();
             if (bonus.status().isEmpty()) {
-                problems.add(owner + ": an apply_status bonus has no status");
+                problems.add(owner + ": a " + kind + " bonus has no status");
             } else if (!statuses.containsKey(bonus.status().get())) {
-                problems.add(owner + ": apply_status names unknown status " + bonus.status().get());
+                problems.add(owner + ": " + kind + " names unknown status " + bonus.status().get());
             }
         }));
         Set<ResourceLocation> kinds = java.util.Arrays.stream(BonusType.values())

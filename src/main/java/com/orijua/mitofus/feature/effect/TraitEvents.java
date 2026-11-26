@@ -57,6 +57,7 @@ public final class TraitEvents {
         if (target instanceof Mob mob && mob.getTarget() != attacker) {
             bonus += ActiveTraits.total(bonuses, level, BonusType.DAMAGE_VS_UNAWARE);
         }
+        bonus += BonusLimits.capped(BonusType.DAMAGE_VS_STATUS, TraitRules.damageVsStatus(bonuses, level, status -> StatusService.has(target, status)));
         double multiplier = 1 + bonus;
         double critChance = ActiveTraits.total(bonuses, level, BonusType.CRIT_CHANCE);
         if (critChance > 0 && attacker.getRandom().nextDouble() < critChance) {

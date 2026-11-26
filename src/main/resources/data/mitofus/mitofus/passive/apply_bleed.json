@@ -1,0 +1,16 @@
+{
+  "name": {
+    "translate": "passive.mitofus.apply_bleed"
+  },
+  "description": {
+    "translate": "passive.mitofus.apply_bleed.desc"
+  },
+  "icon": "minecraft:redstone",
+  "bonuses": [
+    {
+      "type": "apply_status",
+      "amount": 0.2,
+      "status": "mitofus:bleed"
+    }
+  ]
+}

@@ -13,6 +13,8 @@
     "mitofus:rending_slash"
   ],
   "passives": [
-    "mitofus:composure"
+    "mitofus:composure",
+    "mitofus:apply_slow",
+    "mitofus:exploit_weaken"
   ]
 }

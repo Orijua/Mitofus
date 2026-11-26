@@ -1,0 +1,16 @@
+{
+  "name": {
+    "translate": "passive.mitofus.apply_curse"
+  },
+  "description": {
+    "translate": "passive.mitofus.apply_curse.desc"
+  },
+  "icon": "minecraft:wither_rose",
+  "bonuses": [
+    {
+      "type": "apply_status",
+      "amount": 0.2,
+      "status": "mitofus:curse"
+    }
+  ]
+}

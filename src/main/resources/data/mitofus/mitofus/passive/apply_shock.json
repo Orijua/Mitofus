@@ -1,0 +1,16 @@
+{
+  "name": {
+    "translate": "passive.mitofus.apply_shock"
+  },
+  "description": {
+    "translate": "passive.mitofus.apply_shock.desc"
+  },
+  "icon": "minecraft:lightning_rod",
+  "bonuses": [
+    {
+      "type": "apply_status",
+      "amount": 0.2,
+      "status": "mitofus:shock"
+    }
+  ]
+}

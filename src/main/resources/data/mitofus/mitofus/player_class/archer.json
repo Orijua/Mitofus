@@ -11,6 +11,8 @@
   },
   "skills": [],
   "passives": [
-    "mitofus:night_eyes"
+    "mitofus:night_eyes",
+    "mitofus:apply_shock",
+    "mitofus:exploit_burn"
   ]
 }

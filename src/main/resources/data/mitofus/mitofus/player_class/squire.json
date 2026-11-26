@@ -13,6 +13,8 @@
     "mitofus:war_cry"
   ],
   "passives": [
-    "mitofus:tough_skin"
+    "mitofus:tough_skin",
+    "mitofus:apply_weaken",
+    "mitofus:exploit_bleed"
   ]
 }

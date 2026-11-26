@@ -1,0 +1,16 @@
+{
+  "name": {
+    "translate": "passive.mitofus.apply_weaken"
+  },
+  "description": {
+    "translate": "passive.mitofus.apply_weaken.desc"
+  },
+  "icon": "minecraft:fermented_spider_eye",
+  "bonuses": [
+    {
+      "type": "apply_status",
+      "amount": 0.2,
+      "status": "mitofus:weaken"
+    }
+  ]
+}

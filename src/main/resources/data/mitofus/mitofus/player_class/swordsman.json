@@ -13,7 +13,9 @@
     "mitofus:heavy_strike"
   ],
   "passives": [
-    "mitofus:tough_skin"
+    "mitofus:tough_skin",
+    "mitofus:apply_bleed",
+    "mitofus:exploit_slow"
   ],
   "third_slot_passive": "mitofus:sword_mastery"
 }

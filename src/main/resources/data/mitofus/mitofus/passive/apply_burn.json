@@ -1,0 +1,16 @@
+{
+  "name": {
+    "translate": "passive.mitofus.apply_burn"
+  },
+  "description": {
+    "translate": "passive.mitofus.apply_burn.desc"
+  },
+  "icon": "minecraft:fire_charge",
+  "bonuses": [
+    {
+      "type": "apply_status",
+      "amount": 0.2,
+      "status": "mitofus:burn"
+    }
+  ]
+}
