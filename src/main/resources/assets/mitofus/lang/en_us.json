@@ -66,7 +66,6 @@
   "message.mitofus.vrhelmet.logout_quest_deadline": "You can't disconnect: «%s» has a deadline running.",
   "screen.mitofus.logout_forced_title": "Leave now?",
   "screen.mitofus.logout_forced": "If you disconnect now you will lose the quest and its penalties.",
-  "message.mitofus.vrhelmet.logout_in_cave": "There is no way out of this cave",
   "message.mitofus.vrhelmet.logout_cancelled": "Disconnection cancelled",
   "message.mitofus.vrhelmet.logout_cancelled_moved": "Disconnection cancelled: you moved",
   "message.mitofus.vrhelmet.logout_in_progress": "You are already disconnecting",
