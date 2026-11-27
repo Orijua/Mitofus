@@ -7,7 +7,6 @@ import com.orijua.mitofus.feature.quest.QuestDeadlines;
 import com.orijua.mitofus.feature.quest.QuestService;
 import com.orijua.mitofus.feature.world.MitofusWorld;
 import net.minecraft.commands.Commands;
-import com.orijua.mitofus.feature.world.AltamiraProtection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -30,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@code /mitofus logout} (or the "Disconnect" button of the Mitofus window): a 3-second countdown inside Mitofus that ends in {@link VrHelmetService#disconnect}. It is
- * refused after recent combat (damage dealt or taken), inside the Altamira cave and cancelled by moving, damage taken, death, respawn, leaving
+ * refused after recent combat (damage dealt or taken) and cancelled by moving, damage taken, death, respawn, leaving
  * the server or changing dimension (moving is measured from where the countdown began; see
  * {@link VrHelmetRules#stayedStill}). Damage dealt during the countdown does not cancel it.
  */
@@ -42,7 +41,7 @@ public final class LogoutService {
     }
 
     /** What asking to log out did. */
-    public enum Start { STARTED, ALREADY_RUNNING, NOT_IN_MITOFUS, IN_DANGER, IN_CAVE, QUEST_DEADLINE }
+    public enum Start { STARTED, ALREADY_RUNNING, NOT_IN_MITOFUS, IN_DANGER, QUEST_DEADLINE }
 
     private LogoutService() {
     }
@@ -78,9 +77,6 @@ public final class LogoutService {
         if (LogoutRules.inDanger(player.server.getTickCount(), CombatClock.last(player))) {
             return Start.IN_DANGER;
         }
-        if (AltamiraProtection.inCave(player.level(), player.blockPosition())) {
-            return Start.IN_CAVE; // there is no way out of the cave
-        }
         if (!force && !QuestService.get(player).deadlines().isEmpty()) {
             return Start.QUEST_DEADLINE;
         }
@@ -100,7 +96,6 @@ public final class LogoutService {
             case NOT_IN_MITOFUS -> player.displayClientMessage(Component.translatable("message.mitofus.vrhelmet.in_real_world"), true);
             case ALREADY_RUNNING -> player.displayClientMessage(Component.translatable("message.mitofus.vrhelmet.logout_in_progress"), true);
             case IN_DANGER -> player.displayClientMessage(Component.translatable("message.mitofus.vrhelmet.logout_in_danger"), true);
-            case IN_CAVE -> player.displayClientMessage(Component.translatable("message.mitofus.vrhelmet.logout_in_cave"), true);
             case QUEST_DEADLINE -> player.displayClientMessage(Component.translatable("message.mitofus.vrhelmet.logout_quest_deadline",
                     deadlineQuestName(player)), true);
             case STARTED -> {

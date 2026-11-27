@@ -66,7 +66,6 @@
   "message.mitofus.vrhelmet.logout_quest_deadline": "No puedes desconectar: «%s» tiene un plazo en marcha.",
   "screen.mitofus.logout_forced_title": "¿Desconectar ahora?",
   "screen.mitofus.logout_forced": "Perderás la misión y sus penalizaciones.",
-  "message.mitofus.vrhelmet.logout_in_cave": "No hay salida de esta cueva",
   "message.mitofus.vrhelmet.logout_cancelled": "Desconexión cancelada",
   "message.mitofus.vrhelmet.logout_cancelled_moved": "Desconexión cancelada: te has movido",
   "message.mitofus.vrhelmet.logout_in_progress": "Ya estás desconectando",

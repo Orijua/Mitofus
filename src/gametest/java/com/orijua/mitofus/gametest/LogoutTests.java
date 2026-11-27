@@ -4,15 +4,26 @@ import com.orijua.mitofus.Mitofus;
 import com.orijua.mitofus.feature.vrhelmet.VrHelmetService;
 import com.orijua.mitofus.feature.vrhelmet.LogoutRules;
 import com.orijua.mitofus.feature.vrhelmet.LogoutService;
+import com.orijua.mitofus.feature.world.Altamira;
+import com.orijua.mitofus.feature.world.AltamiraProtection;
 import com.orijua.mitofus.feature.world.MitofusWorld;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.levelgen.structure.pieces.PiecesContainer;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.damagesource.DamageContainer;
@@ -22,6 +33,10 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -118,6 +133,56 @@ public final class LogoutTests {
                 LogoutService.forget(player);
             }
         });
+        helper.succeed();
+    }
+
+    @GameTest(template = Altamira.HALL)
+    public static void altamiraAllowsLogoutAfterTheCombatWait(GameTestHelper helper) {
+        var level = helper.getLevel();
+        BlockPos hall = helper.absolutePos(new BlockPos(0, 1, 0));
+        BlockPos inside = helper.absolutePos(new BlockPos(3, 2, 3));
+        var cave = level.registryAccess().registryOrThrow(Registries.STRUCTURE).getOrThrow(Altamira.KEY);
+        var chunk = level.getChunkAt(inside);
+        var startsBefore = Map.copyOf(chunk.getAllStarts());
+        var referencesBefore = Map.copyOf(chunk.getAllReferences());
+        var templates = level.getStructureManager();
+        var element = StructurePoolElement.single(Mitofus.id(Altamira.HALL).toString()).apply(StructureTemplatePool.Projection.RIGID);
+        var piece = new PoolElementStructurePiece(templates, element, hall, 0, Rotation.NONE,
+                element.getBoundingBox(templates, hall, Rotation.NONE), LiquidSettings.APPLY_WATERLOGGING);
+        var player = TestSupport.fakePlayer(helper);
+
+        // GameTest places the hall's blocks but does not register it as a generated structure.
+        var references = new HashMap<>(referencesBefore);
+        references.put(cave, LongOpenHashSet.of(chunk.getPos().toLong()));
+        try {
+            chunk.setStartForStructure(cave, new StructureStart(cave, chunk.getPos(), 0, new PiecesContainer(List.of(piece))));
+            chunk.setAllReferences(references);
+            VrHelmetTests.inMitofus(helper, inside, () -> {
+                helper.assertTrue(VrHelmetService.connect(player, vrhelmet(helper)), "connects");
+                Vec3 position = Vec3.atBottomCenterOf(inside);
+                player.setPos(position.x, position.y, position.z);
+                helper.assertTrue(AltamiraProtection.inCave(level, player.blockPosition()), "inside a registered cave piece");
+
+                long now = level.getServer().getTickCount();
+                LogoutService.markCombat(player, now - LogoutRules.DANGER_TICKS + 1);
+                helper.assertTrue(LogoutService.request(player) == LogoutService.Start.IN_DANGER, "combat still blocks logout");
+                helper.assertFalse(LogoutService.isCountingDown(player), "combat does not start the countdown");
+                LogoutService.markCombat(player, now - LogoutRules.DANGER_TICKS);
+                helper.assertTrue(LogoutService.request(player) == LogoutService.Start.STARTED, "starts once the combat wait ends");
+
+                tickMany(player, LogoutRules.COUNTDOWN_TICKS - 1);
+                helper.assertTrue(LogoutService.isCountingDown(player), "still counting at tick 59");
+                tickMany(player, 1);
+                helper.assertFalse(LogoutService.isCountingDown(player), "the countdown is over");
+                helper.assertTrue(VrHelmetService.state(player).vrhelmet().isEmpty(), "the body is back");
+                helper.assertTrue(VrHelmetService.state(player).lastSave().equals(Optional.of(inside)), "the cave position is saved");
+            });
+        } finally {
+            LogoutService.forget(player);
+            VrHelmetService.cancel(player, false);
+            chunk.setAllStarts(startsBefore);
+            chunk.setAllReferences(referencesBefore);
+        }
         helper.succeed();
     }
 
