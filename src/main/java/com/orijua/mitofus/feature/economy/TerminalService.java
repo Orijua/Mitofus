@@ -105,11 +105,10 @@ public final class TerminalService {
 
     /** The stored Mitofus character, only while the player carries the real world's things and the snapshot can be read. */
     static Optional<CompoundTag> storedCharacter(ServerPlayer player) {
-        CharacterVault vault = vault(player);
-        if (!vault.live().equals(Optional.of(WorldSide.REAL))) {
+        if (!carriesRealWorld(player)) {
             return Optional.empty();
         }
-        return vault.stored().filter(CharacterSnapshot::isReadable);
+        return vault(player).stored().filter(tag -> CharacterSnapshot.isReadable(tag, player.registryAccess()));
     }
 
     public static long today(ServerPlayer player) {

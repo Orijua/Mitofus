@@ -12,6 +12,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 /**
@@ -26,15 +27,15 @@ import java.util.function.BiConsumer;
  * <p>The swap happens on the server thread in one call, so the autosave (which runs between ticks) never sees half of it.
  */
 public final class Characters {
-    /** What puts a stored character on the player; only tests replace it (see {@link #applierForTests}). */
-    private static volatile BiConsumer<ServerPlayer, CompoundTag> applier = CharacterSnapshot::apply;
+    /** Test override for applying the incoming snapshot. */
+    private static volatile BiConsumer<ServerPlayer, CompoundTag> testApplier;
 
     private Characters() {
     }
 
     /** For tests: replaces the step that applies the incoming character (to make it fail); {@code null} puts it back. */
     public static void applierForTests(BiConsumer<ServerPlayer, CompoundTag> replacement) {
-        applier = replacement != null ? replacement : CharacterSnapshot::apply;
+        testApplier = replacement;
     }
 
     /** What {@link #settle} did. */
@@ -97,7 +98,7 @@ public final class Characters {
         if (vault.live().isEmpty() || vault.live().get() == target) {
             return true;
         }
-        return vault.stored().map(CharacterSnapshot::isReadable).orElse(true);
+        return vault.stored().map(tag -> CharacterSnapshot.isReadable(tag, player.registryAccess())).orElse(true);
     }
 
     /** Makes the player carry the character of the world they stand in. Safe to call any time, any number of times. */
@@ -116,7 +117,8 @@ public final class Characters {
         }
         // Everything that can fail is checked before anything is touched.
         CompoundTag incoming = vault.stored().orElseGet(CharacterSnapshot::empty);
-        if (!CharacterSnapshot.isReadable(incoming)) {
+        Optional<CharacterSnapshot.Inventories> decoded = CharacterSnapshot.decodeInventories(incoming, player.registryAccess());
+        if (decoded.isEmpty()) {
             Mitofus.LOGGER.error("The stored character of {} cannot be read: not swapping", player.getGameProfile().getName());
             return Result.FAILED;
         }
@@ -124,7 +126,12 @@ public final class Characters {
         closeMenu(player);
         CompoundTag outgoing = CharacterSnapshot.capture(player);
         try {
-            applier.accept(player, incoming);
+            BiConsumer<ServerPlayer, CompoundTag> override = testApplier;
+            if (override == null) {
+                CharacterSnapshot.apply(player, incoming, decoded.get());
+            } else {
+                override.accept(player, incoming);
+            }
         } catch (RuntimeException e) {
             // Half applied: put back what was there so nothing is duplicated or lost, and keep the vault as it was.
             Mitofus.LOGGER.error("Could not restore the {} character of {}: undoing", want, player.getGameProfile().getName(), e);

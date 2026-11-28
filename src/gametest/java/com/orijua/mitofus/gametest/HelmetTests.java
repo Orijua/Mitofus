@@ -2,16 +2,26 @@ package com.orijua.mitofus.gametest;
 
 import com.orijua.mitofus.Mitofus;
 import com.orijua.mitofus.core.registry.ModBlocks;
+import com.orijua.mitofus.core.registry.ModAttachments;
 import com.orijua.mitofus.core.registry.ModDataComponents;
 import com.orijua.mitofus.core.registry.ModItems;
+import com.orijua.mitofus.feature.character.CharacterSnapshot;
+import com.orijua.mitofus.feature.character.CharacterVault;
+import com.orijua.mitofus.feature.character.Characters;
+import com.orijua.mitofus.feature.character.WorldSide;
 import com.orijua.mitofus.feature.vrhelmet.VrHelmetRules;
 import com.orijua.mitofus.feature.vrhelmet.VrHelmetService;
 import com.orijua.mitofus.feature.vrhelmet.VrHelmetService.Begin;
 import com.orijua.mitofus.feature.vrhelmet.VrHelmetTier;
 import com.orijua.mitofus.feature.fatigue.FatigueService;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -109,6 +119,37 @@ public final class HelmetTests {
             helper.assertFalse(VrHelmetService.isConnecting(player), "the wait is over");
             helper.assertFalse(TestSupport.hasBody(helper, pos), "the body is gone");
             helper.assertTrue(player.getInventory().countItem(ModItems.HELMET.get()) == 1, "and the helmet is back");
+        });
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void anUnreadableCharacterLeavesTheExactHelmetInHand(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        onSolidGround(helper, player);
+        FatigueService.setEnergy(player, 1.0);
+        ItemStack helmet = new ItemStack(ModItems.HELMET.get());
+        helmet.set(DataComponents.CUSTOM_NAME, Component.literal("Personal helmet"));
+        player.getInventory().setItem(player.getInventory().selected, helmet);
+        CompoundTag live = CharacterSnapshot.capture(player);
+        ListTag invalid = new ListTag();
+        invalid.add(StringTag.valueOf("unreadable entry"));
+        CompoundTag malformed = live.copy();
+        malformed.put("inventory", invalid);
+        CharacterVault vault = CharacterVault.of(WorldSide.REAL, malformed);
+        player.setData(ModAttachments.CHARACTER_VAULT.get(), vault);
+
+        lying(helper, () -> {
+            try {
+                helper.assertTrue(VrHelmetService.putOn(player, helmet, VrHelmetTier.BASIC) == Begin.UNREADABLE_CHARACTER,
+                        "preflight refuses before taking the helmet");
+                helper.assertFalse(VrHelmetService.isConnecting(player), "no countdown starts");
+                helper.assertFalse(TestSupport.hasBody(helper, bodyPos(helper, player)), "no body is placed");
+                helper.assertTrue(CharacterSnapshot.capture(player).equals(live), "the named helmet is still in hand");
+                helper.assertTrue(Characters.vault(player).equals(vault), "preflight keeps the raw stored character");
+            } finally {
+                VrHelmetService.cancel(player, false);
+            }
         });
         helper.succeed();
     }

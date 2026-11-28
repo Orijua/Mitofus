@@ -4,10 +4,23 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.food.FoodData;
+import net.minecraft.world.item.ItemStack;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.IntUnaryOperator;
 
 /**
  * Everything of a character that is swapped between the two worlds, as a tag. It uses the vanilla serialization
@@ -35,7 +48,7 @@ public final class CharacterSnapshot {
     private CharacterSnapshot() {
     }
 
-    /** The saved inventory list of a snapshot (empty if it has none); the tag is shared, so copy before changing. */
+    /** The raw inventory list of a validated snapshot. Copy before changing it. */
     public static ListTag inventory(CompoundTag snapshot) {
         return snapshot.getList(INVENTORY, Tag.TAG_COMPOUND);
     }
@@ -70,12 +83,116 @@ public final class CharacterSnapshot {
         return tag;
     }
 
-    /**
-     * Whether {@link #apply} can read this tag. It is checked BEFORE anything is touched, so a damaged tag means no
-     * swap at all and nothing is lost.
-     */
-    public static boolean isReadable(CompoundTag tag) {
-        return tag.contains(INVENTORY, Tag.TAG_LIST) && tag.contains(ENDER_CHEST, Tag.TAG_LIST);
+    /** Checks both stored inventories before a crossing or a terminal operation. */
+    public static boolean isReadable(CompoundTag tag, HolderLookup.Provider provider) {
+        return decodeInventories(tag, provider).isPresent();
+    }
+
+    record Inventories(List<ItemStack> inventory, List<ItemStack> enderChest) {
+    }
+
+    static Optional<Inventories> decodeInventories(CompoundTag tag, HolderLookup.Provider provider) {
+        var ops = provider.createSerializationContext(NbtOps.INSTANCE);
+        return decodeInventory(tag.get(INVENTORY), ops, Inventory.SLOT_OFFHAND + 1, CharacterSnapshot::playerSlot)
+                .flatMap(inventory -> decodeInventory(tag.get(ENDER_CHEST), ops, 27, slot -> slot)
+                        .map(enderChest -> new Inventories(inventory, enderChest)));
+    }
+
+    private static Optional<List<ItemStack>> decodeInventory(Tag raw, RegistryOps<Tag> ops, int size,
+                                                             IntUnaryOperator slotIndex) {
+        if (!(raw instanceof ListTag list)) {
+            return Optional.empty();
+        }
+        List<ItemStack> stacks = new ArrayList<>(Collections.nCopies(size, ItemStack.EMPTY));
+        for (Tag element : list) {
+            if (!(element instanceof CompoundTag entry) || !entry.contains("Slot", Tag.TAG_BYTE)) {
+                return Optional.empty();
+            }
+            int slot = slotIndex.applyAsInt(Byte.toUnsignedInt(entry.getByte("Slot")));
+            if (slot < 0 || slot >= size || !stacks.get(slot).isEmpty()) {
+                return Optional.empty();
+            }
+            ItemStack stack = decodeStack(entry, ops);
+            if (stack.isEmpty()) {
+                return Optional.empty();
+            }
+            stacks.set(slot, stack);
+        }
+        return Optional.of(stacks);
+    }
+
+    /** Maps the saved vanilla slot IDs to the indices used by Inventory#setItem. */
+    private static int playerSlot(int slot) {
+        return switch (slot) {
+            case 100, 101, 102, 103 -> Inventory.INVENTORY_SIZE + slot - 100;
+            case 150 -> Inventory.SLOT_OFFHAND;
+            default -> slot < Inventory.INVENTORY_SIZE ? slot : -1;
+        };
+    }
+
+    private static ItemStack decodeStack(CompoundTag entry, RegistryOps<Tag> ops) {
+        if (!hasValidStackData(entry)) {
+            return ItemStack.EMPTY;
+        }
+        try {
+            return ItemStack.STRICT_CODEC.parse(ops, entry).result().orElse(ItemStack.EMPTY);
+        } catch (RuntimeException e) {
+            // A component codec may throw on malformed data instead of returning a failed DataResult.
+            return ItemStack.EMPTY;
+        }
+    }
+
+    private static boolean hasValidStackData(CompoundTag entry) {
+        // Vanilla defaults missing counts to one. It also defaults failed decodes and can truncate numeric tags.
+        Tag count = entry.get("count");
+        if (count != null && !isWholeNumberInRange(count, 1, 99)) {
+            return false;
+        }
+        // These vanilla components embed stacks using the same count codec. The container codec also overwrites
+        // repeated slots. Check the raw values first, then leave registry resolution and component decoding to vanilla.
+        if (entry.get("components") instanceof CompoundTag components) {
+            for (String key : components.getAllKeys()) {
+                boolean valid = switch (key) {
+                    case "minecraft:container", "container" -> hasValidEmbeddedStacks(components.get(key), true);
+                    case "minecraft:bundle_contents", "bundle_contents",
+                         "minecraft:charged_projectiles", "charged_projectiles" -> hasValidEmbeddedStacks(components.get(key), false);
+                    default -> true;
+                };
+                if (!valid) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static boolean hasValidEmbeddedStacks(Tag raw, boolean slotted) {
+        if (!(raw instanceof ListTag list)) {
+            return false;
+        }
+        Set<Integer> slots = new HashSet<>();
+        for (Tag element : list) {
+            if (!(element instanceof CompoundTag entry)) {
+                return false;
+            }
+            if (slotted) {
+                if (!isWholeNumberInRange(entry.get("slot"), 0, 255) || !slots.add(entry.getInt("slot"))
+                        || !(entry.get("item") instanceof CompoundTag item) || !hasValidStackData(item)) {
+                    return false;
+                }
+            } else if (!hasValidStackData(entry)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isWholeNumberInRange(Tag tag, int min, int max) {
+        if (!(tag instanceof NumericTag number)) {
+            return false;
+        }
+        double value = number.getAsDouble();
+        return value >= min && value <= max && value == number.getAsInt();
     }
 
     /**
@@ -87,9 +204,18 @@ public final class CharacterSnapshot {
      * <p>Effects are frozen while stored: their remaining time does not run in the other world.
      */
     public static void apply(ServerPlayer player, CompoundTag tag) {
-        HolderLookup.Provider provider = player.registryAccess();
-        player.getInventory().load(tag.getList(INVENTORY, Tag.TAG_COMPOUND));
-        player.getEnderChestInventory().fromTag(tag.getList(ENDER_CHEST, Tag.TAG_COMPOUND), provider);
+        Inventories decoded = decodeInventories(tag, player.registryAccess())
+                .orElseThrow(() -> new IllegalArgumentException("Unreadable character inventories"));
+        apply(player, tag, decoded);
+    }
+
+    static void apply(ServerPlayer player, CompoundTag tag, Inventories decoded) {
+        for (int slot = 0; slot < decoded.inventory().size(); slot++) {
+            player.getInventory().setItem(slot, decoded.inventory().get(slot));
+        }
+        for (int slot = 0; slot < decoded.enderChest().size(); slot++) {
+            player.getEnderChestInventory().setItem(slot, decoded.enderChest().get(slot));
+        }
 
         player.experienceLevel = tag.getInt(XP_LEVEL);
         player.experienceProgress = tag.getFloat(XP_PROGRESS);

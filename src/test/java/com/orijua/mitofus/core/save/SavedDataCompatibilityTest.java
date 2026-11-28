@@ -47,6 +47,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -220,7 +221,9 @@ class SavedDataCompatibilityTest {
     @Test
     void aVaultWithAFullStoredInventoryRoundTrips() {
         ListTag inventory = new ListTag();
-        for (int slot = 0; slot < 41; slot++) {
+        for (int index = 0; index < 41; index++) {
+            // Vanilla saves main, armor and offhand under separate slot ranges.
+            int slot = index < 36 ? index : index < 40 ? 100 + index - 36 : 150;
             CompoundTag item = new CompoundTag();
             item.putByte("Slot", (byte) slot);
             item.putString("id", "minecraft:iron_sword");
@@ -239,8 +242,7 @@ class SavedDataCompatibilityTest {
         CharacterVault loaded = CharacterVault.CODEC.parse(NbtOps.INSTANCE, saved).getOrThrow();
 
         assertEquals(vault, loaded);
-        assertEquals(41, CharacterSnapshot.inventory(loaded.stored().orElseThrow()).size());
-        assertTrue(CharacterSnapshot.isReadable(loaded.stored().orElseThrow()));
+        assertEquals(inventory, CharacterSnapshot.inventory(loaded.stored().orElseThrow()));
     }
 
     // ---- The sample of a real vault (the v1 fixture's stored character is not one) ----
@@ -251,19 +253,22 @@ class SavedDataCompatibilityTest {
      * v1 is never edited; the readable sample is saves/samples/character_vault_full.snbt.
      */
     @Test
-    void theStoredCharacterOfV1IsNotAReadableSnapshot() throws Exception {
+    void theStoredCharacterOfV1IsOnlyAnAttachmentFixture() throws Exception {
         CharacterVault v1 = CharacterVault.CODEC.parse(NbtOps.INSTANCE, fixture(1).get("character_vault")).getOrThrow();
 
-        assertTrue(!CharacterSnapshot.isReadable(v1.stored().orElseThrow()));
+        CompoundTag stored = v1.stored().orElseThrow();
+        assertFalse(stored.contains("inventory"));
+        assertFalse(stored.contains("ender_chest"));
     }
 
     @Test
-    void theFullVaultSampleIsReadable() throws Exception {
+    void theFullVaultSampleKeepsItsSavedSlots() throws Exception {
         CharacterVault vault = CharacterVault.CODEC.parse(NbtOps.INSTANCE, sample("character_vault_full")).getOrThrow();
 
         assertEquals(java.util.Optional.of(WorldSide.MITOFUS), vault.live());
-        assertTrue(CharacterSnapshot.isReadable(vault.stored().orElseThrow()));
-        assertEquals(4, CharacterSnapshot.inventory(vault.stored().orElseThrow()).size());
+        ListTag inventory = CharacterSnapshot.inventory(vault.stored().orElseThrow());
+        assertEquals(List.of(0, 1, 100, 150), inventory.stream()
+                .map(tag -> Byte.toUnsignedInt(((CompoundTag) tag).getByte("Slot"))).toList());
     }
 
     private static Tag sample(String name) throws Exception {
