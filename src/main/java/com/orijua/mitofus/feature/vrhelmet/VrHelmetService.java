@@ -75,7 +75,10 @@ public final class VrHelmetService {
     public enum Reason { MANUAL, DEBUG, LOGOUT, FATIGUE, DEATH }
 
     /** What lying down in a vrhelmet did. */
-    public enum Begin { STARTED, ALREADY_CONNECTING, IN_MITOFUS, ALREADY_CONNECTED, NOT_OVERWORLD, NO_MITOFUS, TOO_TIRED, LOCKED, NOT_YOURS, NO_ROOM }
+    public enum Begin {
+        STARTED, ALREADY_CONNECTING, IN_MITOFUS, ALREADY_CONNECTED, NOT_OVERWORLD, NO_MITOFUS, TOO_TIRED, LOCKED,
+        NOT_YOURS, NO_ROOM, UNREADABLE_CHARACTER
+    }
 
     /** The "still locked after your death" line, with the time left as mm:ss. */
     public static Component lockedMessage(ServerPlayer player) {
@@ -165,6 +168,7 @@ public final class VrHelmetService {
             case NOT_YOURS -> player.displayClientMessage(Component.translatable("message.mitofus.vrhelmet.not_yours"), true);
             case LOCKED -> player.displayClientMessage(lockedMessage(player), true);
             case NO_ROOM -> player.displayClientMessage(Component.translatable("message.mitofus.vrhelmet.no_room"), true);
+            case UNREADABLE_CHARACTER -> player.displayClientMessage(Component.translatable("message.mitofus.vrhelmet.character_unreadable"), true);
             case ALREADY_CONNECTING, STARTED -> {
             }
         }
@@ -223,6 +227,10 @@ public final class VrHelmetService {
         // Own design: below the minimum energy the vrhelmet refuses; the real world refills it.
         if (!FatigueRules.canConnect(FatigueBalance.current(), FatigueService.energy(player))) {
             return Begin.TOO_TIRED;
+        }
+        // Handheld use takes the helmet as soon as the wait starts. Refuse before touching that stack.
+        if (!Characters.canCross(player, WorldSide.MITOFUS)) {
+            return Begin.UNREADABLE_CHARACTER;
         }
         start(player, GlobalPos.of(player.level().dimension(), vrhelmet));
         return Begin.STARTED;
