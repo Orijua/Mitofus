@@ -32,6 +32,7 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -208,6 +209,75 @@ public final class TerminalShopTests {
                 assertUnchanged(helper, player, 100_000L, before, marks, "another id");
                 TerminalShop.Outcome piece = TerminalShop.buyOffer(player, new TerminalBuyOfferPayload(7, 0, entry.stack(), entry.price()));
                 helper.assertTrue(piece.result() == TerminalShop.Result.OK, "a piece by payload: " + piece.result());
+            } finally {
+                player.containerMenu = player.inventoryMenu;
+            }
+        });
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void malformedStoredInventoriesAreUnavailableAndCannotBePurchasedInto(GameTestHelper helper) {
+        ServerPlayer player = TestSupport.fakePlayer(helper);
+        withStored(player, inv -> inv.setItem(0, new ItemStack(gold(), 5)));
+        CompoundTag valid = vault(player).stored().orElseThrow();
+
+        CompoundTag wrongList = valid.copy();
+        ListTag strings = new ListTag();
+        strings.add(StringTag.valueOf("unreadable entry"));
+        wrongList.put("inventory", strings);
+
+        CompoundTag brokenStack = valid.copy();
+        ListTag mixed = CharacterSnapshot.inventory(brokenStack);
+        CompoundTag unknown = new CompoundTag();
+        unknown.putByte("Slot", (byte) 1);
+        unknown.putString("id", "mitofus:missing_item_for_test");
+        mixed.add(unknown);
+
+        CompoundTag brokenChest = valid.copy();
+        CompoundTag stack = new CompoundTag();
+        stack.putByte("Slot", (byte) 26);
+        stack.putString("id", "minecraft:iron_sword");
+        CompoundTag enchantments = new CompoundTag();
+        CompoundTag levels = new CompoundTag();
+        levels.putInt("mitofus:missing_enchantment_for_test", 1);
+        enchantments.put("levels", levels);
+        CompoundTag components = new CompoundTag();
+        components.put("minecraft:enchantments", enchantments);
+        stack.put("components", components);
+        ListTag chest = new ListTag();
+        chest.add(stack);
+        brokenChest.put("ender_chest", chest);
+
+        player.getInventory().setItem(0, new ItemStack(ModItems.PHONE.get()));
+        player.getInventory().setItem(1, new ItemStack(Items.EMERALD, 11));
+        player.getEnderChestInventory().setItem(4, new ItemStack(Items.DIAMOND, 3));
+        TestSupport.setIron(player, 100_000L);
+        var purse = Wallet.purse(player);
+        CompoundTag live = CharacterSnapshot.capture(player);
+        real(helper, () -> {
+            long today = TerminalService.today(player);
+            OfferEntry entry = offer(helper, today).get(0);
+            OfferBought marks = OfferBought.EMPTY.with(1, today);
+            player.setData(ModAttachments.OFFER_BOUGHT.get(), marks);
+            player.containerMenu = new TerminalMenu(7, player.getInventory(), Optional.empty());
+            try {
+                TerminalBuyOfferPayload payload = new TerminalBuyOfferPayload(7, entry.position(), entry.stack(), entry.price());
+                for (CompoundTag malformed : List.of(wrongList, brokenStack, brokenChest)) {
+                    CharacterVault before = CharacterVault.of(WorldSide.REAL, malformed);
+                    player.setData(ModAttachments.CHARACTER_VAULT.get(), before);
+                    TerminalState state = TerminalService.state(player, Optional.empty());
+                    helper.assertFalse(state.characterAvailable(), "unreadable character was offered as a destination");
+                    helper.assertTrue(state.freeSlots() == 0 && state.storedGold() == 0, "the terminal exposed partial storage data");
+                    assertUnchanged(helper, player, purse.iron(), before, marks, "reading the terminal");
+
+                    TerminalShop.Outcome outcome = TerminalShop.buyOffer(player, payload);
+                    helper.assertTrue(outcome.result() == TerminalShop.Result.NO_CHARACTER && TerminalShop.message(outcome).isPresent(),
+                            "the purchase should be refused with feedback: " + outcome.result());
+                    assertUnchanged(helper, player, purse.iron(), before, marks, "buying from the terminal");
+                    helper.assertTrue(Wallet.purse(player).equals(purse), "the entire purse is unchanged");
+                    helper.assertTrue(CharacterSnapshot.capture(player).equals(live), "live inventory, Ender Chest and vitals are unchanged");
+                }
             } finally {
                 player.containerMenu = player.inventoryMenu;
             }

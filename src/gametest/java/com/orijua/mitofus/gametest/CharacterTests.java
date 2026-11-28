@@ -1,5 +1,6 @@
 package com.orijua.mitofus.gametest;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.orijua.mitofus.Mitofus;
 import com.orijua.mitofus.core.registry.ModAttachments;
 import com.orijua.mitofus.feature.vrhelmet.VrHelmetState;
@@ -15,6 +16,9 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -128,12 +132,105 @@ public final class CharacterTests {
     @GameTest(template = TestSupport.EMPTY)
     public static void aDamagedTagIsRecognisedBeforeAnythingIsTouched(GameTestHelper helper) {
         ServerPlayer player = TestSupport.fakePlayer(helper);
-        helper.assertFalse(CharacterSnapshot.isReadable(new CompoundTag()), "an empty tag is not a snapshot");
-        helper.assertTrue(CharacterSnapshot.isReadable(CharacterSnapshot.capture(player)), "a captured snapshot is readable");
-        helper.assertTrue(CharacterSnapshot.isReadable(CharacterSnapshot.empty()), "the empty character is readable");
+        helper.assertFalse(CharacterSnapshot.isReadable(new CompoundTag(), player.registryAccess()), "an empty tag is not a snapshot");
+        helper.assertTrue(CharacterSnapshot.isReadable(CharacterSnapshot.capture(player), player.registryAccess()), "a captured snapshot is readable");
+        helper.assertTrue(CharacterSnapshot.isReadable(CharacterSnapshot.empty(), player.registryAccess()), "the empty character is readable");
         CharacterSnapshot.apply(player, CharacterSnapshot.empty());
         helper.assertTrue(player.getInventory().isEmpty() && player.getEnderChestInventory().isEmpty(), "applying the empty character leaves nothing");
         helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void emptyListsAndAnOmittedStackCountAreReadable(GameTestHelper helper) throws CommandSyntaxException {
+        helper.assertTrue(CharacterSnapshot.isReadable(TagParser.parseTag("{inventory:[],ender_chest:[]}"), helper.getLevel().registryAccess()),
+                "empty inventory lists are readable");
+        helper.assertTrue(CharacterSnapshot.isReadable(TagParser.parseTag("""
+                {inventory:[{Slot:35b,id:"minecraft:stone"}],
+                 ender_chest:[{Slot:26b,id:"minecraft:stone",count:64}]}
+                """), helper.getLevel().registryAccess()), "the default count and last slots are readable");
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void fullInventoriesRestoreAllSlots(GameTestHelper helper) {
+        ServerPlayer source = TestSupport.fakePlayer(helper);
+        for (int slot = 0; slot < source.getInventory().getContainerSize(); slot++) {
+            source.getInventory().setItem(slot, new ItemStack(Items.STONE, slot + 1));
+        }
+        for (int slot = 0; slot < source.getEnderChestInventory().getContainerSize(); slot++) {
+            source.getEnderChestInventory().setItem(slot, new ItemStack(Items.EMERALD, slot + 1));
+        }
+        CompoundTag snapshot = CharacterSnapshot.capture(source);
+        ServerPlayer target = TestSupport.fakePlayer(helper);
+        CharacterSnapshot.apply(target, snapshot);
+        helper.assertTrue(CharacterSnapshot.inventory(CharacterSnapshot.capture(target)).equals(CharacterSnapshot.inventory(snapshot)),
+                "all main, armor and offhand slots kept their assigned stacks");
+        helper.assertTrue(CharacterSnapshot.capture(target).get("ender_chest").equals(snapshot.get("ender_chest")),
+                "all Ender Chest slots kept their assigned stacks");
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void badListsAndStacksAreRejectedWithoutChangingTheTag(GameTestHelper helper) throws CommandSyntaxException {
+        String valid = "{Slot:1b,id:'minecraft:stone',count:2}";
+        for (String inventory : List.of(
+                "{}", "[1]", "['stone']", "[I;1]",
+                "[" + valid + ",{id:'minecraft:stone'}]",
+                "[" + valid + ",{Slot:2,id:'minecraft:stone'}]",
+                "[" + valid + ",{Slot:257,id:'minecraft:stone'}]",
+                "[" + valid + ",{Slot:1b,id:'minecraft:dirt'}]",
+                "[" + valid + ",{Slot:2b,id:'minecraft:unknown_item'}]",
+                "[" + valid + ",{Slot:2b,id:'minecraft:air'}]",
+                "[" + valid + ",{Slot:2b,id:'minecraft:stone',components:{'minecraft:unknown_component':{}}}]",
+                "[" + valid + ",{Slot:2b,id:'minecraft:stone',components:{'minecraft:damage':'bad'}}]",
+                "[" + valid + ",{Slot:2b,id:'minecraft:stone',count:'2'}]",
+                "[" + valid + ",{Slot:2b,id:'minecraft:stone',count:0}]",
+                "[" + valid + ",{Slot:2b,id:'minecraft:stone',count:-1}]",
+                "[" + valid + ",{Slot:2b,id:'minecraft:stone',count:1.5d}]",
+                "[" + valid + ",{Slot:2b,id:'minecraft:stone',count:4294967297L}]",
+                "[" + valid + ",{Slot:2b,id:'minecraft:stone',count:100}]",
+                "[" + valid + ",{Slot:2b,id:'minecraft:iron_sword',count:2}]")) {
+            assertUnreadable(helper, "{inventory:" + inventory + ",ender_chest:[" + valid + "]}");
+            assertUnreadable(helper, "{inventory:[" + valid + "],ender_chest:" + inventory + "}");
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void equipmentAndEnderChestUseTheirOwnSlotRanges(GameTestHelper helper) throws CommandSyntaxException {
+        for (int slot : new int[]{36, 99, 104, 149, 151, 255}) {
+            assertUnreadable(helper, "{inventory:[{Slot:" + (byte) slot + "b,id:'minecraft:stone'}],ender_chest:[]}");
+        }
+        for (int slot : new int[]{27, 35, 100, 150}) {
+            assertUnreadable(helper, "{inventory:[],ender_chest:[{Slot:" + (byte) slot + "b,id:'minecraft:stone'}]}");
+        }
+        for (int equipment : new int[]{100, 101, 102, 103, 150}) {
+            String entry = "{Slot:" + (byte) equipment + "b,id:'minecraft:stone'}";
+            assertUnreadable(helper, "{inventory:[" + entry + "," + entry + "],ender_chest:[]}");
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = TestSupport.EMPTY)
+    public static void nestedInventoryValuesCannotBeSilentlyDiscardedOrDefaulted(GameTestHelper helper) throws CommandSyntaxException {
+        assertUnreadable(helper, """
+                {inventory:[{Slot:0b,id:'minecraft:shulker_box',components:{'minecraft:container':[
+                    {slot:1,item:{id:'minecraft:stone'}},{slot:1,item:{id:'minecraft:dirt'}}
+                ]}}],ender_chest:[]}
+                """);
+        assertUnreadable(helper, """
+                {inventory:[],ender_chest:[{Slot:0b,id:'minecraft:crossbow',components:{'minecraft:charged_projectiles':[
+                    {id:'minecraft:arrow',count:0}
+                ]}}]}
+                """);
+        helper.succeed();
+    }
+
+    private static void assertUnreadable(GameTestHelper helper, String snbt) throws CommandSyntaxException {
+        CompoundTag snapshot = TagParser.parseTag(snbt);
+        CompoundTag original = snapshot.copy();
+        helper.assertFalse(CharacterSnapshot.isReadable(snapshot, helper.getLevel().registryAccess()), snbt);
+        helper.assertTrue(original.equals(snapshot), "validation changed raw data: " + snbt);
     }
 
     @GameTest(template = TestSupport.EMPTY)
@@ -181,9 +278,8 @@ public final class CharacterTests {
             throw new IllegalStateException(e);
         }
         CharacterVault sampleVault = CharacterVault.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, sample).getOrThrow();
-        helper.assertTrue(CharacterSnapshot.isReadable(sampleVault.stored().orElseThrow()), "the sample is a readable snapshot");
-
         ServerPlayer player = TestSupport.fakePlayer(helper);
+        helper.assertTrue(CharacterSnapshot.isReadable(sampleVault.stored().orElseThrow(), player.registryAccess()), "the sample is a readable snapshot");
         player.getInventory().setItem(0, new ItemStack(Items.EMERALD, 2));
         player.setData(ModAttachments.CHARACTER_VAULT.get(), CharacterVault.of(WorldSide.REAL, sampleVault.stored().orElseThrow()));
         helper.assertTrue(Characters.canCross(player, WorldSide.MITOFUS), "it can be crossed to");
@@ -438,16 +534,41 @@ public final class CharacterTests {
         net.minecraft.core.BlockPos covadonga = helper.absolutePos(new net.minecraft.core.BlockPos(1, 1, 1));
         net.minecraft.core.GlobalPos vrhelmet = net.minecraft.core.GlobalPos.of(helper.getLevel().dimension(), helper.absolutePos(new net.minecraft.core.BlockPos(0, 1, 0)));
         player.getInventory().setItem(0, new ItemStack(Items.DIAMOND, 5));
-        CharacterVault broken = CharacterVault.of(WorldSide.REAL, new CompoundTag());
+        player.getEnderChestInventory().setItem(26, fancySword(helper));
+        player.setHealth(9.0f);
+        player.setAbsorptionAmount(3.0f);
+        player.getFoodData().setFoodLevel(6);
+        player.experienceLevel = 12;
+        player.experienceProgress = 0.5f;
+        player.totalExperience = 150;
+        player.containerMenu.setCarried(new ItemStack(Items.EMERALD));
+        CompoundTag live = CharacterSnapshot.capture(player);
+        var position = player.position();
+        var level = player.level();
+        var menu = player.containerMenu;
+
+        CompoundTag malformed = live.copy();
+        ListTag invalidChest = new ListTag();
+        invalidChest.add(StringTag.valueOf("unreadable entry"));
+        malformed.put("ender_chest", invalidChest);
+        CharacterVault broken = CharacterVault.of(WorldSide.REAL, malformed);
         player.setData(ModAttachments.CHARACTER_VAULT.get(), broken);
 
         helper.assertFalse(Characters.canCross(player, WorldSide.MITOFUS), "crossing needs a readable stored character");
         helper.assertTrue(Characters.canCross(player, WorldSide.REAL), "staying in the same world needs nothing");
         VrHelmetTests.inMitofus(helper, covadonga, () -> {
             helper.assertFalse(VrHelmetService.connect(player, vrhelmet), "the connection is refused");
-            helper.assertTrue(count(player, Items.DIAMOND) == 5, "nothing moved");
+            helper.assertTrue(player.level() == level && player.position().equals(position), "the player did not move");
+            helper.assertTrue(CharacterSnapshot.capture(player).equals(live), "all carried items, Ender Chest items and vitals stayed intact");
+            helper.assertTrue(player.containerMenu == menu && menu.getCarried().is(Items.EMERALD), "the cursor was not returned or dropped");
             helper.assertTrue(Characters.vault(player).equals(broken), "the vault is as it was");
             helper.assertFalse(VrHelmetService.state(player).isConnected(), "and the body did not leave the real world");
+        });
+        in(helper, WorldSide.MITOFUS, () -> {
+            helper.assertTrue(Characters.settle(player) == Characters.Result.FAILED, "settlement independently refuses the unreadable chest");
+            helper.assertTrue(CharacterSnapshot.capture(player).equals(live), "settlement did not change the active character");
+            helper.assertTrue(Characters.vault(player).equals(broken), "settlement kept the exact stored tag and side");
+            helper.assertTrue(player.containerMenu == menu && menu.getCarried().is(Items.EMERALD), "settlement left the menu alone");
         });
         helper.succeed();
     }
